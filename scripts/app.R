@@ -11,44 +11,31 @@ library(plotly)
 # ============================================================
 # 1. INPUT PARAMETERS
 # ============================================================
-#
-# Все основные входные параметры приложения находятся здесь.
-# Их можно менять без изменения остального кода.
-#
-# ------------------------------------------------------------
 
-# Таблица с лекарствами / drug network
 drug_network_file <- file.path(
   "C:/projects/clinreport/raw",
   "all_samples_string_human_links_v12_0_min900_Ensembl_diamond_trustrank.csv"
 )
 
-# Папка clinreport с JSON-файлами
 clinreport_dir <- file.path(
   "C:/projects/clinreport/raw",
   "clinreport"
 )
 
-# Файл с дифференциальной экспрессией
 gene_file <- file.path(
   "C:/projects/clinreport/raw",
   "carcinoma_vs_normal_gene_names_added.tsv"
 )
 
-# Cutoff для adjusted p-value
+# Adjusted p-value cutoff
 padj_cutoff <- 0.05
 
-# Cutoff для абсолютного log2 Fold Change
-#
-# Например:
-#   1.0  -> |log2FC| >= 1
-#   0.58 -> примерно 1.5-fold
-#
+# Absolute log2 fold-change cutoff
 log2fc_cutoff <- 1.0
 
 
 # ============================================================
-# 2. BASIC VALIDATION OF INPUT PARAMETERS
+# 2. VALIDATION
 # ============================================================
 
 if (!file.exists(drug_network_file)) {
@@ -178,22 +165,29 @@ if (length(missing_gene_columns) > 0) {
 }
 
 
-# Ensure numeric columns are numeric
 gene_data <- gene_data |>
   mutate(
-    baseMean = suppressWarnings(as.numeric(baseMean)),
-    log2FoldChange = suppressWarnings(as.numeric(log2FoldChange)),
-    lfcSE = suppressWarnings(as.numeric(lfcSE)),
-    pvalue = suppressWarnings(as.numeric(pvalue)),
-    padj = suppressWarnings(as.numeric(padj))
+    baseMean = suppressWarnings(
+      as.numeric(baseMean)
+    ),
+    
+    log2FoldChange = suppressWarnings(
+      as.numeric(log2FoldChange)
+    ),
+    
+    lfcSE = suppressWarnings(
+      as.numeric(lfcSE)
+    ),
+    
+    pvalue = suppressWarnings(
+      as.numeric(pvalue)
+    ),
+    
+    padj = suppressWarnings(
+      as.numeric(padj)
+    )
   )
 
-
-# Remove Ensembl version suffix
-#
-# ENSG00000000003.17
-#        ↓
-# ENSG00000000003
 
 gene_data <- gene_data |>
   mutate(
@@ -533,7 +527,10 @@ extract_gene_ids <- function(x) {
   
   x <- as.character(x)
   
-  if (length(x) == 0 || all(is.na(x))) {
+  if (
+    length(x) == 0 ||
+    all(is.na(x))
+  ) {
     return(character())
   }
   
@@ -587,6 +584,7 @@ get_drug_genes <- function(
       .keep_all = TRUE
     ) |>
     mutate(
+      
       significant_padj =
         !is.na(padj) &
         padj < padj_cutoff,
@@ -1018,10 +1016,6 @@ render_target_cards <- function(
       both_pass <- padj_pass && fc_pass
       
       
-      # ------------------------------------------------------
-      # Direction
-      # ------------------------------------------------------
-      
       direction_class <-
         
         if (
@@ -1047,15 +1041,6 @@ render_target_cards <- function(
           "neutral"
         }
       
-      
-      # ------------------------------------------------------
-      # Cutoff state
-      #
-      # both      = padj + FC passed
-      # padj-only = only padj passed
-      # fc-only   = only FC passed
-      # neither   = neither passed
-      # ------------------------------------------------------
       
       cutoff_class <-
         
@@ -1102,19 +1087,13 @@ render_target_cards <- function(
         
         onclick = onclick_js,
         
-        title = paste0(
-          "padj cutoff: ",
-          padj_cutoff,
-          " | |log2FC| cutoff: ",
-          log2fc_cutoff
-        ),
-        
         
         div(
           class = "gene-main",
           
           div(
             class = "gene-symbol",
+            
             ifelse(
               is.na(g$gene_name) ||
                 !nzchar(g$gene_name),
@@ -1190,28 +1169,28 @@ render_target_cards <- function(
             
             span(
               class = "cutoff-badge both",
-              "SIGNIFICANT"
+              "meets criteria"
             )
             
           } else if (padj_pass) {
             
             span(
               class = "cutoff-badge padj-only",
-              "padj ✓"
+              "padj"
             )
             
           } else if (fc_pass) {
             
             span(
               class = "cutoff-badge fc-only",
-              "|log2FC| ✓"
+              "fold change"
             )
             
           } else {
             
             span(
               class = "cutoff-badge neither",
-              "below cutoffs"
+              "below criteria"
             )
           }
         ),
@@ -1251,38 +1230,6 @@ render_drug_page <- function(
       div(
         class = "drug-id",
         drug_id
-      )
-    ),
-    
-    
-    div(
-      class = "cutoff-info",
-      
-      div(
-        class = "cutoff-info-title",
-        "Gene filters"
-      ),
-      
-      div(
-        class = "cutoff-info-item",
-        tags$span(
-          class = "cutoff-dot significant-dot"
-        ),
-        paste0(
-          "padj < ",
-          format(padj_cutoff)
-        )
-      ),
-      
-      div(
-        class = "cutoff-info-item",
-        tags$span(
-          class = "cutoff-dot fc-dot"
-        ),
-        paste0(
-          "|log2FC| ≥ ",
-          format(log2fc_cutoff)
-        )
       )
     ),
     
@@ -1327,8 +1274,21 @@ render_drug_page <- function(
           class = "targets-header",
           
           div(
-            class = "targets-title",
-            "Target genes"
+            
+            div(
+              class = "targets-title",
+              "Target genes"
+            ),
+            
+            div(
+              class = "targets-criteria",
+              paste0(
+                "Criteria · padj < ",
+                padj_cutoff,
+                " · |log2FC| ≥ ",
+                log2fc_cutoff
+              )
+            )
           ),
           
           div(
@@ -1336,7 +1296,11 @@ render_drug_page <- function(
             
             paste(
               nrow(genes),
-              "genes"
+              ifelse(
+                nrow(genes) == 1,
+                "gene",
+                "genes"
+              )
             )
           )
         ),
@@ -1547,6 +1511,10 @@ ui <- fluidPage(
     tags$style(
       HTML(
         "
+        /* ==================================================
+           GLOBAL
+           ================================================== */
+
         body {
           background: #f4f5f7;
           font-family:
@@ -1554,12 +1522,15 @@ ui <- fluidPage(
             BlinkMacSystemFont,
             'Segoe UI',
             sans-serif;
+          color: #1f2937;
         }
 
         .app-title {
           font-size: 28px;
           font-weight: 600;
-          margin: 20px 0;
+          letter-spacing: -0.3px;
+          margin: 22px 0;
+          color: #20252b;
         }
 
         .main-layout {
@@ -1568,7 +1539,10 @@ ui <- fluidPage(
           align-items: stretch;
         }
 
-        /* LEFT */
+
+        /* ==================================================
+           LEFT PANEL
+           ================================================== */
 
         .drug-list {
           width: 43%;
@@ -1576,22 +1550,28 @@ ui <- fluidPage(
           border-radius: 12px;
           padding: 15px;
           box-shadow:
-            0 2px 8px rgba(0,0,0,0.08);
+            0 2px 8px rgba(0,0,0,0.06);
         }
 
-        /* RIGHT */
+
+        /* ==================================================
+           RIGHT PANEL
+           ================================================== */
 
         .drug-details {
           flex: 1;
           background: white;
           border-radius: 12px;
-          padding: 25px;
+          padding: 27px;
           min-height: 700px;
           box-shadow:
-            0 2px 8px rgba(0,0,0,0.08);
+            0 2px 8px rgba(0,0,0,0.06);
         }
 
-        /* DRUG */
+
+        /* ==================================================
+           DRUG HEADER
+           ================================================== */
 
         .drug-header {
           margin-bottom: 12px;
@@ -1601,99 +1581,100 @@ ui <- fluidPage(
           font-size: 30px;
           font-weight: 600;
           line-height: 1.2;
+          letter-spacing: -0.4px;
+          color: #20252b;
         }
 
         .drug-id {
-          color: #777;
-          font-size: 14px;
+          color: #9aa0a6;
+          font-size: 13px;
           margin-top: 5px;
         }
 
-        /* TABS */
+
+        /* ==================================================
+           TABS
+           ================================================== */
 
         .nav-tabs {
           margin-top: 20px;
+          border-bottom: 1px solid #e5e7eb;
+        }
+
+        .nav-tabs > li > a {
+          color: #6b7280;
+          border: none !important;
+          padding: 10px 14px;
+          font-size: 14px;
+          transition:
+            color 0.15s ease;
+        }
+
+        .nav-tabs > li > a:hover {
+          background: transparent !important;
+          color: #374151;
+        }
+
+        .nav-tabs > li.active > a,
+        .nav-tabs > li.active > a:hover,
+        .nav-tabs > li.active > a:focus {
+          color: #1f2937;
+          background: transparent !important;
+          border: none !important;
+          border-bottom: 2px solid #374151 !important;
+          font-weight: 600;
         }
 
         .tab-content {
           padding-top: 10px;
         }
 
-        /* SECTIONS */
+
+        /* ==================================================
+           SECTION HEADERS
+           ================================================== */
 
         .section-title {
-          font-size: 18px;
+          font-size: 17px;
           font-weight: 600;
-          margin-top: 25px;
+          margin-top: 26px;
           margin-bottom: 12px;
           padding-bottom: 8px;
-          border-bottom: 1px solid #ddd;
+          border-bottom: 1px solid #eceef1;
+          color: #30343b;
         }
 
-        /* CUTOFF INFO */
 
-        .cutoff-info {
-          display: flex;
-          align-items: center;
-          gap: 18px;
-          background: #f8fafc;
-          border: 1px solid #e5e7eb;
-          border-radius: 9px;
-          padding: 10px 14px;
-          margin: 12px 0 8px 0;
-          font-size: 13px;
-        }
-
-        .cutoff-info-title {
-          font-weight: 600;
-          color: #555;
-          margin-right: 5px;
-        }
-
-        .cutoff-info-item {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          color: #666;
-        }
-
-        .cutoff-dot {
-          display: inline-block;
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-        }
-
-        .significant-dot {
-          background: #2563eb;
-        }
-
-        .fc-dot {
-          background: #7c3aed;
-        }
-
-        /* FIELDS */
+        /* ==================================================
+           FIELDS
+           ================================================== */
 
         .field-row {
           display: flex;
           padding: 9px 0;
-          border-bottom: 1px solid #f0f0f0;
+          border-bottom: 1px solid #f2f3f5;
         }
 
         .field-label {
           width: 32%;
           min-width: 180px;
-          color: #666;
+          color: #737980;
           font-weight: 500;
+          font-size: 13px;
         }
 
         .field-value {
           width: 68%;
           word-break: break-word;
           white-space: pre-wrap;
+          color: #30343b;
+          font-size: 13px;
         }
 
-        /* INFO CARDS */
+
+        /* ==================================================
+           INFO CARDS
+           ================================================== */
 
         .info-card {
           background: #fafbfc;
@@ -1703,25 +1684,42 @@ ui <- fluidPage(
           margin-bottom: 12px;
         }
 
-        /* TARGETS */
+
+        /* ==================================================
+           TARGET HEADER
+           ================================================== */
 
         .targets-header {
           display: flex;
-          align-items: baseline;
+          align-items: flex-end;
           justify-content: space-between;
           margin-top: 10px;
-          margin-bottom: 15px;
+          margin-bottom: 17px;
         }
 
         .targets-title {
-          font-size: 22px;
+          font-size: 21px;
           font-weight: 600;
+          color: #2f343a;
+        }
+
+        .targets-criteria {
+          margin-top: 4px;
+          color: #9aa0a6;
+          font-size: 11px;
+          letter-spacing: 0.1px;
         }
 
         .targets-count {
-          color: #777;
-          font-size: 14px;
+          color: #9aa0a6;
+          font-size: 13px;
+          white-space: nowrap;
         }
+
+
+        /* ==================================================
+           TARGET LIST
+           ================================================== */
 
         .targets-list {
           display: flex;
@@ -1729,69 +1727,84 @@ ui <- fluidPage(
           gap: 8px;
         }
 
-        /* GENE CARD */
+
+        /* ==================================================
+           GENE CARD
+           ================================================== */
 
         .gene-card {
           display: flex;
           align-items: center;
           padding: 13px 15px;
           background: #fafbfc;
-          border: 1px solid #e5e7eb;
+          border: 1px solid #e6e8eb;
           border-radius: 9px;
           cursor: pointer;
+
           transition:
             transform 0.12s ease,
             box-shadow 0.12s ease,
-            background 0.12s ease;
+            background 0.12s ease,
+            border-color 0.12s ease;
         }
 
         .gene-card:hover {
           transform: translateY(-1px);
           box-shadow:
-            0 3px 10px rgba(0,0,0,0.08);
+            0 4px 12px rgba(0,0,0,0.07);
           background: white;
+          border-color: #d9dde3;
         }
 
-        /* Direction */
+
+        /* ==================================================
+           DIRECTION
+           ================================================== */
 
         .gene-card.up {
-          border-left: 4px solid #3b82f6;
+          border-left: 4px solid #4f86c6;
         }
 
         .gene-card.down {
-          border-left: 4px solid #ef4444;
+          border-left: 4px solid #d96b6b;
         }
 
         .gene-card.neutral {
-          border-left: 4px solid #9ca3af;
+          border-left: 4px solid #aeb4bb;
         }
 
-        /* Cutoff state */
+
+        /* ==================================================
+           CUTOFF STATE
+           ================================================== */
 
         .gene-card.passes-both {
-          background: #f0f7ff;
-          border-top-color: #bfdbfe;
-          border-right-color: #bfdbfe;
-          border-bottom-color: #bfdbfe;
+          background: #f7faff;
+          border-top-color: #d9e6f5;
+          border-right-color: #d9e6f5;
+          border-bottom-color: #d9e6f5;
         }
 
         .gene-card.passes-padj {
-          background: #f8fbff;
+          background: #fafcff;
         }
 
         .gene-card.passes-fc {
-          background: #faf8ff;
+          background: #fbfaff;
         }
 
         .gene-card.passes-neither {
-          opacity: 0.65;
+          opacity: 0.62;
         }
 
         .gene-card.passes-both .gene-symbol {
           font-weight: 700;
         }
 
-        /* MAIN GENE */
+
+        /* ==================================================
+           GENE MAIN
+           ================================================== */
 
         .gene-main {
           flex: 1;
@@ -1799,100 +1812,130 @@ ui <- fluidPage(
         }
 
         .gene-symbol {
-          font-size: 17px;
+          font-size: 16px;
           font-weight: 600;
+          color: #30343b;
         }
 
         .gene-id-small {
-          color: #888;
-          font-size: 11px;
-          margin-top: 2px;
+          color: #9aa0a6;
+          font-size: 10px;
+          margin-top: 3px;
         }
 
-        /* GENE STATS */
+
+        /* ==================================================
+           GENE STATS
+           ================================================== */
 
         .gene-stats {
           display: flex;
-          gap: 25px;
+          gap: 22px;
           margin-right: 18px;
         }
 
         .gene-stat {
-          min-width: 75px;
+          min-width: 70px;
           text-align: right;
         }
 
         .gene-stat-label {
-          font-size: 11px;
-          color: #999;
+          font-size: 10px;
+          color: #a1a6ad;
           margin-bottom: 2px;
         }
 
         .gene-stat-value {
-          font-size: 14px;
+          font-size: 13px;
           font-weight: 600;
+          color: #3f444b;
         }
 
-        /* CUTOFF BADGE */
+
+        /* ==================================================
+           CUTOFF BADGES
+           ================================================== */
 
         .gene-cutoff-status {
-          min-width: 105px;
+          min-width: 95px;
           text-align: center;
-          margin-right: 12px;
+          margin-right: 10px;
         }
 
         .cutoff-badge {
           display: inline-block;
           padding: 4px 7px;
           border-radius: 5px;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 600;
           white-space: nowrap;
+          letter-spacing: 0.1px;
         }
 
         .cutoff-badge.both {
-          background: #dbeafe;
-          color: #1d4ed8;
+          background: #e8f1fb;
+          color: #416f9f;
         }
 
         .cutoff-badge.padj-only {
-          background: #e0f2fe;
-          color: #0369a1;
+          background: #edf6fb;
+          color: #39738e;
         }
 
         .cutoff-badge.fc-only {
-          background: #ede9fe;
-          color: #6d28d9;
+          background: #f1edfa;
+          color: #69539a;
         }
 
         .cutoff-badge.neither {
-          background: #f1f5f9;
-          color: #64748b;
+          background: #f0f1f3;
+          color: #858b92;
         }
+
 
         .gene-arrow {
-          color: #aaa;
-          font-size: 24px;
-          width: 20px;
+          color: #b3b8be;
+          font-size: 22px;
+          width: 18px;
           text-align: center;
+          transition:
+            color 0.12s ease,
+            transform 0.12s ease;
         }
 
-        /* GENE PAGE */
+        .gene-card:hover .gene-arrow {
+          color: #777e86;
+          transform: translateX(2px);
+        }
+
+
+        /* ==================================================
+           GENE PAGE
+           ================================================== */
 
         .back-button {
           margin-bottom: 20px;
           border-radius: 7px;
+          color: #555;
+          border-color: #ddd;
+          background: white;
+        }
+
+        .back-button:hover {
+          background: #f7f7f7;
         }
 
         .gene-title-large {
           font-size: 30px;
           font-weight: 600;
+          letter-spacing: -0.4px;
+          color: #20252b;
         }
 
         .gene-summary {
           display: flex;
           gap: 12px;
-          margin: 15px 0 15px 0;
+          margin: 15px 0 14px 0;
         }
 
         .summary-card {
@@ -1904,55 +1947,85 @@ ui <- fluidPage(
         }
 
         .summary-label {
-          color: #777;
-          font-size: 12px;
+          color: #858b92;
+          font-size: 11px;
           margin-bottom: 5px;
         }
 
         .summary-value {
           font-size: 20px;
           font-weight: 600;
+          color: #30343b;
         }
 
         .gene-filter-status {
           display: flex;
-          gap: 8px;
+          gap: 7px;
           margin: 5px 0 20px 0;
         }
 
         .gene-filter-badge {
           display: inline-block;
-          padding: 5px 9px;
-          border-radius: 6px;
-          font-size: 11px;
+          padding: 4px 8px;
+          border-radius: 5px;
+          font-size: 10px;
           font-weight: 600;
         }
 
         .gene-filter-badge.pass {
-          background: #dcfce7;
-          color: #166534;
+          background: #edf6ef;
+          color: #4b7855;
         }
 
         .gene-filter-badge.fail {
-          background: #f1f5f9;
-          color: #64748b;
+          background: #f1f2f3;
+          color: #858b92;
         }
 
+
+        /* ==================================================
+           EMPTY
+           ================================================== */
+
         .empty-message {
-          color: #999;
+          color: #9aa0a6;
           padding: 40px;
           text-align: center;
+          font-size: 13px;
+        }
+
+
+        /* ==================================================
+           DATATABLE
+           ================================================== */
+
+        table.dataTable {
+          font-size: 13px;
+        }
+
+        table.dataTable thead th {
+          color: #737980;
+          font-weight: 600;
+          font-size: 12px;
+          border-bottom: 1px solid #ddd !important;
+        }
+
+        table.dataTable tbody td {
+          vertical-align: middle;
         }
 
         table.dataTable tbody tr.selected {
-          background-color: #e8f0fe !important;
+          background-color: #eef3f9 !important;
         }
 
-        /* PLOTLY */
-
-        .plotly-container {
-          border-radius: 8px;
+        table.dataTable tbody tr:hover {
+          background-color: #f8fafc !important;
         }
+
+
+        /* ==================================================
+           RESPONSIVE
+           ================================================== */
 
         @media (max-width: 1000px) {
 
@@ -2024,19 +2097,28 @@ server <- function(
   
   # ==========================================================
   # DRUG TABLE
+  #
+  # Drug ID intentionally hidden from UI.
+  # It remains in drug_network and is used internally.
   # ==========================================================
   
   output$drug_table <- renderDT({
     
+    table_data <- drug_network |>
+      select(
+        label,
+        status,
+        score
+      ) |>
+      mutate(
+        ` ` = row_number(),
+        .before = 1
+      )
+    
+    
     datatable(
       
-      drug_network |>
-        select(
-          drugId,
-          label,
-          status,
-          score
-        ),
+      table_data,
       
       selection = "single",
       
@@ -2045,7 +2127,7 @@ server <- function(
       filter = "top",
       
       colnames = c(
-        "Drug ID",
+        "",
         "Drug name",
         "Status",
         "Score"
@@ -2054,7 +2136,27 @@ server <- function(
       options = list(
         pageLength = 20,
         scrollX = TRUE,
-        autoWidth = TRUE
+        autoWidth = TRUE,
+        
+        columnDefs = list(
+          list(
+            width = "45px",
+            targets = 0,
+            className = "dt-center"
+          ),
+          list(
+            width = "auto",
+            targets = 1
+          ),
+          list(
+            width = "100px",
+            targets = 2
+          ),
+          list(
+            width = "90px",
+            targets = 3
+          )
+        )
       )
     )
   })
@@ -2062,6 +2164,12 @@ server <- function(
   
   # ==========================================================
   # SELECTED DRUG
+  #
+  # ВАЖНО:
+  #
+  # DataTable теперь показывает другую таблицу без drugId,
+  # но selected row index всё равно соответствует строке
+  # исходного drug_network.
   # ==========================================================
   
   selected_drug <- reactive({
@@ -2080,13 +2188,6 @@ server <- function(
   
   # ==========================================================
   # CURRENT DRUG GENES
-  #
-  # IMPORTANT:
-  #
-  # Здесь genes вычисляются один раз для текущего drug_id
-  # и используются и для карточек, и для обработки клика.
-  #
-  # Это исправляет проблему с несовпадением индексов.
   # ==========================================================
   
   current_drug_genes <- reactive({
@@ -2105,9 +2206,6 @@ server <- function(
   
   # ==========================================================
   # VIEW MODE
-  #
-  # drug = normal drug page
-  # gene = selected gene page
   # ==========================================================
   
   view_mode <- reactiveVal(
@@ -2131,10 +2229,6 @@ server <- function(
     )
     
     
-    # --------------------------------------------------------
-    # GENE VIEW
-    # --------------------------------------------------------
-    
     if (
       view_mode() == "gene"
     ) {
@@ -2152,10 +2246,6 @@ server <- function(
       )
     }
     
-    
-    # --------------------------------------------------------
-    # DRUG VIEW
-    # --------------------------------------------------------
     
     drug <- selected_drug()
     
@@ -2225,7 +2315,7 @@ server <- function(
   
   
   # ==========================================================
-  # WHEN A DIFFERENT DRUG IS SELECTED
+  # NEW DRUG SELECTED
   # ==========================================================
   
   observeEvent(
@@ -2250,15 +2340,6 @@ server <- function(
   
   # ==========================================================
   # GENE CLICK
-  #
-  # IMPORTANT FIX:
-  #
-  # Раньше render_target_cards() использовал genes после
-  # arrange(is.na(padj), padj), а здесь get_drug_genes()
-  # вызывался повторно в другом порядке.
-  #
-  # Теперь используется current_drug_genes(), то есть
-  # ТОТ ЖЕ объект и ТОТ ЖЕ индекс.
   # ==========================================================
   
   observeEvent(
@@ -2331,24 +2412,6 @@ server <- function(
   
   # ==========================================================
   # VOLCANO
-  #
-  # Здесь cutoff'ы НЕ удаляют выбранный ген.
-  #
-  # Все остальные точки остаются на графике, но:
-  #
-  #   - genes passing both cutoffs  -> нормальные точки
-  #   - genes failing cutoffs       -> более прозрачные точки
-  #
-  # + показываем:
-  #
-  #   vertical lines:
-  #       -log2fc_cutoff
-  #       +log2fc_cutoff
-  #
-  #   horizontal line:
-  #       padj_cutoff
-  #
-  # Выбранный ген всегда рисуется отдельным trace сверху.
   # ==========================================================
   
   output$gene_volcano <- renderPlotly({
@@ -2391,26 +2454,15 @@ server <- function(
         
         pass_both =
           pass_padj &
-          pass_fc,
-        
-        pass_any =
-          pass_padj |
           pass_fc
       )
     
-    
-    # --------------------------------------------------------
-    # Base plot
-    # --------------------------------------------------------
     
     p <- plot_ly()
     
     
     # --------------------------------------------------------
-    # Background / non-significant points
-    #
-    # Все гены остаются на графике.
-    # Не прошедшие cutoff становятся более прозрачными.
+    # Background genes
     # --------------------------------------------------------
     
     background_data <- plot_data |>
@@ -2470,10 +2522,10 @@ server <- function(
           
           marker = list(
             size = 6,
-            opacity = 0.30
+            opacity = 0.25
           ),
           
-          name = "Below cutoffs",
+          name = "Below criteria",
           
           inherit = FALSE
         )
@@ -2481,7 +2533,7 @@ server <- function(
     
     
     # --------------------------------------------------------
-    # Genes passing BOTH cutoffs
+    # Genes passing both criteria
     # --------------------------------------------------------
     
     significant_data <- plot_data |>
@@ -2526,18 +2578,17 @@ server <- function(
             signif(
               padj,
               3
-            ),
-            "<br><b>Passes both cutoffs</b>"
+            )
           ),
           
           hoverinfo = "text",
           
           marker = list(
             size = 7,
-            opacity = 0.75
+            opacity = 0.72
           ),
           
-          name = "Passes both cutoffs",
+          name = "Meets criteria",
           
           inherit = FALSE
         )
@@ -2548,7 +2599,6 @@ server <- function(
     # Cutoff lines
     # --------------------------------------------------------
     
-    # padj cutoff converted to -log10 scale
     padj_y <- -log10(
       max(
         padj_cutoff,
@@ -2576,7 +2626,6 @@ server <- function(
         
         shapes = list(
           
-          # Horizontal padj cutoff
           list(
             type = "line",
             x0 = -Inf,
@@ -2589,7 +2638,6 @@ server <- function(
             )
           ),
           
-          # Negative FC cutoff
           list(
             type = "line",
             x0 = -log2fc_cutoff,
@@ -2602,7 +2650,6 @@ server <- function(
             )
           ),
           
-          # Positive FC cutoff
           list(
             type = "line",
             x0 = log2fc_cutoff,
@@ -2614,70 +2661,12 @@ server <- function(
               width = 1
             )
           )
-        ),
-        
-        annotations = list(
-          
-          list(
-            x = 1,
-            y = padj_y,
-            xref = "x",
-            yref = "y",
-            text = paste0(
-              "padj = ",
-              padj_cutoff
-            ),
-            showarrow = FALSE,
-            xanchor = "left",
-            yanchor = "bottom"
-          ),
-          
-          list(
-            x = log2fc_cutoff,
-            y = 0,
-            xref = "x",
-            yref = "paper",
-            text = paste0(
-              "+",
-              log2fc_cutoff
-            ),
-            showarrow = FALSE,
-            yanchor = "top"
-          ),
-          
-          list(
-            x = -log2fc_cutoff,
-            y = 0,
-            xref = "x",
-            yref = "paper",
-            text = paste0(
-              "-",
-              log2fc_cutoff
-            ),
-            showarrow = FALSE,
-            yanchor = "top"
-          )
         )
       )
     
     
     # --------------------------------------------------------
-    # SELECTED GENE
-    #
-    # КРИТИЧЕСКИ ВАЖНО:
-    #
-    # Он добавляется последним trace и поэтому всегда
-    # находится поверх остальных точек.
-    #
-    # Даже если:
-    #
-    #   padj >= cutoff
-    #
-    # или
-    #
-    #   abs(log2FC) < cutoff
-    #
-    # выбранный ген всё равно будет виден.
+    # SELECTED GENE — ALWAYS ON TOP
     # --------------------------------------------------------
     
     selected_row <- plot_data |>
@@ -2769,17 +2758,7 @@ server <- function(
             selected_fc_text,
             "<br>padj: ",
             selected_padj_text,
-            "<br><b>Selected gene</b>",
-            if (
-              !is.na(selected_padj) &&
-              selected_padj < padj_cutoff &&
-              !is.na(selected_log2fc) &&
-              abs(selected_log2fc) >= log2fc_cutoff
-            ) {
-              "<br>Passes both cutoffs"
-            } else {
-              "<br>Does not pass both cutoffs"
-            }
+            "<br><b>Selected gene</b>"
           ),
           
           name = "Selected gene",
