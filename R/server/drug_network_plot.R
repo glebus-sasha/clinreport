@@ -16,8 +16,8 @@ prepare_vis_network <- function(subgraph, drug, pathway_genes, significant_ids) 
         TRUE ~ 11
       ),
       color = case_when(
-        pathway_hit ~ "#d97706",
-        pathway_member ~ "#7c3aed",
+        pathway_hit ~ "#f59e0b",
+        pathway_member ~ "#0f766e",
         type == "Target" ~ "#2563eb",
         TRUE ~ "#94a3b8"
       ),
@@ -83,8 +83,11 @@ register_drug_network_outputs <- function(
     selected_drug,
     subgraph,
     selected_pathways,
-    significant_ids
+    significant_ids,
+    selected_network_gene
 ) {
+  extra_pathway_node_ids <- reactiveVal(character())
+
   output$drug_network_summary <- renderUI({
     drug <- selected_drug()
 
@@ -153,6 +156,18 @@ register_drug_network_outputs <- function(
           damping = 0.4
         ),
         stabilization = list(enabled = TRUE, iterations = 300)
+      ) |>
+      visEvents(
+        select = JS(
+          "function(properties) {
+             Shiny.setInputValue('selected_network_node', properties.nodes[0] || null, {priority: 'event'});
+           }"
+        ),
+        deselectNode = JS(
+          "function() {
+             Shiny.setInputValue('selected_network_node', null, {priority: 'event'});
+           }"
+        )
       )
   })
 
@@ -168,15 +183,100 @@ register_drug_network_outputs <- function(
       unlist(use.names = FALSE) |>
       unique()
 
-    nodes <- prepare_vis_network(
+    base_data <- prepare_vis_network(
       graph,
       drug,
       pathway_genes = pathway_genes,
       significant_ids = significant_ids
-    )$nodes |>
+    )
+
+    nodes <- base_data$nodes |>
       select(id, size, color, borderWidth, title)
 
-    visNetworkProxy("drug_network_graph") |>
+    proxy <- visNetworkProxy("drug_network_graph") |>
       visUpdateNodes(nodes)
+
+    old_extra_ids <- extra_pathway_node_ids()
+    if (length(old_extra_ids) > 0) {
+      proxy <- proxy |> visRemoveNodes(old_extra_ids)
+    }
+
+    if (length(selected) == 0) {
+      extra_pathway_node_ids(character())
+      return(invisible())
+    }
+
+    selected_sets <- hallmark_pathways |>
+      filter(pathway %in% selected)
+    base_symbols <- base_data$nodes$label
+    extra_symbols <- setdiff(unique(unlist(selected_sets$genes)), base_symbols)
+
+    gene_attributes <- gene_data |>
+      transmute(
+        label = gene_name,
+        significant = gene_id_clean %in% significant_ids
+      ) |>
+      distinct(label, .keep_all = TRUE)
+
+    extra_genes <- tibble(label = extra_symbols) |>
+      left_join(gene_attributes, by = "label") |>
+      mutate(
+        significant = coalesce(significant, FALSE),
+        id = paste0("__PATHWAY_GENE__", label),
+        group = "Selected pathway gene",
+        shape = "dot",
+        size = if_else(significant, 17, 10),
+        color = if_else(significant, "#f59e0b", "#0f766e"),
+        borderWidth = if_else(significant, 3, 1),
+        title = paste0(
+          "<b>", htmlEscape(label), "</b><br>",
+          "Selected Hallmark pathway gene<br>DE status: ",
+          if_else(significant, "significant", "not significant")
+        )
+      ) |>
+      select(id, label, group, shape, size, color, borderWidth, title)
+
+    hubs <- selected_sets |>
+      transmute(
+        id = paste0("__PATHWAY_SET__", pathway),
+        label = sub("^HALLMARK_", "", pathway),
+        group = "Selected pathway",
+        shape = "box",
+        size = 18,
+        color = "#0f766e",
+        borderWidth = 2,
+        title = paste0("<b>", htmlEscape(label), "</b><br>Hallmark pathway")
+      )
+
+    if (nrow(extra_genes) + nrow(hubs) > 0) {
+      proxy <- proxy |> visUpdateNodes(bind_rows(extra_genes, hubs))
+    }
+
+    pathway_edges <- lapply(seq_len(nrow(selected_sets)), function(i) {
+      pathway <- selected_sets$pathway[i]
+      symbols <- selected_sets$genes[[i]]
+      target_ids <- if_else(
+        symbols %in% base_symbols,
+        base_data$nodes$id[match(symbols, base_symbols)],
+        paste0("__PATHWAY_GENE__", symbols)
+      )
+
+      tibble(
+        id = paste0("__PATHWAY_EDGE__", pathway, "__", symbols),
+        from = paste0("__PATHWAY_SET__", pathway),
+        to = target_ids,
+        title = "Hallmark pathway membership",
+        color = "#5eead4",
+        width = 1,
+        dashes = TRUE
+      )
+    }) |>
+      bind_rows()
+
+    if (nrow(pathway_edges) > 0) {
+      proxy |> visUpdateEdges(pathway_edges)
+    }
+
+    extra_pathway_node_ids(c(extra_genes$id, hubs$id))
   }, ignoreInit = TRUE)
 }

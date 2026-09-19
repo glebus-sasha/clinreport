@@ -157,6 +157,28 @@ server <- function(
   )
 
   selected_pathways <- reactiveVal(character())
+  selected_network_gene <- reactiveVal(NULL)
+
+  set_network_gene_focus <- function(gene_symbol) {
+    gene_lookup <- bind_rows(
+      gene_data |>
+        transmute(gene_id_clean, gene_name),
+      tx2gene_names |>
+        transmute(gene_id_clean = gene_id, gene_name)
+    ) |>
+      filter(!is.na(gene_name), gene_name == gene_symbol) |>
+      distinct(gene_name, .keep_all = TRUE)
+
+    if (nrow(gene_lookup) == 0) {
+      selected_network_gene(NULL)
+      return(invisible())
+    }
+
+    selected_network_gene(list(
+      id = gene_lookup$gene_id_clean[1],
+      symbol = gene_symbol
+    ))
+  }
 
   significant_gene_ids <- gene_data |>
     filter(
@@ -179,6 +201,95 @@ server <- function(
         c(selected, pathway)
       }
     )
+  })
+
+  current_drug_target_symbols <- reactive({
+    drug <- selected_drug()
+    req(drug)
+
+    get_gene_display_names(get_drug_target_ids(drug$drugId)) |>
+      pull(gene_name) |>
+      discard(is.na) |>
+      unique()
+  })
+
+  drug_table_proxy <- dataTableProxy("drug_table")
+
+  observeEvent(input$selected_network_node, {
+    node_id <- input$selected_network_node
+
+    if (is.null(node_id) || node_id == "__DRUG__" || startsWith(node_id, "__PATHWAY_SET__")) {
+      selected_network_gene(NULL)
+      return()
+    }
+
+    gene_symbol <- if (startsWith(node_id, "__PATHWAY_GENE__")) {
+      sub("^__PATHWAY_GENE__", "", node_id)
+    } else {
+      gene_data |>
+        filter(gene_id_clean == node_id) |>
+        pull(gene_name) |>
+        first(default = NA_character_)
+    }
+
+    if (is.na(gene_symbol) || !nzchar(gene_symbol)) {
+      selected_network_gene(NULL)
+      return()
+    }
+
+    set_network_gene_focus(gene_symbol)
+  })
+
+  output$focused_drugs <- renderUI({
+    gene <- selected_network_gene()
+    req(!is.null(gene))
+
+    related_drugs <- drug_network |>
+      filter(vapply(
+        drugId,
+        function(drug_id) gene$id %in% get_drug_target_ids(drug_id),
+        logical(1)
+      )) |>
+      arrange(desc(score), label)
+
+    div(
+      class = "focused-drugs-panel",
+      div(class = "focused-drugs-title", paste0("Drugs targeting ", gene$symbol)),
+      if (nrow(related_drugs) > 0) {
+        div(
+          class = "focused-drugs-list",
+          lapply(seq_len(nrow(related_drugs)), function(i) {
+            div(
+              class = "focused-drug-chip",
+              onclick = sprintf(
+                "Shiny.setInputValue('selected_focused_drug_id', '%s', {priority: 'event'})",
+                related_drugs$drugId[i]
+              ),
+              span(class = "focused-drug-name", related_drugs$label[i]),
+              span(class = "focused-drug-status", related_drugs$status[i]),
+              span(class = "focused-drug-score", sprintf("%.3f", related_drugs$score[i]))
+            )
+          })
+        )
+      } else {
+        div(class = "focused-drugs-empty", "No direct drug targets in this dataset.")
+      }
+    )
+  })
+
+  observeEvent(input$clear_gsea_pathways, {
+    selected_pathways(character())
+    selected_network_gene(NULL)
+  })
+
+  observeEvent(input$selected_focused_drug_id, {
+    row_index <- match(input$selected_focused_drug_id, drug_network$drugId)
+    req(!is.na(row_index))
+    selectRows(drug_table_proxy, row_index)
+  })
+
+  observeEvent(input$selected_network_gene_symbol, {
+    set_network_gene_focus(input$selected_network_gene_symbol)
   })
   
   
@@ -323,6 +434,7 @@ server <- function(
       )
 
       selected_pathways(character())
+      selected_network_gene(NULL)
       
     },
     
@@ -407,14 +519,19 @@ server <- function(
     selected_drug = selected_drug,
     subgraph = drug_string_subgraph,
     selected_pathways = selected_pathways,
-    significant_ids = significant_gene_ids
+    significant_ids = significant_gene_ids,
+    selected_network_gene = selected_network_gene
   )
 
   register_gsea_outputs(
     output = output,
+    input = input,
     selected_pathways = selected_pathways,
     significant_ids = significant_gene_ids,
-    subgraph = drug_string_subgraph
+    subgraph = drug_string_subgraph,
+    selected_network_gene = selected_network_gene,
+    selected_drug = selected_drug,
+    drug_target_symbols = current_drug_target_symbols
   )
 
 

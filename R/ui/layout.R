@@ -6,7 +6,8 @@ ui <- fluidPage(
       rel = "stylesheet",
       type = "text/css",
       href = "css/app.css"
-    )
+    ),
+    tags$script(src = "js/app.js")
   ),
   div(
     class = "app-title",
@@ -46,6 +47,8 @@ ui <- fluidPage(
           )
         )
       ),
+
+      uiOutput("focused_drugs"),
       
       DTOutput(
         "drug_table"

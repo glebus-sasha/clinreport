@@ -45,9 +45,11 @@ render_drug_page <- function(
     ),
 
     div(
-      class = "network-gsea-layout",
+      class = "drug-network-panel combined-network-panel",
       div(
-        class = "drug-network-panel top-network-panel",
+        class = "network-content-grid",
+        div(
+          class = "network-graph-column",
         div(
           class = "network-visualization-header",
           div(
@@ -61,12 +63,29 @@ render_drug_page <- function(
         ),
         uiOutput("drug_network_summary"),
         visNetworkOutput("drug_network_graph", height = "500px")
-      ),
-      div(
-        class = "gsea-panel",
-        div(class = "gsea-panel-title", "Hallmark pathways"),
+        ),
+        div(
+          class = "gsea-panel embedded-gsea-panel",
+        div(
+          class = "gsea-panel-heading",
+          div(class = "gsea-panel-title", "Hallmark pathways"),
+          actionButton("clear_gsea_pathways", "Clear", class = "gsea-clear-button")
+        ),
         div(class = "gsea-panel-subtitle", "All tested gene sets · click to highlight DE genes"),
-        div(class = "gsea-pathway-list", uiOutput("gsea_pathway_tiles"))
+        div(
+          class = "gsea-sort",
+          radioButtons(
+            "gsea_sort",
+            NULL,
+            choices = c("Enrichment" = "nes", "FDR" = "fdr"),
+            selected = "nes",
+            inline = TRUE
+          )
+        ),
+          uiOutput("gsea_matching_pathways"),
+          div(class = "gsea-all-pathways-label", "All Hallmark pathways"),
+          div(class = "gsea-pathway-list", uiOutput("gsea_pathway_tiles"))
+        )
       ),
       div(class = "gsea-details-strip", uiOutput("gsea_pathway_details"))
     ),
