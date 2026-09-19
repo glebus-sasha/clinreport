@@ -1,20 +1,36 @@
 # Drug / STRING network visualization
 
-prepare_vis_network <- function(subgraph, drug) {
+prepare_vis_network <- function(subgraph, drug, pathway_genes, significant_ids) {
   gene_nodes <- subgraph$nodes |>
     mutate(
       label = if_else(is.na(gene_name) | gene_name == "", gene_id, gene_name),
+      significant = gene_id %in% significant_ids,
+      pathway_member = label %in% pathway_genes,
+      pathway_hit = significant & pathway_member,
       group = if_else(type == "Target", "Target", "STRING neighbor"),
       shape = "dot",
-      size = if_else(type == "Target", 22, 11),
-      color = if_else(type == "Target", "#2563eb", "#94a3b8"),
+      size = case_when(
+        pathway_hit ~ 27,
+        pathway_member ~ 17,
+        type == "Target" ~ 22,
+        TRUE ~ 11
+      ),
+      color = case_when(
+        pathway_hit ~ "#d97706",
+        pathway_member ~ "#7c3aed",
+        type == "Target" ~ "#2563eb",
+        TRUE ~ "#94a3b8"
+      ),
+      borderWidth = if_else(significant, 4, 1),
       title = paste0(
         "<b>", htmlEscape(label), "</b><br>",
         "Ensembl: ", htmlEscape(gene_id), "<br>",
-        if_else(type == "Target", "Drug target", "STRING neighbor")
+        if_else(type == "Target", "Drug target", "STRING neighbor"),
+        "<br>DE status: ", if_else(significant, "significant", "not significant"),
+        "<br>Selected Hallmark pathway: ", if_else(pathway_member, "member", "not a member")
       )
     ) |>
-    transmute(id = gene_id, label, group, shape, size, color, title)
+    transmute(id = gene_id, label, group, shape, size, color, borderWidth, title)
 
   nodes <- bind_rows(
     tibble(
@@ -65,7 +81,9 @@ prepare_vis_network <- function(subgraph, drug) {
 register_drug_network_outputs <- function(
     output,
     selected_drug,
-    subgraph
+    subgraph,
+    selected_pathways,
+    significant_ids
 ) {
   output$drug_network_summary <- renderUI({
     drug <- selected_drug()
@@ -98,7 +116,12 @@ register_drug_network_outputs <- function(
     graph <- subgraph()
     req(nrow(graph$nodes) > 0)
 
-    data <- prepare_vis_network(graph, drug)
+    data <- prepare_vis_network(
+      graph,
+      drug,
+      pathway_genes = character(),
+      significant_ids = significant_ids
+    )
     req(nrow(data$edges) > 0)
 
     visNetwork(data$nodes, data$edges, width = "100%", height = "500px") |>
@@ -132,4 +155,28 @@ register_drug_network_outputs <- function(
         stabilization = list(enabled = TRUE, iterations = 300)
       )
   })
+
+  observeEvent(selected_pathways(), {
+    drug <- selected_drug()
+    req(drug)
+
+    graph <- subgraph()
+    selected <- selected_pathways()
+    pathway_genes <- hallmark_pathways |>
+      filter(pathway %in% selected) |>
+      pull(genes) |>
+      unlist(use.names = FALSE) |>
+      unique()
+
+    nodes <- prepare_vis_network(
+      graph,
+      drug,
+      pathway_genes = pathway_genes,
+      significant_ids = significant_ids
+    )$nodes |>
+      select(id, size, color, borderWidth, title)
+
+    visNetworkProxy("drug_network_graph") |>
+      visUpdateNodes(nodes)
+  }, ignoreInit = TRUE)
 }

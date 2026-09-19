@@ -20,6 +20,7 @@ source("R/data/load_drug_network.R")
 source("R/data/load_gene_data.R")
 source("R/data/load_string_network.R")
 source("R/data/load_tx2gene.R")
+source("R/data/load_gsea.R")
 source("R/data/drug_directories.R")
 source("R/data/json_reader.R")
 
@@ -47,6 +48,7 @@ source("R/ui/layout.R")
 # Server
 source("R/server/volcano_plot.R")
 source("R/server/drug_network_plot.R")
+source("R/server/gsea_panel.R")
 source("R/server/server.R")
 
 shinyApp(

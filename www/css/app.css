@@ -43,7 +43,7 @@ body {
 
 .main-layout {
   display: grid;
-  grid-template-columns: minmax(380px, 43%) minmax(0, 57%);
+  grid-template-columns: minmax(250px, 25%) minmax(0, 75%);
   gap: 16px;
   align-items: stretch;
 }
@@ -94,6 +94,110 @@ body {
     0 2px 10px rgba(20, 30, 40, 0.045);
   overflow: hidden;
 }
+
+.network-gsea-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2.1fr) minmax(245px, 0.9fr);
+  gap: 0;
+  margin: 16px 0 20px;
+  align-items: stretch;
+}
+
+.top-network-panel {
+  margin: 0;
+  border-radius: 16px 0 0 16px;
+  border-right: 0;
+}
+
+.gsea-panel {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 0 16px 16px 0;
+  background: #ffffff;
+}
+
+.gsea-panel-title {
+  color: #17202a;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.gsea-panel-subtitle {
+  margin-top: 4px;
+  color: #66707a;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.gsea-pathway-list {
+  display: grid;
+  gap: 6px;
+  max-height: 246px;
+  margin-top: 12px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.gsea-pathway-tile {
+  padding: 9px 10px;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #94a3b8;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.gsea-pathway-tile:hover,
+.gsea-pathway-tile.active {
+  border-color: #17202a;
+  background: #f1f5f9;
+}
+
+.gsea-pathway-tile.up { border-left-color: #2563eb; }
+.gsea-pathway-tile.down { border-left-color: #b45309; }
+
+.gsea-pathway-name {
+  color: #334155;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.gsea-pathway-metrics,
+.gsea-details-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 9px;
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 10px;
+}
+
+.gsea-details-strip {
+  grid-column: 1 / -1;
+}
+
+.gsea-details-strip:has(.gsea-details) {
+  padding: 13px 18px;
+  border: 1px solid #e5e7eb;
+  border-top: 0;
+  border-radius: 0 0 16px 16px;
+  background: #fbfcfd;
+}
+
+.gsea-details {
+  display: inline-block;
+  width: 100%;
+}
+
+.gsea-details-heading { color: #17202a; font-size: 12px; font-weight: 700; }
+.gsea-msigdb-link { display: inline-block; margin-top: 9px; color: #2563eb !important; font-size: 11px; text-decoration: none !important; }
+.gsea-gene-list { display: flex; flex-wrap: wrap; gap: 5px; max-height: 118px; margin-top: 9px; overflow-y: auto; }
+.gsea-gene-chip { padding: 3px 6px; border: 1px solid #dbe3ec; border-radius: 999px; background: #ffffff; color: #64748b; font-size: 10px; cursor: default; }
+.gsea-gene-chip.deg-network { border-color: #d97706; background: #fff7ed; color: #9a3412; }
+.gsea-gene-chip.deg-only { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
+.gsea-gene-chip.network-only { border-color: #7c3aed; background: #f5f3ff; color: #6d28d9; }
 
 
 /* ==================================================
@@ -1177,6 +1281,10 @@ table.dataTable tbody tr.selected td {
 
   .structure-network-layout,
   .structure-identifiers {
+    grid-template-columns: 1fr;
+  }
+
+  .network-gsea-layout {
     grid-template-columns: 1fr;
   }
 }

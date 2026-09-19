@@ -7,6 +7,17 @@ if (!file.exists(drug_network_file)) {
   stop("Drug network file does not exist: ", drug_network_file)
 }
 
+gsea_input_files <- c(
+  gsea_carcinoma_report_file,
+  gsea_normal_report_file,
+  hallmark_gmt_file
+)
+
+missing_gsea_files <- gsea_input_files[!file.exists(gsea_input_files)]
+if (length(missing_gsea_files) > 0) {
+  stop("Missing GSEA input files: ", paste(missing_gsea_files, collapse = ", "))
+}
+
 if (!dir.exists(clinreport_dir)) {
   stop("ClinReport directory does not exist: ", clinreport_dir)
 }

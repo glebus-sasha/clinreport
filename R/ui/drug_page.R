@@ -45,20 +45,30 @@ render_drug_page <- function(
     ),
 
     div(
-      class = "drug-network-panel top-network-panel",
+      class = "network-gsea-layout",
       div(
-        class = "network-visualization-header",
+        class = "drug-network-panel top-network-panel",
         div(
-          class = "network-visualization-title",
-          network_name
+          class = "network-visualization-header",
+          div(
+            class = "network-visualization-title",
+            network_name
+          ),
+          div(
+            class = "network-visualization-subtitle",
+            "Selected drug, direct targets, and one-hop STRING neighbors"
+          )
         ),
-        div(
-          class = "network-visualization-subtitle",
-          "Selected drug, direct targets, and one-hop STRING neighbors"
-        )
+        uiOutput("drug_network_summary"),
+        visNetworkOutput("drug_network_graph", height = "500px")
       ),
-      uiOutput("drug_network_summary"),
-      visNetworkOutput("drug_network_graph", height = "500px")
+      div(
+        class = "gsea-panel",
+        div(class = "gsea-panel-title", "Hallmark pathways"),
+        div(class = "gsea-panel-subtitle", "All tested gene sets · click to highlight DE genes"),
+        div(class = "gsea-pathway-list", uiOutput("gsea_pathway_tiles"))
+      ),
+      div(class = "gsea-details-strip", uiOutput("gsea_pathway_details"))
     ),
     
     

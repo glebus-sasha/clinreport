@@ -155,6 +155,31 @@ server <- function(
   selected_gene <- reactiveVal(
     NULL
   )
+
+  selected_pathways <- reactiveVal(character())
+
+  significant_gene_ids <- gene_data |>
+    filter(
+      !is.na(padj),
+      padj < padj_cutoff,
+      !is.na(log2FoldChange),
+      abs(log2FoldChange) >= log2fc_cutoff
+    ) |>
+    pull(gene_id_clean) |>
+    unique()
+
+  observeEvent(input$selected_gsea_pathway, {
+    pathway <- input$selected_gsea_pathway
+    selected <- selected_pathways()
+
+    selected_pathways(
+      if (pathway %in% selected) {
+        setdiff(selected, pathway)
+      } else {
+        c(selected, pathway)
+      }
+    )
+  })
   
   
   # ==========================================================
@@ -237,20 +262,27 @@ server <- function(
           ),
 
           div(
-            class = "drug-network-panel embedded-network-panel",
+            class = "network-gsea-layout",
             div(
-              class = "network-visualization-header",
+              class = "drug-network-panel top-network-panel",
               div(
-                class = "network-visualization-title",
-                network_display_name
+                class = "network-visualization-header",
+                div(class = "network-visualization-title", network_display_name),
+                div(
+                  class = "network-visualization-subtitle",
+                  "Selected drug, direct targets, and one-hop STRING neighbors"
+                )
               ),
-              div(
-                class = "network-visualization-subtitle",
-                "Selected drug, direct targets, and one-hop STRING neighbors"
-              )
+              uiOutput("drug_network_summary"),
+              visNetworkOutput("drug_network_graph", height = "500px")
             ),
-            uiOutput("drug_network_summary"),
-            visNetworkOutput("drug_network_graph", height = "500px")
+            div(
+              class = "gsea-panel",
+              div(class = "gsea-panel-title", "Hallmark pathways"),
+              div(class = "gsea-panel-subtitle", "All tested gene sets · click to highlight DE genes"),
+              div(class = "gsea-pathway-list", uiOutput("gsea_pathway_tiles")),
+              uiOutput("gsea_pathway_details")
+            )
           )
         )
       )
@@ -289,6 +321,8 @@ server <- function(
       selected_gene(
         NULL
       )
+
+      selected_pathways(character())
       
     },
     
@@ -371,6 +405,15 @@ server <- function(
   register_drug_network_outputs(
     output = output,
     selected_drug = selected_drug,
+    subgraph = drug_string_subgraph,
+    selected_pathways = selected_pathways,
+    significant_ids = significant_gene_ids
+  )
+
+  register_gsea_outputs(
+    output = output,
+    selected_pathways = selected_pathways,
+    significant_ids = significant_gene_ids,
     subgraph = drug_string_subgraph
   )
 

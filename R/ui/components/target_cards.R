@@ -142,8 +142,11 @@ render_target_cards <- function(
         div(
           class = "gene-main",
           
-          div(
-            class = "gene-symbol",
+          tags$a(
+            href = ensembl_url(g$gene_id_clean),
+            target = "_blank",
+            rel = "noopener noreferrer",
+            class = "gene-symbol gene-external-link",
             gene_name
           ),
           
@@ -251,5 +254,4 @@ render_target_cards <- function(
     }
   )
 }
-
 

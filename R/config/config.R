@@ -34,6 +34,21 @@ tx2gene_file <- file.path(
   "tx2gene.tsv"
 )
 
+# Hallmark GSEA inputs. These remain explicit configuration values so a later
+# parameterized run can replace them without changing UI or server logic.
+gsea_carcinoma_report_file <- file.path(
+  "C:/projects/clinreport/raw/gsea",
+  "carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_gsea_report_for_carcinoma.tsv"
+)
+gsea_normal_report_file <- file.path(
+  "C:/projects/clinreport/raw/gsea",
+  "carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_gsea_report_for_normal.tsv"
+)
+hallmark_gmt_file <- file.path(
+  "C:/projects/clinreport/raw/gsea",
+  "carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_h_all_v2026_1_Hs_symbols.gmt"
+)
+
 # Maximum number of STRING neighbors displayed per drug target.
 network_max_neighbors <- 40
 
