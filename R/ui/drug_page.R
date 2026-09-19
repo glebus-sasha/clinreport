@@ -7,7 +7,8 @@ render_drug_page <- function(
     drug_id,
     drug_name,
     data,
-    genes
+    genes,
+    network_name
 ) {
   
   chembl_id <- get_chembl_id(data)
@@ -41,6 +42,23 @@ render_drug_page <- function(
           pubchem_cid
         )
       )
+    ),
+
+    div(
+      class = "drug-network-panel top-network-panel",
+      div(
+        class = "network-visualization-header",
+        div(
+          class = "network-visualization-title",
+          network_name
+        ),
+        div(
+          class = "network-visualization-subtitle",
+          "Selected drug, direct targets, and one-hop STRING neighbors"
+        )
+      ),
+      uiOutput("drug_network_summary"),
+      visNetworkOutput("drug_network_graph", height = "500px")
     ),
     
     
@@ -139,5 +157,3 @@ render_drug_page <- function(
     )
   )
 }
-
-

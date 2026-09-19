@@ -2,7 +2,11 @@
 
 ui <- fluidPage(
   tags$head(
-    includeCSS("www/css/app.css")
+    tags$link(
+      rel = "stylesheet",
+      type = "text/css",
+      href = "css/app.css"
+    )
   ),
   div(
     class = "app-title",
@@ -61,6 +65,7 @@ ui <- fluidPage(
       )
     )
   )
+
 )
 
 

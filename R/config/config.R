@@ -22,6 +22,24 @@ gene_file <- file.path(
   "carcinoma_vs_normal_gene_names_added.tsv"
 )
 
+# Protein/gene interaction network used for the drug subgraph visualization.
+string_network_file <- file.path(
+  "C:/projects/clinreport/raw/network",
+  "string.human_links_v12_0_min900.Ensembl.edges.tsv"
+)
+
+# Transcript -> gene mapping. Used to enrich/normalize gene identifiers and names.
+tx2gene_file <- file.path(
+  "C:/projects/clinreport/raw",
+  "tx2gene.tsv"
+)
+
+# Maximum number of STRING neighbors displayed per drug target.
+network_max_neighbors <- 40
+
+# Display name for the selected interaction network. Keep this as a distinct
+# input so a future dataset metadata loader can provide it at startup.
+network_display_name <- "Drug–gene interaction network"
+
 padj_cutoff <- 0.05
 log2fc_cutoff <- 1.0
-

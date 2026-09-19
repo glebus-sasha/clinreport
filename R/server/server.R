@@ -131,6 +131,20 @@ server <- function(
   
   
   # ==========================================================
+  # DRUG / STRING SUBGRAPH
+  # ==========================================================
+
+  drug_string_subgraph <- reactive({
+    req(selected_drug())
+
+    get_drug_string_subgraph(
+      selected_drug()$drugId,
+      max_neighbors = network_max_neighbors
+    )
+  })
+
+
+  # ==========================================================
   # VIEW MODE
   # ==========================================================
   
@@ -220,6 +234,23 @@ server <- function(
             
             "Detailed information is not available ",
             "for this drug."
+          ),
+
+          div(
+            class = "drug-network-panel embedded-network-panel",
+            div(
+              class = "network-visualization-header",
+              div(
+                class = "network-visualization-title",
+                network_display_name
+              ),
+              div(
+                class = "network-visualization-subtitle",
+                "Selected drug, direct targets, and one-hop STRING neighbors"
+              )
+            ),
+            uiOutput("drug_network_summary"),
+            visNetworkOutput("drug_network_graph", height = "500px")
           )
         )
       )
@@ -234,7 +265,9 @@ server <- function(
       
       data,
       
-      genes
+      genes,
+
+      network_display_name
     )
   })
   
@@ -335,6 +368,13 @@ server <- function(
   )
   
   
+  register_drug_network_outputs(
+    output = output,
+    selected_drug = selected_drug,
+    subgraph = drug_string_subgraph
+  )
+
+
   # ==========================================================
   # VOLCANO
   # ==========================================================

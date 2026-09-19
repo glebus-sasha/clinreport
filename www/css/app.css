@@ -412,6 +412,24 @@ body {
   align-items: stretch;
 }
 
+.structure-network-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 32%) minmax(0, 68%);
+  gap: 13px;
+  align-items: stretch;
+}
+
+.embedded-network-panel {
+  margin-top: 0;
+  min-width: 0;
+}
+
+.structure-identifiers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 13px;
+}
+
 .structure-visual {
   min-height: 280px;
   border: 1px solid #e5e8eb;
@@ -1156,6 +1174,11 @@ table.dataTable tbody tr.selected td {
   .structure-layout {
     grid-template-columns: 1fr;
   }
+
+  .structure-network-layout,
+  .structure-identifiers {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 750px) {
@@ -1201,5 +1224,81 @@ table.dataTable tbody tr.selected td {
 
   .gene-status {
     display: none;
+  }
+}
+
+
+/* ============================================================
+   DRUG / STRING NETWORK VISUALIZATION
+   ============================================================ */
+
+.drug-network-panel {
+  margin-top: 24px;
+  padding: 22px 24px 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.network-visualization-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 8px;
+}
+
+.network-visualization-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #17202a;
+}
+
+.network-visualization-subtitle {
+  margin-top: 4px;
+  color: #66707a;
+  font-size: 13px;
+}
+
+.network-controls .shiny-input-container {
+  margin-bottom: 0;
+}
+
+.network-controls .radio-inline {
+  margin-right: 12px;
+}
+
+.network-summary {
+  margin: 8px 0 10px;
+  color: #66707a;
+  font-size: 13px;
+}
+
+.network-summary-drug {
+  color: #17202a;
+  font-weight: 700;
+}
+
+.network-empty-message {
+  margin: 14px 0 10px;
+  padding: 18px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  color: #66707a;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.drug-network-panel .vis-network {
+  width: 100% !important;
+}
+
+@media (max-width: 900px) {
+  .network-visualization-header {
+    flex-direction: column;
+  }
+
+  .drug-network-panel {
+    padding: 18px 14px 14px;
   }
 }

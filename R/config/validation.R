@@ -34,3 +34,18 @@ if (
   stop("log2fc_cutoff must be a single non-negative number.")
 }
 
+
+
+# Network visualization inputs
+if (!file.exists(string_network_file)) {
+  stop("STRING edge file not found: ", string_network_file)
+}
+
+if (!file.exists(tx2gene_file)) {
+  stop("tx2gene file not found: ", tx2gene_file)
+}
+
+if (!is.numeric(network_max_neighbors) || length(network_max_neighbors) != 1 ||
+    is.na(network_max_neighbors) || network_max_neighbors < 1) {
+  stop("network_max_neighbors must be a positive number")
+}

@@ -115,7 +115,8 @@ register_volcano_output <- function(
             
             marker = list(
               size = 6,
-              opacity = 0.22
+              color = "#cbd5e1",
+              opacity = 0.72
             ),
             
             name = "Below criteria",
@@ -178,7 +179,8 @@ register_volcano_output <- function(
             
             marker = list(
               size = 7,
-              opacity = 0.70
+              color = "#2563eb",
+              opacity = 0.82
             ),
             
             name = "Meets criteria",
@@ -204,69 +206,31 @@ register_volcano_output <- function(
         
         layout(
           
-          title = list(
-            text = "Differential expression",
-            font = list(
-              size = 16
-            )
-          ),
-          
           xaxis = list(
-            title = "log2 Fold Change",
-            zeroline = TRUE
+            title = "",
+            showgrid = FALSE,
+            zeroline = FALSE,
+            showline = FALSE,
+            showticklabels = FALSE,
+            ticks = ""
           ),
           
           yaxis = list(
-            title = "-log10 adjusted p-value"
+            title = "",
+            showgrid = FALSE,
+            zeroline = FALSE,
+            showline = FALSE,
+            showticklabels = FALSE,
+            ticks = ""
           ),
           
           hovermode = "closest",
+          paper_bgcolor = "#ffffff",
+          plot_bgcolor = "#ffffff",
+          font = list(family = "Arial, sans-serif", color = "#374151"),
+          showlegend = FALSE,
           
-          margin = list(
-            l = 65,
-            r = 25,
-            b = 55,
-            t = 55
-          ),
-          
-          shapes = list(
-            
-            list(
-              type = "line",
-              x0 = -Inf,
-              x1 = Inf,
-              y0 = padj_y,
-              y1 = padj_y,
-              line = list(
-                dash = "dash",
-                width = 1
-              )
-            ),
-            
-            list(
-              type = "line",
-              x0 = -log2fc_cutoff,
-              x1 = -log2fc_cutoff,
-              y0 = 0,
-              y1 = Inf,
-              line = list(
-                dash = "dash",
-                width = 1
-              )
-            ),
-            
-            list(
-              type = "line",
-              x0 = log2fc_cutoff,
-              x1 = log2fc_cutoff,
-              y0 = 0,
-              y1 = Inf,
-              line = list(
-                dash = "dash",
-                width = 1
-              )
-            )
-          )
+          margin = list(l = 12, r = 12, b = 12, t = 12)
         )
       
       
@@ -337,17 +301,15 @@ register_volcano_output <- function(
             
             type = "scatter",
             
-            mode = "markers+text",
-            
-            text = ~gene_name,
-            
-            textposition = "top center",
+            mode = "markers",
             
             marker = list(
-              size = 16,
-              symbol = "diamond",
+              size = 12,
+              symbol = "circle",
+              color = "#ffffff",
               line = list(
-                width = 2
+                color = "#17202a",
+                width = 3
               )
             ),
             
@@ -373,6 +335,6 @@ register_volcano_output <- function(
       }
       
       
-      p
+      config(p, displayModeBar = FALSE)
     })
 }

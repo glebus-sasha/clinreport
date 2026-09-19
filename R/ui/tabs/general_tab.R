@@ -101,7 +101,7 @@ render_general <- function(
     
     div(
       class = "section-header",
-      
+
       div(
         class = "section-title",
         "Identifiers"
@@ -209,150 +209,35 @@ render_general <- function(
       chembl_id,
       pubchem_cid
     ),
-    
-    
-    # --------------------------------------------------------
-    # MOLECULAR PROPERTIES
-    # --------------------------------------------------------
-    
+
     div(
       class = "section-header",
-      
-      div(
-        class = "section-title",
-        "Molecular properties"
-      ),
-      
-      div(
-        class = "section-subtitle",
-        "Compact physicochemical profile"
-      )
+      div(class = "section-title", "Development")
     ),
-    
-    div(
-      class = "molecular-grid",
-      
-      molecular_metric(
-        "Molecular weight",
-        molecular_weight,
-        800,
-        " Da"
-      ),
-      
-      molecular_metric(
-        "AlogP",
-        alogp,
-        8
-      ),
-      
-      molecular_metric(
-        "H-bond acceptors",
-        hba,
-        12
-      ),
-      
-      molecular_metric(
-        "H-bond donors",
-        hbd,
-        8
-      ),
-      
-      molecular_metric(
-        "Polar surface area",
-        psa,
-        160,
-        " Å²"
-      ),
-      
-      molecular_metric(
-        "Rotatable bonds",
-        rtb,
-        12
-      )
-    ),
-    
-    div(
-      class = "formula-card",
-      
-      div(
-        class = "formula-label",
-        "Molecular formula"
-      ),
-      
-      div(
-        class = "formula-value mono-value",
-        safe_text(
-          get_nested(
-            molecule,
-            "molecule_properties",
-            "full_molformula"
-          )
-        )
-      )
-    ),
-    
-    
-    # --------------------------------------------------------
-    # DEVELOPMENT
-    # --------------------------------------------------------
-    
-    div(
-      class = "section-header",
-      
-      div(
-        class = "section-title",
-        "Development"
-      )
-    ),
-    
+
     div(
       class = "development-grid",
-      
       div(
         class = "development-card",
-        
-        div(
-          class = "development-label",
-          "First approval"
-        ),
-        
+        div(class = "development-label", "First approval"),
         div(
           class = "development-value",
-          safe_text(
-            get_nested(
-              molecule,
-              "first_approval"
-            )
-          )
+          safe_text(get_nested(molecule, "first_approval"))
         )
       ),
-      
       div(
         class = "development-card",
-        
-        div(
-          class = "development-label",
-          "Maximum phase"
-        ),
-        
+        div(class = "development-label", "Maximum phase"),
         div(
           class = "phase-badge large",
-          paste0(
-            "Phase ",
-            safe_text(
-              get_nested(
-                molecule,
-                "max_phase"
-              )
-            )
-          )
+          paste0("Phase ", safe_text(get_nested(molecule, "max_phase")))
         )
       )
     ),
     
     
     # --------------------------------------------------------
-    # STRUCTURES
+    # STRUCTURE AND TARGET NETWORK
     # --------------------------------------------------------
     
     div(
@@ -360,21 +245,21 @@ render_general <- function(
       
       div(
         class = "section-title",
-        "Structures"
+        "Structure and target network"
       ),
       
       div(
         class = "section-subtitle",
-        "2D representation and machine-readable identifiers"
+        "Chemical structure alongside the selected interaction network"
       )
     ),
     
     div(
       class = "structure-layout",
-      
+
       div(
         class = "structure-visual",
-        
+
         render_structure(
           pubchem_cid
         )
@@ -382,69 +267,56 @@ render_general <- function(
       
       div(
         class = "structure-data",
-        
         div(
           class = "structure-field",
-          
-          div(
-            class = "structure-field-label",
-            "Canonical SMILES"
-          ),
-          
+          div(class = "structure-field-label", "Canonical SMILES"),
           div(
             class = "structure-code",
-            safe_text(
-              get_nested(
-                molecule,
-                "molecule_structures",
-                "canonical_smiles"
-              )
-            )
+            safe_text(get_nested(molecule, "molecule_structures", "canonical_smiles"))
           )
         ),
-        
         div(
           class = "structure-field",
-          
-          div(
-            class = "structure-field-label",
-            "Standard InChI"
-          ),
-          
+          div(class = "structure-field-label", "Standard InChI"),
           div(
             class = "structure-code",
-            safe_text(
-              get_nested(
-                molecule,
-                "molecule_structures",
-                "standard_inchi"
-              )
-            )
+            safe_text(get_nested(molecule, "molecule_structures", "standard_inchi"))
           )
         ),
-        
         div(
           class = "structure-field",
-          
-          div(
-            class = "structure-field-label",
-            "InChI Key"
-          ),
-          
+          div(class = "structure-field-label", "InChI Key"),
           div(
             class = "structure-code",
-            safe_text(
-              get_nested(
-                molecule,
-                "molecule_structures",
-                "standard_inchi_key"
-              )
-            )
+            safe_text(get_nested(molecule, "molecule_structures", "standard_inchi_key"))
           )
         )
+      )
+    ),
+
+    div(
+      class = "section-header",
+      div(class = "section-title", "Molecular properties"),
+      div(class = "section-subtitle", "Compact physicochemical profile")
+    ),
+
+    div(
+      class = "molecular-grid",
+      molecular_metric("Molecular weight", molecular_weight, 800, " Da"),
+      molecular_metric("AlogP", alogp, 8),
+      molecular_metric("H-bond acceptors", hba, 12),
+      molecular_metric("H-bond donors", hbd, 8),
+      molecular_metric("Polar surface area", psa, 160, " Å²"),
+      molecular_metric("Rotatable bonds", rtb, 12)
+    ),
+
+    div(
+      class = "formula-card",
+      div(class = "formula-label", "Molecular formula"),
+      div(
+        class = "formula-value mono-value",
+        safe_text(get_nested(molecule, "molecule_properties", "full_molformula"))
       )
     )
   )
 }
-
-
