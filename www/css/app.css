@@ -1,0 +1,1205 @@
+/* ==================================================
+   GLOBAL
+   ================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #f3f5f7;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  color: #20242a;
+  margin: 0;
+}
+
+.container-fluid {
+  padding-left: 26px;
+  padding-right: 26px;
+}
+
+.app-title {
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.5px;
+  margin: 24px 0 5px 0;
+  color: #171b20;
+}
+
+.app-subtitle {
+  color: #8a9199;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+
+/* ==================================================
+   MAIN LAYOUT
+   ================================================== */
+
+.main-layout {
+  display: grid;
+  grid-template-columns: minmax(380px, 43%) minmax(0, 57%);
+  gap: 16px;
+  align-items: stretch;
+}
+
+
+/* ==================================================
+   LEFT / NETWORK ZONE
+   ================================================== */
+
+.drug-list {
+  background: #f8fafb;
+  border: 1px solid #e2e6ea;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow:
+    0 2px 8px rgba(20, 30, 40, 0.035);
+  min-height: 760px;
+}
+
+.network-header {
+  padding: 7px 6px 12px 6px;
+}
+
+.network-title {
+  font-size: 16px;
+  font-weight: 650;
+  color: #30363d;
+}
+
+.network-subtitle {
+  color: #9299a1;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+
+/* ==================================================
+   RIGHT / DETAIL ZONE
+   ================================================== */
+
+.drug-details {
+  background: white;
+  border: 1px solid #e4e7ea;
+  border-radius: 14px;
+  padding: 28px 30px;
+  min-height: 760px;
+  box-shadow:
+    0 2px 10px rgba(20, 30, 40, 0.045);
+  overflow: hidden;
+}
+
+
+/* ==================================================
+   DRUG HEADER
+   ================================================== */
+
+.drug-header {
+  margin-bottom: 4px;
+}
+
+.drug-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.drug-title {
+  font-size: 29px;
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  color: #171b20;
+}
+
+.drug-id {
+  color: #9aa1a8;
+  font-size: 12px;
+  margin-top: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+
+/* ==================================================
+   SOURCE BUTTONS
+   ================================================== */
+
+.source-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.source-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 9px;
+  border: 1px solid #dfe3e7;
+  border-radius: 7px;
+  background: #fafbfc;
+  color: #616971 !important;
+  font-size: 10px;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.source-button:hover {
+  background: white;
+  border-color: #c8ced5;
+}
+
+
+/* ==================================================
+   TABS
+   ================================================== */
+
+.nav-tabs {
+  margin-top: 22px;
+  border-bottom: 1px solid #e6e8eb;
+}
+
+.nav-tabs > li > a {
+  color: #7d858d;
+  border: none !important;
+  padding: 10px 14px;
+  font-size: 13px;
+  transition:
+    color 0.12s ease;
+}
+
+.nav-tabs > li > a:hover {
+  background: transparent !important;
+  color: #394149;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+  color: #252b31;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid #3d4650 !important;
+  font-weight: 650;
+}
+
+.tab-content {
+  padding-top: 8px;
+}
+
+
+/* ==================================================
+   SECTION HEADERS
+   ================================================== */
+
+.section-header {
+  margin-top: 23px;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 650;
+  color: #30363d;
+}
+
+.section-subtitle {
+  color: #9aa1a8;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+
+/* ==================================================
+   IDENTIFIERS
+   ================================================== */
+
+.identifier-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(130px, 1fr)
+    minmax(130px, 1fr)
+    minmax(130px, 1fr);
+  gap: 8px;
+}
+
+.identifier-card {
+  background: #fafbfc;
+  border: 1px solid #e7e9ec;
+  border-radius: 9px;
+  padding: 11px 12px;
+  min-width: 0;
+}
+
+.identifier-card.wide {
+  grid-column: 1 / -1;
+}
+
+.identifier-label {
+  color: #969da5;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.35px;
+  margin-bottom: 5px;
+}
+
+.identifier-value {
+  color: #343a41;
+  font-size: 13px;
+  font-weight: 550;
+  overflow-wrap: anywhere;
+}
+
+.preferred-name {
+  font-size: 14px;
+}
+
+.identifier-link,
+.external-link,
+.target-link,
+.gene-external-link {
+  color: #526c84 !important;
+  text-decoration: none !important;
+}
+
+.identifier-link:hover,
+.external-link:hover,
+.target-link:hover,
+.gene-external-link:hover {
+  text-decoration: underline !important;
+}
+
+
+/* ==================================================
+   MOLECULAR PROFILE
+   ================================================== */
+
+.molecular-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.molecular-metric {
+  background: #fafbfc;
+  border: 1px solid #e7e9ec;
+  border-radius: 9px;
+  padding: 11px 12px;
+}
+
+.metric-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.metric-label {
+  color: #7e868e;
+  font-size: 11px;
+}
+
+.metric-value {
+  color: #30363d;
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.metric-track {
+  height: 4px;
+  background: #e9ecef;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.metric-fill {
+  height: 100%;
+  background: #7e93a8;
+  border-radius: 5px;
+  min-width: 2px;
+}
+
+.formula-card {
+  margin-top: 9px;
+  padding: 11px 12px;
+  border: 1px solid #e7e9ec;
+  border-radius: 9px;
+  background: #fcfcfd;
+}
+
+.formula-label {
+  color: #969da5;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.35px;
+  margin-bottom: 5px;
+}
+
+.formula-value {
+  font-size: 14px;
+  color: #343a41;
+}
+
+
+/* ==================================================
+   DEVELOPMENT
+   ================================================== */
+
+.development-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.development-card {
+  border: 1px solid #e7e9ec;
+  background: #fafbfc;
+  border-radius: 9px;
+  padding: 12px;
+}
+
+.development-label {
+  color: #9299a1;
+  font-size: 10px;
+  margin-bottom: 6px;
+}
+
+.development-value {
+  font-size: 18px;
+  font-weight: 650;
+  color: #343a41;
+}
+
+.phase-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  border-radius: 5px;
+  background: #edf1f4;
+  color: #596773;
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.phase-badge.large {
+  font-size: 13px;
+  padding: 6px 9px;
+}
+
+
+/* ==================================================
+   STRUCTURES
+   ================================================== */
+
+.structure-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, 38%) minmax(0, 62%);
+  gap: 13px;
+  align-items: stretch;
+}
+
+.structure-visual {
+  min-height: 280px;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+  background: #fbfcfd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.structure-container {
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.chemical-structure {
+  max-width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+}
+
+.structure-caption {
+  margin-top: 7px;
+  color: #9aa1a8;
+  font-size: 10px;
+}
+
+.structure-data {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.structure-field {
+  border: 1px solid #e7e9ec;
+  background: #fafbfc;
+  border-radius: 9px;
+  padding: 11px 12px;
+}
+
+.structure-field-label {
+  color: #969da5;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.35px;
+  margin-bottom: 6px;
+}
+
+.structure-code {
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #454c54;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.mono-value {
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+}
+
+.structure-empty {
+  color: #9aa1a8;
+  text-align: center;
+  padding: 25px;
+  font-size: 12px;
+}
+
+
+/* ==================================================
+   INDICATIONS
+   ================================================== */
+
+.indications-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.indication-card {
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+  background: #fafbfc;
+  padding: 12px;
+}
+
+.indication-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.indication-name {
+  font-size: 14px;
+  font-weight: 650;
+  color: #353c43;
+  line-height: 1.35;
+}
+
+.indication-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid #e8eaed;
+}
+
+.meta-item {
+  display: flex;
+  gap: 8px;
+  font-size: 10px;
+}
+
+.meta-label {
+  width: 35px;
+  color: #9aa1a8;
+  text-transform: uppercase;
+}
+
+.meta-value {
+  color: #606870;
+  overflow-wrap: anywhere;
+}
+
+
+/* ==================================================
+   MECHANISMS
+   ================================================== */
+
+.pharmacology-section {
+  margin-top: 28px;
+}
+
+.mechanism-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mechanism-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 13px 14px;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+  background: #fafbfc;
+}
+
+.mechanism-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.mechanism-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #343b42;
+}
+
+.mechanism-target {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #8d959d;
+}
+
+.target-label {
+  margin-right: 6px;
+  color: #a0a6ad;
+}
+
+.mechanism-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.mechanism-pill {
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: #edf1f4;
+  color: #596773;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.mechanism-detail {
+  text-align: right;
+}
+
+.mechanism-detail-label {
+  display: block;
+  color: #a0a6ad;
+  font-size: 9px;
+}
+
+.mechanism-detail-value {
+  display: block;
+  margin-top: 2px;
+  color: #555e67;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+/* ==================================================
+   SAFETY
+   ================================================== */
+
+.safety-section {
+  margin-top: 28px;
+}
+
+.warning-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.warning-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid #eadfdf;
+  border-left: 4px solid #b76d6d;
+  border-radius: 9px;
+  background: #fdfafa;
+}
+
+.warning-icon {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f0dddd;
+  color: #9d5555;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.warning-content {
+  min-width: 0;
+}
+
+.warning-class {
+  color: #4b3636;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.warning-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.warning-type,
+.warning-country {
+  display: inline-flex;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: #f2eded;
+  color: #766666;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.synonym-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.synonym-chip {
+  display: inline-flex;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #e1e4e7;
+  background: #fafbfc;
+  color: #626a72;
+  font-size: 10px;
+}
+
+
+/* ==================================================
+   TARGETS
+   ================================================== */
+
+.targets-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+
+.targets-title {
+  font-size: 20px;
+  font-weight: 650;
+  color: #30363d;
+}
+
+.targets-criteria {
+  display: flex;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.criteria-chip {
+  padding: 4px 6px;
+  border-radius: 5px;
+  background: #f0f2f4;
+  color: #7c858e;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.targets-count {
+  color: #8f979f;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.targets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.gene-card {
+  display: flex;
+  align-items: center;
+  padding: 11px 13px;
+  background: #fafbfc;
+  border: 1px solid #e5e8eb;
+  border-radius: 9px;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.gene-card:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 12px rgba(20,30,40,0.06);
+  background: white;
+  border-color: #d5dbe0;
+}
+
+.gene-card.up {
+  border-left: 4px solid #7698b8;
+}
+
+.gene-card.down {
+  border-left: 4px solid #b77a7a;
+}
+
+.gene-card.neutral {
+  border-left: 4px solid #aeb5bc;
+}
+
+.gene-card.passes-both {
+  background: #f8fafc;
+}
+
+.gene-card.passes-neither {
+  opacity: 0.62;
+}
+
+.gene-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.gene-symbol {
+  font-size: 15px;
+  font-weight: 650;
+  color: #30363d;
+}
+
+.gene-id-small {
+  font-size: 9px;
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gene-expression {
+  width: 90px;
+  text-align: right;
+}
+
+.expression-direction {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 5px;
+}
+
+.direction-arrow {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.direction-arrow.up {
+  color: #5d83a5;
+}
+
+.direction-arrow.down {
+  color: #a96767;
+}
+
+.direction-arrow.neutral {
+  color: #9da4ab;
+}
+
+.expression-value {
+  font-size: 12px;
+  font-weight: 650;
+  color: #4a525a;
+}
+
+.gene-padj {
+  width: 90px;
+  text-align: right;
+  margin-left: 10px;
+}
+
+.gene-stat-label {
+  color: #a0a6ad;
+  font-size: 9px;
+  margin-bottom: 2px;
+}
+
+.gene-stat-value {
+  color: #4a525a;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.gene-status {
+  width: 105px;
+  text-align: center;
+  margin-left: 10px;
+}
+
+.cutoff-badge {
+  display: inline-block;
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.cutoff-badge.both {
+  background: #eaf0f5;
+  color: #506b83;
+}
+
+.cutoff-badge.padj-only {
+  background: #eef3f6;
+  color: #5b778b;
+}
+
+.cutoff-badge.fc-only {
+  background: #f1eff4;
+  color: #6e647d;
+}
+
+.cutoff-badge.neither {
+  background: #eef0f2;
+  color: #858c93;
+}
+
+.gene-arrow {
+  color: #b1b7bd;
+  font-size: 21px;
+  width: 17px;
+  text-align: center;
+  transition:
+    transform 0.12s ease;
+}
+
+.gene-card:hover .gene-arrow {
+  transform: translateX(2px);
+}
+
+
+/* ==================================================
+   GENE PAGE
+   ================================================== */
+
+.back-button {
+  margin-bottom: 20px;
+  border-radius: 7px;
+  color: #59616a;
+  border-color: #dfe3e7;
+  background: white;
+  font-size: 12px;
+}
+
+.back-button:hover {
+  background: #f7f8f9;
+}
+
+.gene-title-large {
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -0.4px;
+  color: #20252b;
+}
+
+.gene-id {
+  color: #8d959d;
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+.gene-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin: 15px 0 13px 0;
+}
+
+.summary-card {
+  background: #fafbfc;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  padding: 14px;
+}
+
+.summary-label {
+  color: #858d95;
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+
+.summary-value {
+  font-size: 20px;
+  font-weight: 650;
+  color: #30363d;
+}
+
+.summary-note {
+  color: #9ba2a9;
+  font-size: 9px;
+  margin-top: 4px;
+}
+
+.gene-filter-status {
+  display: flex;
+  gap: 6px;
+  margin: 5px 0 18px 0;
+}
+
+.gene-filter-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.gene-filter-badge.pass {
+  background: #edf3ef;
+  color: #58725f;
+}
+
+.gene-filter-badge.fail {
+  background: #f0f1f3;
+  color: #858c93;
+}
+
+
+/* ==================================================
+   DATATABLE / INPUT TABLE
+   ================================================== */
+
+.drug-list .dataTables_wrapper {
+  padding: 0;
+}
+
+.drug-list .dataTables_filter {
+  float: none;
+  margin: 4px 0 10px 0;
+}
+
+.drug-list .dataTables_filter label {
+  width: 100%;
+  color: #9299a1;
+  font-size: 10px;
+}
+
+.drug-list .dataTables_filter input {
+  width: 100%;
+  margin-left: 0 !important;
+  margin-top: 5px;
+  border: 1px solid #dfe3e7 !important;
+  border-radius: 7px !important;
+  padding: 7px 9px !important;
+  font-size: 12px !important;
+  box-shadow: none !important;
+}
+
+table.dataTable {
+  width: 100% !important;
+  font-size: 12px;
+  border-collapse: separate !important;
+  border-spacing: 0 4px !important;
+}
+
+table.dataTable thead th {
+  color: #8b939b;
+  font-weight: 650;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border-bottom: none !important;
+  padding: 8px 8px !important;
+  white-space: nowrap;
+}
+
+table.dataTable tbody tr {
+  background: white;
+}
+
+table.dataTable tbody td {
+  vertical-align: middle;
+  border-top: 1px solid #e8eaed;
+  border-bottom: 1px solid #e8eaed;
+  padding: 9px 8px !important;
+  color: #4c545c;
+}
+
+table.dataTable tbody td:first-child {
+  border-left: 1px solid #e8eaed;
+  border-radius: 7px 0 0 7px;
+}
+
+table.dataTable tbody td:last-child {
+  border-right: 1px solid #e8eaed;
+  border-radius: 0 7px 7px 0;
+}
+
+table.dataTable tbody tr:hover td {
+  background: #f8fafc !important;
+}
+
+table.dataTable tbody tr.selected td {
+  background: #eef3f7 !important;
+  border-color: #dce5ec;
+}
+
+.drug-table-name {
+  font-weight: 600;
+  color: #343b42;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 6px;
+  border-radius: 5px;
+  background: #eef1f3;
+  color: #66707a;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.score-value {
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  font-size: 10px;
+  color: #626b74;
+}
+
+
+/* ==================================================
+   EMPTY
+   ================================================== */
+
+.empty-message {
+  color: #9aa1a8;
+  padding: 38px 20px;
+  text-align: center;
+  font-size: 12px;
+  border: 1px dashed #e1e4e7;
+  border-radius: 9px;
+  background: #fbfcfd;
+}
+
+
+/* ==================================================
+   RESPONSIVE
+   ================================================== */
+
+@media (max-width: 1100px) {
+
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .drug-list,
+  .drug-details {
+    min-height: auto;
+  }
+
+  .structure-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 750px) {
+
+  .container-fluid {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .drug-details {
+    padding: 20px;
+  }
+
+  .identifier-grid,
+  .molecular-grid,
+  .indications-grid,
+  .development-grid,
+  .gene-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .identifier-card.wide {
+    grid-column: auto;
+  }
+
+  .drug-title-row {
+    flex-direction: column;
+  }
+
+  .source-buttons {
+    justify-content: flex-start;
+  }
+
+  .mechanism-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mechanism-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .gene-status {
+    display: none;
+  }
+}
