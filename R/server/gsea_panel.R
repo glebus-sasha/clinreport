@@ -20,22 +20,23 @@ register_gsea_outputs <- function(
     }
   }
 
-  output$gsea_pathway_tiles <- renderUI({
-    active <- selected_pathways()
-    focused_gene <- selected_network_gene()
-    pathway_table <- sort_pathways(hallmark_pathways)
-
+  make_pathway_tiles <- function(pathway_table) {
     lapply(seq_len(nrow(pathway_table)), function(i) {
       pathway <- pathway_table[i, ]
-      selected_class <- if (pathway$pathway %in% active) " active" else ""
-      direction_class <- if (is.na(pathway$nes) || pathway$nes >= 0) " up" else " down"
+      selected_class <- if (pathway$pathway %in% selected_pathways()) " active" else ""
+      tile_color <- if (isTRUE(input$gsea_color_by_direction)) {
+        pathway_direction_color(pathway$nes)
+      } else {
+        pathway_identity_color(pathway$pathway)
+      }
       click <- sprintf(
         "Shiny.setInputValue('selected_gsea_pathway', '%s', {priority: 'event'})",
         pathway$pathway
       )
 
       div(
-        class = paste0("gsea-pathway-tile", selected_class, direction_class),
+        class = paste0("gsea-pathway-tile", selected_class),
+        style = paste0("border-left-color: ", tile_color, ";"),
         onclick = click,
         div(class = "gsea-pathway-name", sub("^HALLMARK_", "", pathway$pathway)),
         div(
@@ -45,35 +46,20 @@ register_gsea_outputs <- function(
         )
       )
     })
+  }
+
+  output$gsea_pathway_tiles <- renderUI({
+    active <- selected_pathways()
+    focused_gene <- selected_network_gene()
+    pathway_table <- sort_pathways(hallmark_pathways)
+
+    make_pathway_tiles(pathway_table)
   })
 
   output$gsea_matching_pathways <- renderUI({
     focused_gene <- selected_network_gene()
     drug <- selected_drug()
     target_symbols <- drug_target_symbols()
-
-    make_pathway_tiles <- function(pathway_table) {
-      lapply(seq_len(nrow(pathway_table)), function(i) {
-        pathway <- pathway_table[i, ]
-        selected_class <- if (pathway$pathway %in% selected_pathways()) " active" else ""
-        direction_class <- if (is.na(pathway$nes) || pathway$nes >= 0) " up" else " down"
-        click <- sprintf(
-          "Shiny.setInputValue('selected_gsea_pathway', '%s', {priority: 'event'})",
-          pathway$pathway
-        )
-
-        div(
-          class = paste0("gsea-pathway-tile", selected_class, direction_class),
-          onclick = click,
-          div(class = "gsea-pathway-name", sub("^HALLMARK_", "", pathway$pathway)),
-          div(
-            class = "gsea-pathway-metrics",
-            span(sprintf("NES %+.2f", pathway$nes)),
-            span(sprintf("FDR %.2g", pathway$fdr_q))
-          )
-        )
-      })
-    }
 
     drug_pathways <- hallmark_pathways |>
       filter(vapply(genes, function(gene_set) {

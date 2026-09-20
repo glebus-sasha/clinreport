@@ -514,13 +514,16 @@ server <- function(
   )
   
   
+  color_by_direction <- reactive(isTRUE(input$gsea_color_by_direction))
+
   register_drug_network_outputs(
     output = output,
     selected_drug = selected_drug,
     subgraph = drug_string_subgraph,
     selected_pathways = selected_pathways,
     significant_ids = significant_gene_ids,
-    selected_network_gene = selected_network_gene
+    selected_network_gene = selected_network_gene,
+    color_by_direction = color_by_direction
   )
 
   register_gsea_outputs(

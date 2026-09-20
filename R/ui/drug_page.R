@@ -53,15 +53,30 @@ render_drug_page <- function(
         div(
           class = "network-visualization-header",
           div(
-            class = "network-visualization-title",
-            network_name
-          ),
-          div(
-            class = "network-visualization-subtitle",
-            "Selected drug, direct targets, and one-hop STRING neighbors"
+            class = "network-header-copy",
+            div(
+              class = "network-visualization-title",
+              network_name
+            ),
+            div(
+              class = "network-visualization-subtitle",
+              "Selected drug, direct targets, and one-hop STRING neighbors"
+            )
           )
         ),
         uiOutput("drug_network_summary"),
+        div(
+          class = "gsea-sort network-color-toggle",
+          tags$label(
+            class = "radio-inline",
+            tags$input(
+              id = "gsea_color_by_direction",
+              type = "checkbox",
+              class = "shiny-input-checkbox"
+            ),
+            "Direction"
+          )
+        ),
         visNetworkOutput("drug_network_graph", height = "500px")
         ),
         div(

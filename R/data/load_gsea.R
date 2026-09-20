@@ -36,3 +36,31 @@ gsea_results <- bind_rows(
 hallmark_pathways <- read_hallmark_gmt(hallmark_gmt_file) |>
   left_join(gsea_results, by = "pathway") |>
   arrange(desc(abs(nes)), pathway)
+
+# A pathway keeps this identity colour everywhere in the default view: its
+# tile, hub, membership links and member genes.  Direction colours are kept
+# separate because they are an optional, different visual encoding.
+# Golden-angle hues keep neighbouring tiles visually distinct even after the
+# table is re-sorted.  Each of the 50 Hallmark sets therefore has its own
+# stable, non-grey identity colour.
+hallmark_pathway_palette <- grDevices::hcl(
+  h = ((seq_len(nrow(hallmark_pathways)) - 1) * 137.508) %% 360,
+  c = 78,
+  l = 48
+)
+hallmark_pathway_colors <- setNames(
+  hallmark_pathway_palette,
+  hallmark_pathways$pathway
+)
+hallmark_direction_colors <- c(up = "#dc2626", down = "#2563eb", unknown = "#94a3b8")
+
+pathway_identity_color <- function(pathways) {
+  unname(hallmark_pathway_colors[as.character(pathways)])
+}
+
+pathway_direction_color <- function(nes) {
+  ifelse(
+    is.na(nes), hallmark_direction_colors[["unknown"]],
+    ifelse(nes >= 0, hallmark_direction_colors[["up"]], hallmark_direction_colors[["down"]])
+  )
+}
