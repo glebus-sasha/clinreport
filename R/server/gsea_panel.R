@@ -79,21 +79,30 @@ register_gsea_outputs <- function(
 
     req(nrow(drug_pathways) > 0 || nrow(gene_pathways) > 0)
 
-    div(
-      class = "gsea-matching-pathways",
-      if (nrow(drug_pathways) > 0) tagList(
+    make_related_section <- function(title, pathway_table) {
+      div(
+        class = "gsea-pathway-section gsea-related-section",
+        div(class = "gsea-pathway-section-title", title),
         div(
-          class = "gsea-matching-title",
-          paste0("Pathways containing targets of ", drug$label)
-        ),
-        make_pathway_tiles(drug_pathways)
+          class = "gsea-pathway-list gsea-related-pathway-list",
+          make_pathway_tiles(pathway_table)
+        )
+      )
+    }
+
+    div(
+      class = "gsea-pathway-sections",
+      if (nrow(drug_pathways) > 0) tagList(
+        make_related_section(
+          paste0("Targets of ", drug$label),
+          drug_pathways
+        )
       ),
       if (nrow(gene_pathways) > 0) tagList(
-        div(
-          class = "gsea-matching-title",
-          paste0("Pathways containing ", focused_gene$symbol)
-        ),
-        make_pathway_tiles(gene_pathways)
+        make_related_section(
+          paste0("Selected gene: ", focused_gene$symbol),
+          gene_pathways
+        )
       )
     )
   })

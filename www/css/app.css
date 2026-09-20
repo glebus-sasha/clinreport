@@ -205,16 +205,22 @@ body {
 .gsea-pathway-list {
   display: grid;
   gap: 6px;
-  flex: none;
-  height: 484px;
-  margin-top: 12px;
   overflow-y: auto;
   padding-right: 4px;
 }
 
-.gsea-all-pathways-label,
-.gsea-matching-title {
-  margin: 10px 0 6px;
+.gsea-pathway-sections {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.gsea-pathway-section {
+  min-width: 0;
+}
+
+.gsea-pathway-section-title {
+  margin: 0 0 6px;
   color: #64748b;
   font-size: 10px;
   font-weight: 700;
@@ -222,15 +228,16 @@ body {
   letter-spacing: 0.04em;
 }
 
-.gsea-matching-pathways {
-  display: grid;
-  gap: 5px;
-  max-height: 174px;
-  overflow-y: auto;
+.gsea-related-pathway-list {
+  max-height: 112px;
 }
 
-.embedded-gsea-panel:has(.gsea-matching-pathways) .gsea-pathway-list {
-  height: 252px;
+.gsea-all-pathway-section {
+  margin-top: 10px;
+}
+
+.gsea-all-pathway-list {
+  height: 214px;
 }
 
 .gsea-pathway-tile {

@@ -98,8 +98,14 @@ render_drug_page <- function(
           )
         ),
           uiOutput("gsea_matching_pathways"),
-          div(class = "gsea-all-pathways-label", "All Hallmark pathways"),
-          div(class = "gsea-pathway-list", uiOutput("gsea_pathway_tiles"))
+          div(
+            class = "gsea-pathway-section gsea-all-pathway-section",
+            div(class = "gsea-pathway-section-title", "All Hallmark pathways"),
+            div(
+              class = "gsea-pathway-list gsea-all-pathway-list",
+              uiOutput("gsea_pathway_tiles")
+            )
+          )
         )
       ),
       div(class = "gsea-details-strip", uiOutput("gsea_pathway_details"))
