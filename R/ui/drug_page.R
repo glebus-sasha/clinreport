@@ -203,6 +203,11 @@ render_drug_page <- function(
             genes
           )
         )
+      ),
+
+      tabPanel(
+        "WES variants",
+        render_wes_variants()
       )
     )
   )

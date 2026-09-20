@@ -292,6 +292,117 @@ server <- function(
   observeEvent(input$selected_network_gene_symbol, {
     set_network_gene_focus(input$selected_network_gene_symbol)
   })
+
+  output$wes_variants_table <- renderDT({
+    variant_table <- wes_variants |>
+      mutate(
+        classification_rank = case_when(
+          classification %in% c("Oncogenic", "Likely Oncogenic", "Pathogenic", "Likely Pathogenic") ~ 1L,
+          classification == "VUS" ~ 2L,
+          TRUE ~ 3L
+        )
+      ) |>
+      arrange(classification_rank, desc(impact), gene_symbol, position)
+
+    escape_html <- function(x) as.character(htmltools::htmlEscape(x))
+    shiny_button <- function(label, input_id, value, class_name) {
+      paste0(
+        "<button type='button' class='", class_name, "' onclick='",
+        "Shiny.setInputValue(\"", input_id, "\", ",
+        jsonlite::toJSON(value, auto_unbox = TRUE),
+        ", {priority: \"event\"});'>", escape_html(label), "</button>"
+      )
+    }
+
+    table_data <- lapply(seq_len(nrow(variant_table)), function(i) {
+      variant <- variant_table[i, ]
+      gene_url <- if (!is.na(variant$gene_id) && nzchar(variant$gene_id)) {
+        ensembl_url(variant$gene_id)
+      } else {
+        ncbi_gene_search_url(variant$gene_symbol)
+      }
+      related_pathways <- pathway_sets |>
+        filter(vapply(genes, function(gene_set) variant$gene_symbol %in% gene_set, logical(1)))
+      pathway_html <- if (nrow(related_pathways) == 0) {
+        "—"
+      } else {
+        paste(vapply(seq_len(nrow(related_pathways)), function(j) {
+          pathway <- related_pathways[j, ]
+          shiny_button(
+            display_pathway_name(pathway$pathway),
+            "selected_gsea_pathway",
+            pathway$pathway,
+            "wes-table-pathway"
+          )
+        }, character(1)), collapse = " ")
+      }
+      has_expression <- any(gene_data$gene_name == variant$gene_symbol, na.rm = TRUE)
+      links <- c(
+        if (has_expression) shiny_button("Gene profile", "selected_wes_expression_gene_symbol", variant$gene_symbol, "wes-table-profile"),
+        paste0("<a href='", escape_html(gene_url), "' target='_blank' rel='noopener noreferrer'>Ensembl ↗</a>"),
+        if (!is.null(clinvar_allele_url(variant$clinvar_allele_id))) {
+          paste0("<a href='", escape_html(clinvar_allele_url(variant$clinvar_allele_id)), "' target='_blank' rel='noopener noreferrer'>ClinVar ↗</a>")
+        },
+        if (!is.null(dbsnp_url(variant$dbsnp_rsid))) {
+          paste0("<a href='", escape_html(dbsnp_url(variant$dbsnp_rsid)), "' target='_blank' rel='noopener noreferrer'>dbSNP ↗</a>")
+        }
+      )
+
+      data.frame(
+        Gene = shiny_button(variant$gene_symbol, "selected_wes_gene_symbol", variant$gene_symbol, "wes-table-gene"),
+        Variant = escape_html(variant$variant_label),
+        Annotation = escape_html(if_else(is.na(variant$protein_change), variant$consequence, variant$protein_change)),
+        Impact = paste0("<span class='wes-table-impact'>", escape_html(variant$impact), "</span>"),
+        Classification = paste0("<span class='wes-table-classification'>", escape_html(variant$classification), "</span>"),
+        VAF = if_else(is.na(variant$vaf), "—", sprintf("%.1f%%", variant$vaf * 100)),
+        Depth = if_else(is.na(variant$depth), "—", as.character(variant$depth)),
+        Pathways = pathway_html,
+        Links = paste(links, collapse = " · "),
+        check.names = FALSE,
+        stringsAsFactors = FALSE
+      )
+    }) |>
+      bind_rows()
+
+    datatable(
+      table_data,
+      rownames = FALSE,
+      escape = FALSE,
+      filter = "top",
+      class = "compact stripe hover",
+      options = list(
+        pageLength = 15,
+        lengthMenu = list(c(15, 25, 50), c("15", "25", "50")),
+        scrollX = TRUE,
+        autoWidth = FALSE,
+        order = list(list(4, "asc"), list(0, "asc")),
+        columnDefs = list(
+          list(targets = c(7, 8), orderable = FALSE)
+        )
+      )
+    )
+  })
+
+  observeEvent(input$selected_wes_gene_symbol, {
+    set_network_gene_focus(input$selected_wes_gene_symbol)
+    focused_gene <- selected_network_gene()
+    if (!is.null(focused_gene)) {
+      session$sendCustomMessage(
+        "focus-network-gene",
+        list(id = focused_gene$id, symbol = focused_gene$symbol)
+      )
+    }
+  })
+
+  observeEvent(input$selected_wes_expression_gene_symbol, {
+    expression_gene <- gene_data |>
+      filter(gene_name == input$selected_wes_expression_gene_symbol) |>
+      slice(1)
+    req(nrow(expression_gene) > 0)
+
+    selected_gene(expression_gene)
+    view_mode("gene")
+  })
   
   
   # ==========================================================

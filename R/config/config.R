@@ -22,6 +22,13 @@ gene_file <- file.path(
   "carcinoma_vs_normal_gene_names_added.tsv"
 )
 
+# Whole-exome sequencing variants annotated by PCGR for the current patient.
+wes_vcf_file <- file.path(
+  "C:/projects/clinreport/raw",
+  "R_PTA_22.pcgr.grch38.pass.vcf.gz"
+)
+wes_display_name <- "WES · PCGR"
+
 # Protein/gene interaction network used for the drug subgraph visualization.
 interaction_network_file <- file.path(
   "C:/projects/clinreport/raw/network",

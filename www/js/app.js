@@ -14,6 +14,23 @@ Shiny.addCustomMessageHandler("filter-drug-rows", function (message) {
   }
 });
 
+/* Select a WES-listed gene in the current interaction graph when it is present. */
+Shiny.addCustomMessageHandler("focus-network-gene", function (message) {
+  var widget = HTMLWidgets.find("#drug_network_graph");
+  if (!widget || !widget.getInstance) return;
+
+  var instance = widget.getInstance();
+  var network = instance && instance.network;
+  if (!network || !network.body || !network.body.nodes) return;
+
+  var nodeId = network.body.nodes[message.id]
+    ? message.id
+    : "__PATHWAY_GENE__" + message.symbol;
+  if (!network.body.nodes[nodeId]) return;
+
+  network.selectNodes([nodeId], false);
+});
+
 $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
   if (settings.nTable.id !== "drug_table" || settings.geneFilterRows == null) {
     return true;

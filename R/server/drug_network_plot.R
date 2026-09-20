@@ -9,10 +9,20 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
       by = "gene_id"
     ) |>
     mutate(
-      label = if_else(is.na(gene_name) | gene_name == "", gene_id, gene_name),
+      label = if_else(is.na(gene_name) | gene_name == "", gene_id, gene_name)
+    ) |>
+    left_join(
+      wes_gene_summary |>
+        rename(label = gene_symbol),
+      by = "label"
+    ) |>
+    mutate(
       pathway_color = unname(pathway_gene_colors[label]),
       pathway_member = !is.na(pathway_color),
       significant = gene_id %in% significant_ids,
+      mutation_count = coalesce(mutation_count, 0L),
+      mutation_classes = coalesce(mutation_classes, "none"),
+      mutated = mutation_count > 0,
       group = if_else(type == "Target", "Target", paste(interaction_network_name, "neighbor")),
       shape = "dot",
       size = case_when(
@@ -33,7 +43,10 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
           TRUE ~ "#94a3b8"
         )
       },
-      borderWidth = if_else(significant, 4, 1),
+      borderWidth = case_when(
+        significant ~ 4,
+        TRUE ~ 1
+      ),
       title = paste0(
         "<b>", htmlEscape(label), "</b><br>",
         "Ensembl: ", htmlEscape(gene_id), "<br>",
@@ -44,10 +57,11 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
           log2FoldChange >= 0 ~ "up",
           TRUE ~ "down"
         ),
-        "<br>Selected ", pathway_collection_name, " pathway: ", if_else(pathway_member, "member", "not a member")
+        "<br>Selected ", pathway_collection_name, " pathway: ", if_else(pathway_member, "member", "not a member"),
+        "<br>WES variants: ", mutation_count, " (", htmlEscape(mutation_classes), ")"
       )
     ) |>
-    transmute(id = gene_id, label, group, shape, size, color, borderWidth, title)
+    transmute(id = gene_id, label, group, shape, size, color, borderWidth, mutated, title)
 
   nodes <- bind_rows(
     tibble(
@@ -57,6 +71,7 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
       shape = "diamond",
       size = 30,
       color = "#17202a",
+      mutated = FALSE,
       title = paste0("<b>", htmlEscape(drug$label), "</b><br>Drug")
     ),
     gene_nodes
@@ -123,6 +138,7 @@ register_drug_network_outputs <- function(
     graph <- subgraph()
     selected <- selected_pathways()
     network_symbols <- graph$nodes$gene_name
+    mutated_node_count <- sum(network_symbols %in% wes_gene_summary$gene_symbol)
     target_nodes <- graph$nodes |>
       filter(type == "Target")
     neighbor_count <- sum(graph$nodes$type != "Target")
@@ -130,6 +146,7 @@ register_drug_network_outputs <- function(
       pull(gene_name) |>
       unique() |>
       discard(is.na)
+    mutated_target_count <- sum(target_symbols %in% wes_gene_summary$gene_symbol)
     deg_target_symbols <- target_nodes |>
       filter(gene_id %in% significant_ids) |>
       pull(gene_name) |>
@@ -158,8 +175,15 @@ register_drug_network_outputs <- function(
       span(paste0(
         " · ", nrow(target_nodes), " direct targets · ",
         length(deg_target_symbols), " DE-significant targets · ",
+        mutated_target_count, " WES-mutated targets · ",
         target_pathway_count, " ", pathway_collection_name, " pathways contain drug targets"
       )),
+      if (mutated_node_count > 0) {
+        span(
+          class = "network-summary-wes",
+          paste0("WES: ", mutated_node_count, " mutated genes on graph · centre dot")
+        )
+      },
       span(
         class = "network-summary-context",
         paste0(
@@ -237,6 +261,24 @@ register_drug_network_outputs <- function(
           "function() {
              Shiny.setInputValue('selected_network_node', null, {priority: 'event'});
            }"
+        ),
+        afterDrawing = JS(
+          "function(ctx) {
+             var nodes = this.body.nodes;
+             Object.keys(nodes).forEach(function(id) {
+               var node = nodes[id];
+               if (!node || !node.options || !node.options.mutated) return;
+               ctx.save();
+               ctx.beginPath();
+               ctx.arc(node.x, node.y, 3.4, 0, 2 * Math.PI);
+               ctx.fillStyle = '#be185d';
+               ctx.fill();
+               ctx.lineWidth = 1.2;
+               ctx.strokeStyle = '#ffffff';
+               ctx.stroke();
+               ctx.restore();
+             });
+           }"
         )
       )
   })
@@ -280,7 +322,7 @@ register_drug_network_outputs <- function(
     )
 
     nodes <- base_data$nodes |>
-      select(id, size, color, borderWidth, title)
+      select(id, size, color, borderWidth, mutated, title)
 
     proxy <- visNetworkProxy("drug_network_graph") |>
       visUpdateNodes(nodes)
@@ -319,9 +361,13 @@ register_drug_network_outputs <- function(
 
     extra_genes <- tibble(label = extra_symbols) |>
       left_join(gene_attributes, by = "label") |>
+      left_join(wes_gene_summary, by = c("label" = "gene_symbol")) |>
       mutate(pathway_color = unname(pathway_gene_colors[label])) |>
       mutate(
         significant = coalesce(significant, FALSE),
+        mutation_count = coalesce(mutation_count, 0L),
+        mutation_classes = coalesce(mutation_classes, "none"),
+        mutated = mutation_count > 0,
         id = paste0("__PATHWAY_GENE__", label),
         group = "Selected pathway gene",
         shape = "dot",
@@ -335,7 +381,10 @@ register_drug_network_outputs <- function(
         } else {
           pathway_color
         },
-        borderWidth = if_else(significant, 3, 1),
+        borderWidth = case_when(
+          significant ~ 3,
+          TRUE ~ 1
+        ),
         title = paste0(
           "<b>", htmlEscape(label), "</b><br>",
           paste0("Selected ", pathway_collection_name, " pathway gene<br>DE status: "),
@@ -344,10 +393,11 @@ register_drug_network_outputs <- function(
             is.na(log2FoldChange) ~ "unknown",
             log2FoldChange >= 0 ~ "up",
             TRUE ~ "down"
-          )
+          ),
+          "<br>WES variants: ", mutation_count, " (", htmlEscape(mutation_classes), ")"
         )
       ) |>
-      select(id, label, group, shape, size, color, borderWidth, title)
+      select(id, label, group, shape, size, color, borderWidth, mutated, title)
 
     hubs <- selected_sets |>
       transmute(
@@ -358,6 +408,7 @@ register_drug_network_outputs <- function(
         size = 18,
         color = pathway_color,
         borderWidth = 2,
+        mutated = FALSE,
         title = paste0("<b>", htmlEscape(label), "</b><br>", pathway_collection_name, " pathway")
       )
 

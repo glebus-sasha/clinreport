@@ -67,3 +67,35 @@ ensembl_url <- function(gene_id) {
 }
 
 
+ncbi_gene_search_url <- function(gene_symbol) {
+  if (is.null(gene_symbol) || !nzchar(gene_symbol)) {
+    return(NULL)
+  }
+
+  paste0(
+    "https://www.ncbi.nlm.nih.gov/gene/?term=",
+    utils::URLencode(paste0(gene_symbol, "[sym]"), reserved = TRUE)
+  )
+}
+
+
+clinvar_allele_url <- function(allele_id) {
+  if (is.null(allele_id) || is.na(allele_id) || !nzchar(allele_id)) {
+    return(NULL)
+  }
+
+  paste0(
+    "https://www.ncbi.nlm.nih.gov/clinvar/?term=",
+    utils::URLencode(paste0(allele_id, "[alleleid]"), reserved = TRUE)
+  )
+}
+
+
+dbsnp_url <- function(rsid) {
+  if (is.null(rsid) || is.na(rsid) || !nzchar(rsid)) {
+    return(NULL)
+  }
+
+  paste0("https://www.ncbi.nlm.nih.gov/snp/", rsid)
+}
+

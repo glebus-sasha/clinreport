@@ -26,6 +26,10 @@ if (!file.exists(gene_file)) {
   stop("Gene expression file does not exist: ", gene_file)
 }
 
+if (!file.exists(wes_vcf_file)) {
+  stop("WES VCF file does not exist: ", wes_vcf_file)
+}
+
 if (
   !is.numeric(padj_cutoff) ||
   length(padj_cutoff) != 1 ||

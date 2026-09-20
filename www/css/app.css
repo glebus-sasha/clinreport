@@ -423,6 +423,326 @@ body {
 .gsea-gene-chip.deg-only { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
 .gsea-gene-chip.network-only { border-color: #7c3aed; background: #f5f3ff; color: #6d28d9; }
 
+
+/* ============================================================
+   WES / PCGR VARIANTS
+   ============================================================ */
+
+.wes-variants-panel {
+  max-width: 1040px;
+}
+
+.wes-variants-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.wes-variants-title {
+  color: #17202a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.wes-variants-subtitle {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.wes-variants-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.wes-variants-summary span {
+  padding: 4px 7px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #475569;
+  background: #fbfcfd;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.wes-variants-note {
+  margin: 14px 0 12px;
+  padding: 8px 10px;
+  border: 1px solid #fbcfe8;
+  border-radius: 8px;
+  color: #9d174d;
+  background: #fff1f7;
+  font-size: 11px;
+}
+
+.wes-variants-table .dataTables_wrapper { color: #475569; font-size: 11px; }
+.wes-variants-table table.dataTable { margin-top: 0 !important; border-collapse: separate; border-spacing: 0; }
+.wes-variants-table table.dataTable thead th {
+  padding: 8px 9px;
+  border-bottom: 1px solid #dbe3ec;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.wes-variants-table table.dataTable thead .filter_column input {
+  width: 100% !important;
+  min-width: 54px;
+  padding: 4px 5px;
+  border: 1px solid #e2e8f0;
+  border-radius: 5px;
+  color: #475569;
+  background: #fbfcfd;
+  font-size: 10px;
+}
+.wes-variants-table table.dataTable tbody td {
+  padding: 8px 9px;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: middle;
+}
+.wes-variants-table .dataTables_length { margin-top: 10px; color: #64748b; }
+.wes-variants-table .dataTables_info { color: #94a3b8; font-size: 10px; }
+.wes-variants-table .dataTables_paginate { margin-top: 5px; }
+
+.wes-table-gene,
+.wes-table-profile,
+.wes-table-pathway {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.wes-table-gene {
+  padding: 0;
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 700;
+}
+.wes-table-gene:hover,
+.wes-table-profile:hover { text-decoration: underline; }
+
+.wes-table-profile {
+  padding: 0;
+  color: #0f766e;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.wes-table-pathway {
+  margin: 1px 2px 1px 0;
+  padding: 2px 5px;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  color: #1d4ed8;
+  background: #eff6ff;
+  font-size: 9px;
+  font-weight: 600;
+}
+.wes-table-pathway:hover { border-color: #93c5fd; background: #dbeafe; }
+
+.wes-table-impact,
+.wes-table-classification {
+  display: inline-block;
+  padding: 3px 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.wes-table-impact { color: #475569; background: #f1f5f9; }
+.wes-table-classification { color: #6d28d9; background: #f5f3ff; }
+
+.wes-variants-table a { color: #2563eb !important; font-size: 10px; text-decoration: none !important; }
+.wes-variants-table a:hover { text-decoration: underline !important; }
+
+.wes-variant-list {
+  display: grid;
+  gap: 7px;
+  max-height: 630px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.wes-variant-card {
+  display: grid;
+  grid-template-columns: minmax(230px, 1.4fr) minmax(260px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.wes-variant-card:hover { border-color: #cbd5e1; background: #fbfcfd; }
+
+.wes-variant-main,
+.wes-variant-metadata,
+.wes-variant-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px 8px;
+  min-width: 0;
+}
+
+.wes-variant-main { gap: 3px 8px; }
+
+.wes-variant-description {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+}
+
+.wes-variant-gene {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #1d4ed8 !important;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none !important;
+}
+
+.wes-variant-gene:hover { text-decoration: underline !important; }
+.wes-variant-gene:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; border-radius: 2px; }
+
+.wes-variant-coordinate,
+.wes-variant-protein {
+  color: #64748b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10px;
+}
+
+.wes-variant-protein { color: #334155; }
+
+.wes-variant-metadata {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.wes-variant-impact,
+.wes-variant-classification {
+  padding: 3px 6px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.wes-variant-impact { color: #475569; background: #f1f5f9; }
+.wes-variant-classification { color: #6d28d9; background: #f5f3ff; }
+
+.wes-variant-links {
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.wes-variant-links a {
+  color: #2563eb !important;
+  font-size: 10px;
+  text-decoration: none !important;
+}
+
+.wes-variant-links a:hover { text-decoration: underline !important; }
+
+.wes-variant-expression-link,
+.wes-variant-pathway-chip {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.wes-variant-expression-link {
+  color: #0f766e;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.wes-variant-expression-link:hover { text-decoration: underline; }
+
+.wes-variant-pathways {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  padding-top: 2px;
+}
+
+.wes-variant-pathways-label {
+  margin-right: 2px;
+  color: #94a3b8;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.wes-variant-pathway-chip {
+  padding: 3px 6px;
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  color: #1d4ed8;
+  background: #eff6ff;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.wes-variant-pathway-chip:hover { border-color: #93c5fd; background: #dbeafe; }
+
+.gene-wes-variants {
+  margin: 16px 0;
+  padding: 12px 14px;
+  border: 1px solid #fbcfe8;
+  border-radius: 10px;
+  background: #fffafb;
+}
+
+.gene-wes-variants-title {
+  margin-bottom: 8px;
+  color: #9d174d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.gene-wes-variants-list { display: grid; gap: 6px; }
+
+.gene-wes-variant {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  color: #64748b;
+  font-size: 10px;
+}
+
+.gene-wes-coordinate,
+.gene-wes-protein {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.gene-wes-protein { color: #334155; }
+
+.gene-wes-classification {
+  padding: 2px 5px;
+  border-radius: 999px;
+  color: #9d174d;
+  background: #fce7f3;
+  font-weight: 700;
+}
+
+.gene-wes-variant a { color: #2563eb !important; text-decoration: none !important; }
+.gene-wes-variant a:hover { text-decoration: underline !important; }
+
 .focused-drugs-panel {
   margin: 10px 0 12px;
 }
@@ -1351,7 +1671,7 @@ body {
 
 .gene-summary {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 9px;
   margin: 15px 0 13px 0;
 }
@@ -1680,6 +2000,17 @@ table.dataTable tbody tr.selected td {
   margin-top: 1px;
   color: #94a3b8;
   font-size: 11px;
+}
+
+.network-summary-wes {
+  margin-left: 5px;
+  padding: 3px 7px;
+  border: 1px solid #fbcfe8;
+  border-radius: 6px;
+  color: #9d174d;
+  background: #fff1f7;
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .network-empty-message {

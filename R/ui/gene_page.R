@@ -13,6 +13,10 @@ render_gene_page <- function(
     "Unknown gene",
     gene$gene_name
   )
+
+  gene_variants <- wes_variants |>
+    filter(gene_symbol == gene_name)
+  mutation_count <- nrow(gene_variants)
   
   
   div(
@@ -155,6 +159,55 @@ render_gene_page <- function(
           class = "summary-note",
           "Mean normalized expression"
         )
+      ),
+
+      div(
+        class = "summary-card",
+
+        div(
+          class = "summary-label",
+          "WES variants"
+        ),
+
+        div(
+          class = "summary-value",
+          mutation_count
+        ),
+
+        div(
+          class = "summary-note",
+          if (mutation_count == 0) {
+            "No PASS variants"
+          } else {
+            wes_gene_summary |>
+              filter(gene_symbol == gene_name) |>
+              pull(mutation_classes) |>
+              first(default = "PCGR-annotated")
+          }
+        )
+      )
+    ),
+
+    if (mutation_count > 0) div(
+      class = "gene-wes-variants",
+      div(class = "gene-wes-variants-title", "WES variant calls"),
+      div(
+        class = "gene-wes-variants-list",
+        lapply(seq_len(mutation_count), function(i) {
+          variant <- gene_variants[i, ]
+          protein_text <- if (is.na(variant$protein_change)) variant$consequence else variant$protein_change
+          clinvar_url <- clinvar_allele_url(variant$clinvar_allele_id)
+          rsid_url <- dbsnp_url(variant$dbsnp_rsid)
+          div(
+            class = "gene-wes-variant",
+            span(class = "gene-wes-coordinate", variant$variant_label),
+            span(class = "gene-wes-protein", protein_text),
+            span(class = "gene-wes-classification", variant$classification),
+            if (!is.na(variant$vaf)) span(sprintf("VAF %.1f%%", variant$vaf * 100)),
+            if (!is.null(clinvar_url)) tags$a(href = clinvar_url, target = "_blank", rel = "noopener noreferrer", "ClinVar ↗"),
+            if (!is.null(rsid_url)) tags$a(href = rsid_url, target = "_blank", rel = "noopener noreferrer", "dbSNP ↗")
+          )
+        })
       )
     ),
     
@@ -218,12 +271,12 @@ render_gene_page <- function(
       
       div(
         class = "section-title",
-        "Gene expression overview"
+        "Differential expression"
       ),
       
       div(
         class = "section-subtitle",
-        "Genome-wide differential expression context"
+        "Genome-wide differential-expression context"
       )
     ),
     
@@ -233,5 +286,3 @@ render_gene_page <- function(
     )
   )
 }
-
-

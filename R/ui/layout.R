@@ -49,6 +49,11 @@ render_input_overview <- function() {
           paste(pathway_collection_name, "GSEA"),
           basename(pathway_gmt_file),
           paste(nrow(pathway_sets), "gene sets")
+        ),
+        input_card(
+          wes_display_name,
+          basename(wes_vcf_file),
+          paste(nrow(wes_variants), "PASS variants ·", nrow(wes_gene_summary), "genes")
         )
       )
     ),
