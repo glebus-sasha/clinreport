@@ -43,7 +43,7 @@ body {
 
 .main-layout {
   display: grid;
-  grid-template-columns: minmax(250px, 25%) minmax(0, 75%);
+  grid-template-columns: minmax(220px, 22%) minmax(0, 78%);
   gap: 16px;
   align-items: stretch;
 }
@@ -93,6 +93,121 @@ body {
   box-shadow:
     0 2px 10px rgba(20, 30, 40, 0.045);
   overflow: hidden;
+}
+
+.input-overview {
+  max-width: 900px;
+}
+
+.input-overview-title {
+  margin: 0;
+  color: #17202a;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.25px;
+}
+
+.input-overview-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.input-overview-patient {
+  min-width: 175px;
+  padding: 10px 13px;
+  border: 1px solid #c9ddd9;
+  border-radius: 10px;
+  background: #f0fdfa;
+}
+
+.input-overview-patient-label {
+  color: #0f766e;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.input-overview-patient-value {
+  margin-top: 3px;
+  color: #134e4a;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -.3px;
+}
+
+.input-overview-subtitle {
+  max-width: 620px;
+  margin: 7px 0 22px;
+  color: #66707a;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.input-overview-section {
+  margin-top: 20px;
+}
+
+.input-overview-section-title {
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.input-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.input-overview-card {
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fbfcfd;
+}
+
+.input-overview-label {
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.input-overview-value {
+  margin-top: 5px;
+  overflow: hidden;
+  color: #17202a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.input-overview-note {
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 10px;
+}
+
+.input-overview-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.input-overview-setting {
+  padding: 5px 8px;
+  border: 1px solid #dbe3ec;
+  border-radius: 6px;
+  color: #475569;
+  background: #ffffff;
+  font-size: 11px;
 }
 
 .network-gsea-layout {
@@ -1539,6 +1654,10 @@ table.dataTable tbody tr.selected td {
 
 .network-summary {
   margin: 8px 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
   color: #66707a;
   font-size: 13px;
 }
@@ -1546,6 +1665,21 @@ table.dataTable tbody tr.selected td {
 .network-summary-drug {
   color: #17202a;
   font-weight: 700;
+}
+
+.network-summary-pathways {
+  margin-left: 5px;
+  padding-left: 9px;
+  border-left: 1px solid #cbd5e1;
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.network-summary-context {
+  flex-basis: 100%;
+  margin-top: 1px;
+  color: #94a3b8;
+  font-size: 11px;
 }
 
 .network-empty-message {

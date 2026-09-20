@@ -13,7 +13,7 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
       pathway_color = unname(pathway_gene_colors[label]),
       pathway_member = !is.na(pathway_color),
       significant = gene_id %in% significant_ids,
-      group = if_else(type == "Target", "Target", "STRING neighbor"),
+      group = if_else(type == "Target", "Target", paste(interaction_network_name, "neighbor")),
       shape = "dot",
       size = case_when(
         type == "Target" ~ 22,
@@ -22,9 +22,9 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
       ),
       color = if (color_by_direction) {
         case_when(
-          is.na(log2FoldChange) ~ hallmark_direction_colors[["unknown"]],
-          log2FoldChange >= 0 ~ hallmark_direction_colors[["up"]],
-          TRUE ~ hallmark_direction_colors[["down"]]
+          is.na(log2FoldChange) ~ pathway_direction_colors[["unknown"]],
+          log2FoldChange >= 0 ~ pathway_direction_colors[["up"]],
+          TRUE ~ pathway_direction_colors[["down"]]
         )
       } else {
         case_when(
@@ -37,14 +37,14 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
       title = paste0(
         "<b>", htmlEscape(label), "</b><br>",
         "Ensembl: ", htmlEscape(gene_id), "<br>",
-        if_else(type == "Target", "Drug target", "STRING neighbor"),
+        if_else(type == "Target", "Drug target", paste(interaction_network_name, "neighbor")),
         "<br>DE status: ", if_else(significant, "significant", "not significant"),
         "<br>Expression: ", case_when(
           is.na(log2FoldChange) ~ "unknown",
           log2FoldChange >= 0 ~ "up",
           TRUE ~ "down"
         ),
-        "<br>Selected Hallmark pathway: ", if_else(pathway_member, "member", "not a member")
+        "<br>Selected ", pathway_collection_name, " pathway: ", if_else(pathway_member, "member", "not a member")
       )
     ) |>
     transmute(id = gene_id, label, group, shape, size, color, borderWidth, title)
@@ -83,7 +83,7 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
       transmute(
         from = source,
         to = target,
-        title = "STRING interaction",
+        title = paste(interaction_network_name, "interaction"),
         color = "#cbd5e1",
         width = 1,
         dashes = TRUE
@@ -115,20 +115,67 @@ register_drug_network_outputs <- function(
       return(
         div(
           class = "network-empty-message",
-          "Select a drug in the table to display its STRING subgraph."
+          paste("Select a drug in the table to display its", interaction_network_name, "subgraph.")
         )
       )
     }
 
     graph <- subgraph()
+    selected <- selected_pathways()
+    network_symbols <- graph$nodes$gene_name
+    target_nodes <- graph$nodes |>
+      filter(type == "Target")
+    neighbor_count <- sum(graph$nodes$type != "Target")
+    target_symbols <- target_nodes |>
+      pull(gene_name) |>
+      unique() |>
+      discard(is.na)
+    deg_target_symbols <- target_nodes |>
+      filter(gene_id %in% significant_ids) |>
+      pull(gene_name) |>
+      unique() |>
+      discard(is.na)
+    target_pathway_count <- sum(vapply(
+      pathway_sets$genes,
+      function(gene_set) any(target_symbols %in% gene_set),
+      logical(1)
+    ))
+
+    selected_pathway_genes <- if (length(selected) > 0) {
+      pathway_sets |>
+        filter(pathway %in% selected) |>
+        pull(genes) |>
+        unlist() |>
+        unique()
+    } else {
+      character()
+    }
+    pathway_overlap <- sum(selected_pathway_genes %in% network_symbols)
+
     div(
       class = "network-summary",
       span(class = "network-summary-drug", drug$label),
       span(paste0(
-        " · ", length(graph$targets), " target genes · ",
-        nrow(graph$nodes), " genes in subgraph · ",
-        nrow(graph$edges), " STRING edges"
-      ))
+        " · ", nrow(target_nodes), " direct targets · ",
+        length(deg_target_symbols), " DE-significant targets · ",
+        target_pathway_count, " ", pathway_collection_name, " pathways contain drug targets"
+      )),
+      span(
+        class = "network-summary-context",
+        paste0(
+          "Graph context: ", neighbor_count, " one-hop ", interaction_network_name,
+          " neighbours; ", nrow(graph$edges), " interaction links connect them to direct targets."
+        )
+      ),
+      if (length(selected) > 0) {
+        span(
+          class = "network-summary-pathways",
+          paste0(
+            "Selected overlay: ", length(selected), " ", pathway_collection_name, " pathways · ",
+            length(selected_pathway_genes), " genes · ", pathway_overlap, " in drug subgraph"
+          )
+        )
+      }
     )
   })
 
@@ -201,7 +248,7 @@ register_drug_network_outputs <- function(
     graph <- subgraph()
     selected <- selected_pathways()
     structure_changed <- !identical(selected, rendered_pathways())
-    selected_sets <- hallmark_pathways |>
+    selected_sets <- pathway_sets |>
       filter(pathway %in% selected) |>
       mutate(
         pathway_color = if (color_by_direction()) {
@@ -281,9 +328,9 @@ register_drug_network_outputs <- function(
         size = 10,
         color = if (color_by_direction()) {
           case_when(
-            is.na(log2FoldChange) ~ hallmark_direction_colors[["unknown"]],
-            log2FoldChange >= 0 ~ hallmark_direction_colors[["up"]],
-            TRUE ~ hallmark_direction_colors[["down"]]
+            is.na(log2FoldChange) ~ pathway_direction_colors[["unknown"]],
+            log2FoldChange >= 0 ~ pathway_direction_colors[["up"]],
+            TRUE ~ pathway_direction_colors[["down"]]
           )
         } else {
           pathway_color
@@ -291,7 +338,7 @@ register_drug_network_outputs <- function(
         borderWidth = if_else(significant, 3, 1),
         title = paste0(
           "<b>", htmlEscape(label), "</b><br>",
-          "Selected Hallmark pathway gene<br>DE status: ",
+          paste0("Selected ", pathway_collection_name, " pathway gene<br>DE status: "),
           if_else(significant, "significant", "not significant"),
           "<br>Expression: ", case_when(
             is.na(log2FoldChange) ~ "unknown",
@@ -305,13 +352,13 @@ register_drug_network_outputs <- function(
     hubs <- selected_sets |>
       transmute(
         id = paste0("__PATHWAY_SET__", pathway),
-        label = sub("^HALLMARK_", "", pathway),
+        label = display_pathway_name(pathway),
         group = "Selected pathway",
         shape = "box",
         size = 18,
         color = pathway_color,
         borderWidth = 2,
-        title = paste0("<b>", htmlEscape(label), "</b><br>Hallmark pathway")
+        title = paste0("<b>", htmlEscape(label), "</b><br>", pathway_collection_name, " pathway")
       )
 
     if (nrow(extra_genes) + nrow(hubs) > 0) {
@@ -331,7 +378,7 @@ register_drug_network_outputs <- function(
         id = paste0("__PATHWAY_EDGE__", pathway, "__", symbols),
         from = paste0("__PATHWAY_SET__", pathway),
         to = target_ids,
-        title = "Hallmark pathway membership",
+        title = paste(pathway_collection_name, "pathway membership"),
         color = selected_sets$pathway_color[i],
         width = 1,
         dashes = TRUE
@@ -364,7 +411,7 @@ register_drug_network_outputs <- function(
       filter(!is.na(gene_id)) |>
       distinct(gene_id, .keep_all = TRUE)
 
-    pathway_string_edges <- string_edges |>
+    pathway_interaction_edges <- interaction_edges |>
       filter(
         source %in% pathway_node_lookup$gene_id,
         target %in% pathway_node_lookup$gene_id
@@ -380,17 +427,17 @@ register_drug_network_outputs <- function(
         by = "target"
       ) |>
       transmute(
-        id = paste0("__PATHWAY_STRING__", source, "__", target),
+        id = paste0("__PATHWAY_INTERACTION__", source, "__", target),
         from,
         to,
-        title = "STRING interaction between selected pathway genes",
+        title = paste(interaction_network_name, "interaction between selected pathway genes"),
         color = "rgba(15, 118, 110, 0.48)",
         width = 1.6,
         dashes = FALSE
       ) |>
       distinct(id, .keep_all = TRUE)
 
-    dynamic_edges <- bind_rows(pathway_edges, pathway_string_edges)
+    dynamic_edges <- bind_rows(pathway_edges, pathway_interaction_edges)
     if (nrow(dynamic_edges) > 0) {
       proxy |> visUpdateEdges(dynamic_edges)
     }

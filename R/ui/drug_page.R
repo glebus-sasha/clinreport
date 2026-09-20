@@ -60,7 +60,7 @@ render_drug_page <- function(
             ),
             div(
               class = "network-visualization-subtitle",
-              "Selected drug, direct targets, and one-hop STRING neighbors"
+              paste("Drug targets, differential expression, and", pathway_collection_name, "pathway coverage")
             )
           )
         ),
@@ -83,10 +83,10 @@ render_drug_page <- function(
           class = "gsea-panel embedded-gsea-panel",
         div(
           class = "gsea-panel-heading",
-          div(class = "gsea-panel-title", "Hallmark pathways"),
+          div(class = "gsea-panel-title", paste(pathway_collection_name, "pathways")),
           actionButton("clear_gsea_pathways", "Clear", class = "gsea-clear-button")
         ),
-        div(class = "gsea-panel-subtitle", "All tested gene sets · click to highlight DE genes"),
+        div(class = "gsea-panel-subtitle", paste("All tested", pathway_collection_name, "gene sets · click to highlight DE genes")),
         div(
           class = "gsea-sort",
           radioButtons(
@@ -100,7 +100,7 @@ render_drug_page <- function(
           uiOutput("gsea_matching_pathways"),
           div(
             class = "gsea-pathway-section gsea-all-pathway-section",
-            div(class = "gsea-pathway-section-title", "All Hallmark pathways"),
+            div(class = "gsea-pathway-section-title", paste("All", pathway_collection_name, "pathways")),
             div(
               class = "gsea-pathway-list gsea-all-pathway-list",
               uiOutput("gsea_pathway_tiles")

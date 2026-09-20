@@ -16,7 +16,7 @@ read_gsea_report <- function(path, direction) {
   )
 }
 
-read_hallmark_gmt <- function(path) {
+read_pathway_gmt <- function(path) {
   lines <- readLines(path, warn = FALSE)
   fields <- strsplit(lines, "\t", fixed = TRUE)
 
@@ -33,7 +33,7 @@ gsea_results <- bind_rows(
 ) |>
   distinct(pathway, .keep_all = TRUE)
 
-hallmark_pathways <- read_hallmark_gmt(hallmark_gmt_file) |>
+pathway_sets <- read_pathway_gmt(pathway_gmt_file) |>
   left_join(gsea_results, by = "pathway") |>
   arrange(desc(abs(nes)), pathway)
 
@@ -43,24 +43,24 @@ hallmark_pathways <- read_hallmark_gmt(hallmark_gmt_file) |>
 # Golden-angle hues keep neighbouring tiles visually distinct even after the
 # table is re-sorted.  Each of the 50 Hallmark sets therefore has its own
 # stable, non-grey identity colour.
-hallmark_pathway_palette <- grDevices::hcl(
-  h = ((seq_len(nrow(hallmark_pathways)) - 1) * 137.508) %% 360,
+pathway_set_palette <- grDevices::hcl(
+  h = ((seq_len(nrow(pathway_sets)) - 1) * 137.508) %% 360,
   c = 78,
   l = 48
 )
-hallmark_pathway_colors <- setNames(
-  hallmark_pathway_palette,
-  hallmark_pathways$pathway
+pathway_set_colors <- setNames(
+  pathway_set_palette,
+  pathway_sets$pathway
 )
-hallmark_direction_colors <- c(up = "#dc2626", down = "#2563eb", unknown = "#94a3b8")
+pathway_direction_colors <- c(up = "#dc2626", down = "#2563eb", unknown = "#94a3b8")
 
 pathway_identity_color <- function(pathways) {
-  unname(hallmark_pathway_colors[as.character(pathways)])
+  unname(pathway_set_colors[as.character(pathways)])
 }
 
 pathway_direction_color <- function(nes) {
   ifelse(
-    is.na(nes), hallmark_direction_colors[["unknown"]],
-    ifelse(nes >= 0, hallmark_direction_colors[["up"]], hallmark_direction_colors[["down"]])
+    is.na(nes), pathway_direction_colors[["unknown"]],
+    ifelse(nes >= 0, pathway_direction_colors[["up"]], pathway_direction_colors[["down"]])
   )
 }

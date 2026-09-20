@@ -1,4 +1,4 @@
-# Drug -> STRING subgraph business logic
+# Drug -> interaction-network subgraph business logic
 
 normalize_gene_id <- function(x) {
   str_remove(as.character(x), "\\.[0-9]+$")
@@ -56,9 +56,9 @@ get_gene_display_names <- function(gene_ids) {
     select(gene_id, gene_name)
 }
 
-get_drug_string_subgraph <- function(
+get_drug_interaction_subgraph <- function(
     drug_id,
-    max_neighbors = network_max_neighbors
+    max_neighbors = interaction_network_max_neighbors
 ) {
   target_ids <- get_drug_target_ids(drug_id)
 
@@ -70,9 +70,9 @@ get_drug_string_subgraph <- function(
     ))
   }
 
-  # Keep only STRING edges touching at least one drug target. This is the
+  # Keep only interaction edges touching at least one drug target. This is the
   # one-hop neighborhood used on the main screen.
-  touching_edges <- string_edges |>
+  touching_edges <- interaction_edges |>
     filter(source %in% target_ids | target %in% target_ids)
 
   neighbor_ids <- unique(c(
@@ -128,7 +128,7 @@ get_drug_string_subgraph <- function(
 
   nodes <- names |>
     mutate(
-      type = if_else(gene_id %in% target_ids, "Target", "STRING neighbor")
+      type = if_else(gene_id %in% target_ids, "Target", "Network neighbor")
     ) |>
     left_join(target_degree, by = "gene_id") |>
     mutate(degree = coalesce(degree, 0L))

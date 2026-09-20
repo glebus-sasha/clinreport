@@ -38,7 +38,7 @@ register_gsea_outputs <- function(
         class = paste0("gsea-pathway-tile", selected_class),
         style = paste0("border-left-color: ", tile_color, ";"),
         onclick = click,
-        div(class = "gsea-pathway-name", sub("^HALLMARK_", "", pathway$pathway)),
+        div(class = "gsea-pathway-name", display_pathway_name(pathway$pathway)),
         div(
           class = "gsea-pathway-metrics",
           span(ifelse(is.na(pathway$nes), "NES —", sprintf("NES %+.2f", pathway$nes))),
@@ -51,7 +51,7 @@ register_gsea_outputs <- function(
   output$gsea_pathway_tiles <- renderUI({
     active <- selected_pathways()
     focused_gene <- selected_network_gene()
-    pathway_table <- sort_pathways(hallmark_pathways)
+    pathway_table <- sort_pathways(pathway_sets)
 
     make_pathway_tiles(pathway_table)
   })
@@ -61,20 +61,20 @@ register_gsea_outputs <- function(
     drug <- selected_drug()
     target_symbols <- drug_target_symbols()
 
-    drug_pathways <- hallmark_pathways |>
+    drug_pathways <- pathway_sets |>
       filter(vapply(genes, function(gene_set) {
         any(target_symbols %in% gene_set)
       }, logical(1))) |>
       sort_pathways()
 
     gene_pathways <- if (!is.null(focused_gene)) {
-      hallmark_pathways |>
+      pathway_sets |>
         filter(vapply(genes, function(gene_set) {
           focused_gene$symbol %in% gene_set
         }, logical(1))) |>
         sort_pathways()
     } else {
-      hallmark_pathways[0, ]
+      pathway_sets[0, ]
     }
 
     req(nrow(drug_pathways) > 0 || nrow(gene_pathways) > 0)
@@ -115,7 +115,7 @@ register_gsea_outputs <- function(
     network_symbols <- subgraph()$nodes$gene_name
 
     lapply(selected, function(pathway_name) {
-      pathway <- hallmark_pathways |>
+      pathway <- pathway_sets |>
         filter(pathway == pathway_name) |>
         slice(1)
 
@@ -145,7 +145,7 @@ register_gsea_outputs <- function(
         class = "gsea-details",
         div(
           class = "gsea-details-heading",
-          sub("^HALLMARK_", "", pathway$pathway)
+          display_pathway_name(pathway$pathway)
         ),
         div(
           class = "gsea-details-stats",

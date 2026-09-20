@@ -10,7 +10,7 @@ if (!file.exists(drug_network_file)) {
 gsea_input_files <- c(
   gsea_carcinoma_report_file,
   gsea_normal_report_file,
-  hallmark_gmt_file
+  pathway_gmt_file
 )
 
 missing_gsea_files <- gsea_input_files[!file.exists(gsea_input_files)]
@@ -48,15 +48,15 @@ if (
 
 
 # Network visualization inputs
-if (!file.exists(string_network_file)) {
-  stop("STRING edge file not found: ", string_network_file)
+if (!file.exists(interaction_network_file)) {
+  stop(interaction_network_name, " edge file not found: ", interaction_network_file)
 }
 
 if (!file.exists(tx2gene_file)) {
   stop("tx2gene file not found: ", tx2gene_file)
 }
 
-if (!is.numeric(network_max_neighbors) || length(network_max_neighbors) != 1 ||
-    is.na(network_max_neighbors) || network_max_neighbors < 1) {
-  stop("network_max_neighbors must be a positive number")
+if (!is.numeric(interaction_network_max_neighbors) || length(interaction_network_max_neighbors) != 1 ||
+    is.na(interaction_network_max_neighbors) || interaction_network_max_neighbors < 1) {
+  stop("interaction_network_max_neighbors must be a positive number")
 }

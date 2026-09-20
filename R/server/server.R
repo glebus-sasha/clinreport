@@ -99,13 +99,14 @@ server <- function(
   # ==========================================================
   
   selected_drug <- reactive({
-    
-    req(
-      input$drug_table_rows_selected
-    )
-    
+    selected_row <- input$drug_table_rows_selected
+
+    if (is.null(selected_row) || length(selected_row) == 0) {
+      return(NULL)
+    }
+
     drug_network[
-      input$drug_table_rows_selected,
+      selected_row,
       ,
       drop = FALSE
     ]
@@ -131,15 +132,15 @@ server <- function(
   
   
   # ==========================================================
-  # DRUG / STRING SUBGRAPH
+  # DRUG / INTERACTION-NETWORK SUBGRAPH
   # ==========================================================
 
-  drug_string_subgraph <- reactive({
+  drug_interaction_subgraph <- reactive({
     req(selected_drug())
 
-    get_drug_string_subgraph(
+    get_drug_interaction_subgraph(
       selected_drug()$drugId,
-      max_neighbors = network_max_neighbors
+      max_neighbors = interaction_network_max_neighbors
     )
   })
 
@@ -298,10 +299,11 @@ server <- function(
   # ==========================================================
   
   output$right_panel <- renderUI({
-    
-    req(
-      selected_drug()
-    )
+    drug <- selected_drug()
+
+    if (is.null(drug) || nrow(drug) == 0) {
+      return(render_input_overview())
+    }
     
     
     if (
@@ -321,8 +323,6 @@ server <- function(
       )
     }
     
-    
-    drug <- selected_drug()
     
     drug_id <- drug$drugId
     
@@ -381,7 +381,7 @@ server <- function(
                 div(class = "network-visualization-title", network_display_name),
                 div(
                   class = "network-visualization-subtitle",
-                  "Selected drug, direct targets, and one-hop STRING neighbors"
+                  paste("Drug targets, differential expression, and", pathway_collection_name, "pathway coverage")
                 )
               ),
               uiOutput("drug_network_summary"),
@@ -389,8 +389,8 @@ server <- function(
             ),
             div(
               class = "gsea-panel",
-              div(class = "gsea-panel-title", "Hallmark pathways"),
-              div(class = "gsea-panel-subtitle", "All tested gene sets · click to highlight DE genes"),
+              div(class = "gsea-panel-title", paste(pathway_collection_name, "pathways")),
+              div(class = "gsea-panel-subtitle", paste("All tested", pathway_collection_name, "gene sets · click to highlight DE genes")),
               div(class = "gsea-pathway-list", uiOutput("gsea_pathway_tiles")),
               uiOutput("gsea_pathway_details")
             )
@@ -519,7 +519,7 @@ server <- function(
   register_drug_network_outputs(
     output = output,
     selected_drug = selected_drug,
-    subgraph = drug_string_subgraph,
+    subgraph = drug_interaction_subgraph,
     selected_pathways = selected_pathways,
     significant_ids = significant_gene_ids,
     selected_network_gene = selected_network_gene,
@@ -531,7 +531,7 @@ server <- function(
     input = input,
     selected_pathways = selected_pathways,
     significant_ids = significant_gene_ids,
-    subgraph = drug_string_subgraph,
+    subgraph = drug_interaction_subgraph,
     selected_network_gene = selected_network_gene,
     selected_drug = selected_drug,
     drug_target_symbols = current_drug_target_symbols

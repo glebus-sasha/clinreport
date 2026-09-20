@@ -23,7 +23,7 @@ gene_file <- file.path(
 )
 
 # Protein/gene interaction network used for the drug subgraph visualization.
-string_network_file <- file.path(
+interaction_network_file <- file.path(
   "C:/projects/clinreport/raw/network",
   "string.human_links_v12_0_min900.Ensembl.edges.tsv"
 )
@@ -44,17 +44,32 @@ gsea_normal_report_file <- file.path(
   "C:/projects/clinreport/raw/gsea",
   "carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_gsea_report_for_normal.tsv"
 )
-hallmark_gmt_file <- file.path(
+pathway_gmt_file <- file.path(
   "C:/projects/clinreport/raw/gsea",
   "carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_h_all_v2026_1_Hs_symbols.gmt"
 )
 
-# Maximum number of STRING neighbors displayed per drug target.
-network_max_neighbors <- 40
+# Maximum number of interaction-network neighbours displayed per drug target.
+interaction_network_max_neighbors <- 40
 
-# Display name for the selected interaction network. Keep this as a distinct
-# input so a future dataset metadata loader can provide it at startup.
+# Display metadata. These are explicit inputs so a later dataset metadata
+# loader can replace the patient, interaction network or GMT collection
+# without changing presentation code.
+patient_id <- "PATIENT-001"
 network_display_name <- "Drug–gene interaction network"
+interaction_network_name <- "STRING"
+pathway_collection_name <- "Hallmark"
+pathway_id_prefix <- "HALLMARK_"
+
+display_pathway_name <- function(pathways) {
+  pathways <- as.character(pathways)
+  has_prefix <- startsWith(pathways, pathway_id_prefix)
+  ifelse(
+    has_prefix,
+    substr(pathways, nchar(pathway_id_prefix) + 1, nchar(pathways)),
+    pathways
+  )
+}
 
 padj_cutoff <- 0.05
 log2fc_cutoff <- 1.0
