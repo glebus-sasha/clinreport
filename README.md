@@ -81,6 +81,29 @@ required for `--prepare` and `--check`; `--tf-file=` and `--dorothea-file=` are
 valid empty optional inputs. Metadata and thresholds use the documented defaults
 unless explicitly supplied.
 
+| Parameter | Required for `--prepare` / `--check` | Default |
+| --- | --- | --- |
+| `--drug-network-file` | Yes | — |
+| `--clinreport-dir` | Yes | — |
+| `--gene-file` | Yes | — |
+| `--wes-vcf-file` | Yes | — |
+| `--interaction-network-file` | Yes | — |
+| `--tx2gene-file` | Yes | — |
+| `--gsea-carcinoma-report-file` | Yes | — |
+| `--gsea-normal-report-file` | Yes | — |
+| `--pathway-gmt-file` | Yes | — |
+| `--tf-file` | No | `raw/carcinoma_vs_normal_significant_tfs.tsv` |
+| `--dorothea-file` | No | Downloaded at application startup |
+| `--patient-id` | No | `PATIENT-001` |
+| `--wes-display-name` | No | `WES · PCGR` |
+| `--network-display-name` | No | `Drug–gene interaction network` |
+| `--interaction-network-name` | No | `STRING` |
+| `--pathway-collection-name` | No | `Hallmark` |
+| `--pathway-id-prefix` | No | `HALLMARK_` |
+| `--padj-cutoff` | No | `0.05` |
+| `--log2fc-cutoff` | No | `1.0` |
+| `--interaction-network-max-neighbors` | No | `40` |
+
 ```sh
 Rscript run.R --help
 Rscript run.R --check [all nine required input arguments]
