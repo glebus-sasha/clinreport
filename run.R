@@ -15,16 +15,16 @@ main <- function() {
         "       clinreport --check [parameters]\n\n",
         "Required with --prepare and --check:\n",
         "  --drug-network-file PATH\n",
-        "  --clinreport-dir PATH\n",
         "  --gene-file PATH\n",
-        "  --wes-vcf-file PATH\n",
         "  --interaction-network-file PATH\n",
         "  --tx2gene-file PATH\n",
         "  --gsea-carcinoma-report-file PATH\n",
         "  --gsea-normal-report-file PATH\n",
         "  --pathway-gmt-file PATH\n\n",
         "Optional data:\n",
-        "  --tf-file PATH                 Default: raw/carcinoma_vs_normal_significant_tfs.tsv\n",
+        "  --clinreport-dir PATH         Drug annotations; omitted means unavailable\n",
+        "  --wes-vcf-file PATH           Variant evidence; omitted means unavailable\n",
+        "  --tf-file PATH                 TF evidence; omitted means unavailable\n",
         "  --dorothea-file PATH           Default: download DoRothEA at application startup\n\n",
         "Optional metadata and thresholds:\n",
         "  --patient-id TEXT              Default: PATIENT-001\n",
@@ -58,9 +58,16 @@ main <- function() {
   on.exit(setwd(caller_dir), add = TRUE)
   env <- new.env(parent = globalenv())
   source("R/config/config.R", local = env, encoding = "UTF-8")
+  if (!is.null(cli$prepare) || isTRUE(cli$check)) {
+    # In a pipeline, an omitted optional analysis must mean "not supplied",
+    # not "use the local development fixture from raw/".
+    for (key in c("clinreport_dir", "wes_vcf_file", "tf_file")) {
+      if (!key %in% names(values)) values[[key]] <- ""
+    }
+  }
   for (key in names(values)) assign(key, values[[key]], envir = env)
   if (!is.null(cli$prepare) || isTRUE(cli$check)) {
-    required <- setdiff(clinreport_paths, c("tf_file", "dorothea_file"))
+    required <- setdiff(clinreport_paths, c("clinreport_dir", "wes_vcf_file", "tf_file", "dorothea_file"))
     missing <- setdiff(required, names(cli))
     if (length(missing)) stop("Explicit input required: ", paste(paste0("--", gsub("_", "-", missing)), collapse = ", "))
   }

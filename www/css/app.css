@@ -173,6 +173,19 @@ body {
   background: #fbfcfd;
 }
 
+.input-overview-card.unavailable {
+  border-style: dashed;
+  background: #f8fafc;
+}
+
+.input-overview-card.unavailable .input-overview-value {
+  color: #94a3b8;
+}
+
+.evidence-overview-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .input-overview-label {
   color: #475569;
   font-size: 11px;

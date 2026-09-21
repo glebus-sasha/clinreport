@@ -62,15 +62,17 @@ register_tf_outputs <- function(input, output, session, selected_tfs,
     req(drug)
     targets <- unique(drug_target_symbols())
     target_rows <- gene_data |> filter(gene_name %in% targets)
-    wes_symbols <- unique(wes_gene_summary$gene_symbol)
+    wes_symbols <- if (has_wes) unique(wes_gene_summary$gene_symbol) else character()
     related <- get_target_tf_links(targets)
     div(class = "network-summary",
       span(class = "network-summary-drug", drug$label),
-      span(paste0(" · ", length(targets), " direct targets · ",
-        sum(target_rows$gene_id_clean %in% significant_ids), " DE-significant targets · ",
-        sum(targets %in% wes_symbols), " WES-mutated targets · ",
-        sum(vapply(pathway_sets$genes, function(gs) any(targets %in% gs), logical(1))),
-        " ", pathway_collection_name, " pathways contain drug targets")),
+      span(paste0(" · ", paste(c(
+        paste0(length(targets), " direct targets"),
+        paste0(sum(target_rows$gene_id_clean %in% significant_ids), " DE-significant targets"),
+        if (has_wes) paste0(sum(targets %in% wes_symbols), " WES-mutated targets"),
+        paste0(sum(vapply(pathway_sets$genes, function(gs) any(targets %in% gs), logical(1))),
+          " ", pathway_collection_name, " pathways contain drug targets")
+      ), collapse = " · "))),
       span(class = "network-summary-context", paste0(
         "Graph context: ", nrow(related), " DoRothEA TF-target links connect imported TFs to direct targets.")))
   })

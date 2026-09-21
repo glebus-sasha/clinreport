@@ -171,12 +171,14 @@ render_gene_page <- function(
 
         div(
           class = "summary-value",
-          mutation_count
+          if (has_wes) mutation_count else "—"
         ),
 
         div(
           class = "summary-note",
-          if (mutation_count == 0) {
+          if (!has_wes) {
+            "Not supplied"
+          } else if (mutation_count == 0) {
             "No PASS variants"
           } else {
             wes_gene_summary |>
@@ -188,7 +190,7 @@ render_gene_page <- function(
       )
     ),
 
-    if (mutation_count > 0) div(
+    if (has_wes && mutation_count > 0) div(
       class = "gene-wes-variants",
       div(class = "gene-wes-variants-title", "WES variant calls"),
       div(

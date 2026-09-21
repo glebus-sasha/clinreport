@@ -76,23 +76,25 @@ If R is installed elsewhere, provide its executable explicitly:
 ```
 
 All input paths, display metadata, and thresholds are command-line options. Paths
-are relative to the calling working directory. The nine core input paths are
-required for `--prepare` and `--check`; `--tf-file=` and `--dorothea-file=` are
-valid empty optional inputs. Metadata and thresholds use the documented defaults
-unless explicitly supplied.
+are relative to the calling working directory. Seven core input paths are required
+for `--prepare` and `--check`. `--clinreport-dir`, `--wes-vcf-file`, `--tf-file`,
+and `--dorothea-file` are optional. Omitting the first three disables the
+corresponding analysis; they also accept an explicit empty value, such as
+`--wes-vcf-file=`. Metadata and thresholds use the documented defaults unless
+explicitly supplied.
 
 | Parameter | Required for `--prepare` / `--check` | Default |
 | --- | --- | --- |
 | `--drug-network-file` | Yes | — |
-| `--clinreport-dir` | Yes | — |
+| `--clinreport-dir` | No | Annotation tabs are unavailable |
 | `--gene-file` | Yes | — |
-| `--wes-vcf-file` | Yes | — |
+| `--wes-vcf-file` | No | WES views and variant evidence are unavailable |
 | `--interaction-network-file` | Yes | — |
 | `--tx2gene-file` | Yes | — |
 | `--gsea-carcinoma-report-file` | Yes | — |
 | `--gsea-normal-report-file` | Yes | — |
 | `--pathway-gmt-file` | Yes | — |
-| `--tf-file` | No | `raw/carcinoma_vs_normal_significant_tfs.tsv` |
+| `--tf-file` | No | TF analysis is unavailable |
 | `--dorothea-file` | No | Downloaded at application startup |
 | `--patient-id` | No | `PATIENT-001` |
 | `--wes-display-name` | No | `WES · PCGR` |

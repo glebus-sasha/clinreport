@@ -28,27 +28,42 @@ format_mutation_classes <- function(classes) {
   paste0(names(counts), " (", as.integer(counts), ")", collapse = ", ")
 }
 
-wes_connection <- gzfile(wes_vcf_file, "rt")
-wes_vcf <- read.delim(
-  wes_connection,
-  header = FALSE,
-  comment.char = "#",
-  sep = "\t",
-  quote = "",
-  stringsAsFactors = FALSE,
-  fill = TRUE
-)
-close(wes_connection)
-
-if (ncol(wes_vcf) < 8) {
-  stop("WES VCF must contain the eight mandatory VCF columns.")
+empty_wes_variants <- function() {
+  tibble(
+    chrom = character(), position = integer(), ref = character(), alt = character(),
+    filter = character(), gene_symbol = character(), gene_id = character(),
+    consequence = character(), impact = character(), protein_change = character(),
+    oncogenicity = character(), clinvar_classification = character(),
+    clinvar_allele_id = character(), dbsnp_rsid = character(), vaf = double(),
+    depth = integer(), classification = character(), variant_label = character()
+  )
 }
 
-names(wes_vcf)[seq_len(8)] <- c(
-  "chrom", "position", "variant_id", "ref", "alt", "quality", "filter", "info"
-)
+if (!has_wes) {
+  wes_variants <- empty_wes_variants()
+  wes_gene_summary <- tibble(gene_symbol = character(), mutation_count = integer(), mutation_classes = character())
+} else {
+  wes_connection <- gzfile(wes_vcf_file, "rt")
+  wes_vcf <- read.delim(
+    wes_connection,
+    header = FALSE,
+    comment.char = "#",
+    sep = "\t",
+    quote = "",
+    stringsAsFactors = FALSE,
+    fill = TRUE
+  )
+  close(wes_connection)
 
-wes_variants <- wes_vcf |>
+  if (ncol(wes_vcf) < 8) {
+    stop("WES VCF must contain the eight mandatory VCF columns.")
+  }
+
+  names(wes_vcf)[seq_len(8)] <- c(
+    "chrom", "position", "variant_id", "ref", "alt", "quality", "filter", "info"
+  )
+
+  wes_variants <- wes_vcf |>
   transmute(
     chrom = as.character(chrom),
     position = as.integer(position),
@@ -77,10 +92,11 @@ wes_variants <- wes_vcf |>
   ) |>
   filter(!is.na(gene_symbol), gene_symbol != "")
 
-wes_gene_summary <- wes_variants |>
-  group_by(gene_symbol) |>
-  summarise(
-    mutation_count = n(),
-    mutation_classes = format_mutation_classes(classification),
-    .groups = "drop"
-  )
+  wes_gene_summary <- wes_variants |>
+    group_by(gene_symbol) |>
+    summarise(
+      mutation_count = n(),
+      mutation_classes = format_mutation_classes(classification),
+      .groups = "drop"
+    )
+}

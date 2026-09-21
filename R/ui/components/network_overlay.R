@@ -1,7 +1,9 @@
 render_network_overlay_panel <- function() {
+  overlay_choices <- c("Pathways" = "pathways")
+  if (has_tf_analysis) overlay_choices <- c(overlay_choices, "TF" = "tf")
   tagList(
     div(class = "overlay-mode-switch",
-      radioButtons("overlay_mode", NULL, c("Pathways" = "pathways", "TF" = "tf"), inline = TRUE)),
+      radioButtons("overlay_mode", NULL, overlay_choices, inline = TRUE)),
     conditionalPanel("input.overlay_mode !== 'tf'",
       div(class = "gsea-panel-heading",
         div(class = "gsea-panel-title", paste(pathway_collection_name, "pathways")),
@@ -30,6 +32,7 @@ render_network_overlay_panel <- function() {
   )
 }
 render_tf_tab <- function() {
+  if (!has_tf_analysis) return(NULL)
   tabPanel("TF", div(class = "wes-variants-panel",
     div(class = "targets-header",
       div(div(class = "targets-title", "Transcription factor activity"),

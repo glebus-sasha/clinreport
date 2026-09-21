@@ -1,6 +1,9 @@
 # WES variant table shell
 
 render_wes_variants <- function() {
+  if (!has_wes) {
+    return(div(class = "empty-message", "WES variants were not supplied for this report."))
+  }
   if (nrow(wes_variants) == 0) {
     return(div(class = "empty-message", "No gene-level variants were found in the WES VCF."))
   }

@@ -146,7 +146,7 @@ register_drug_network_outputs <- function(
     graph <- subgraph()
     selected <- if (overlay_mode() == "tf") character() else selected_pathways()
     network_symbols <- graph$nodes$gene_name
-    mutated_node_count <- sum(network_symbols %in% wes_gene_summary$gene_symbol)
+    mutated_node_count <- if (has_wes) sum(network_symbols %in% wes_gene_summary$gene_symbol) else 0L
     target_nodes <- graph$nodes |>
       filter(type == "Target")
     neighbor_count <- sum(graph$nodes$type != "Target")
@@ -154,7 +154,7 @@ register_drug_network_outputs <- function(
       pull(gene_name) |>
       unique() |>
       discard(is.na)
-    mutated_target_count <- sum(target_symbols %in% wes_gene_summary$gene_symbol)
+    mutated_target_count <- if (has_wes) sum(target_symbols %in% wes_gene_summary$gene_symbol) else 0L
     target_tf_links <- get_target_tf_links(target_symbols)
     deg_target_symbols <- target_nodes |>
       filter(gene_id %in% significant_ids) |>
@@ -178,20 +178,22 @@ register_drug_network_outputs <- function(
     }
     pathway_overlap <- sum(selected_pathway_genes %in% network_symbols)
 
+    evidence_summary <- c(
+      paste0(nrow(target_nodes), " direct targets"),
+      paste0(length(deg_target_symbols), " DE-significant targets"),
+      if (has_wes) paste0(mutated_target_count, " WES-mutated targets"),
+      paste0(target_pathway_count, " ", pathway_collection_name, " pathways contain drug targets"),
+      if (has_tf_analysis) paste0(
+        n_distinct(target_tf_links$tf), " imported TFs regulate ",
+        n_distinct(target_tf_links$target), " drug targets (",
+        nrow(distinct(target_tf_links, tf, target)), " TF–target pairs)"
+      )
+    )
+
     div(
       class = "network-summary",
       span(class = "network-summary-drug", drug$label),
-      span(paste0(
-        " · ", nrow(target_nodes), " direct targets · ",
-        length(deg_target_symbols), " DE-significant targets · ",
-        mutated_target_count, " WES-mutated targets · ",
-        target_pathway_count, " ", pathway_collection_name, " pathways contain drug targets",
-        if (is.null(dorothea_resource$error)) paste0(
-          " · ", n_distinct(target_tf_links$tf), " imported TFs regulate ",
-          n_distinct(target_tf_links$target), " drug targets (",
-          nrow(distinct(target_tf_links, tf, target)), " TF–target pairs)")
-        else " · TF associations unavailable"
-      )),
+      span(paste0(" · ", paste(evidence_summary, collapse = " · "))),
       if (mutated_node_count > 0) {
         span(
           class = "network-summary-wes",

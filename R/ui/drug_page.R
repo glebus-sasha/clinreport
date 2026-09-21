@@ -94,32 +94,16 @@ render_drug_page <- function(
       selected = "General",
       
       
-      tabPanel(
-        "General",
-        
-        render_general(
-          drug_id,
-          data
-        )
-      ),
-      
-      
-      tabPanel(
-        "Indications & Mechanism",
-        
-        render_pharmacology(
-          data
-        )
-      ),
-      
-      
-      tabPanel(
-        "Safety",
-        
-        render_safety(
-          data
-        )
-      ),
+      if (has_drug_details) {
+        tabPanel("General", render_general(drug_id, data))
+      } else {
+        tabPanel("Drug annotations", div(
+          class = "empty-message",
+          "Drug annotation files were not supplied. Pharmacology, safety and structure details are unavailable."
+        ))
+      },
+      if (has_drug_details) tabPanel("Indications & Mechanism", render_pharmacology(data)),
+      if (has_drug_details) tabPanel("Safety", render_safety(data)),
       
       
       tabPanel(
@@ -182,10 +166,7 @@ render_drug_page <- function(
         )
       ),
 
-      tabPanel(
-        "WES variants",
-        render_wes_variants()
-      ),
+      if (has_wes) tabPanel("WES variants", render_wes_variants()),
       render_tf_tab()
     )
   )

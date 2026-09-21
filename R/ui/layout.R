@@ -1,9 +1,9 @@
 # UI layout
 
 render_input_overview <- function() {
-  input_card <- function(label, value, note) {
+  input_card <- function(label, value, note, status = "available") {
     div(
-      class = "input-overview-card",
+      class = paste("input-overview-card", status),
       div(class = "input-overview-label", label),
       div(class = "input-overview-value", title = value, value),
       div(class = "input-overview-note", note)
@@ -21,9 +21,51 @@ render_input_overview <- function() {
         div(class = "input-overview-patient-value", patient_id)
       )
     ),
+      div(
+        class = "input-overview-subtitle",
+      "Select a drug to inspect the evidence available for its targets, expression profile and interaction network."
+    ),
     div(
-      class = "input-overview-subtitle",
-      "Select a drug from the list to inspect its pharmacology, targets, expression profile and interaction network."
+      class = "input-overview-section",
+      div(class = "input-overview-section-title", "Evidence available for drug assessment"),
+      div(
+        class = "input-overview-grid evidence-overview-grid",
+        input_card(
+          "Differential expression",
+          "Available",
+          paste(nrow(gene_data), "genes; targets are assessed against RNA differential expression")
+        ),
+        input_card(
+          paste(interaction_network_name, "network expansion"),
+          "Available",
+          paste("One-hop", interaction_network_name, "neighbours extend direct drug targets")
+        ),
+        input_card(
+          "TF regulatory context",
+          if (has_tf_analysis) "Available" else "Not available",
+          if (has_tf_analysis) {
+            paste(nrow(tf_results), "TF activities with DoRothEA target links")
+          } else {
+            "No usable TF activity input and DoRothEA reference pair was supplied"
+          },
+          if (has_tf_analysis) "available" else "unavailable"
+        ),
+        input_card(
+          "WES variants",
+          if (has_wes) "Available" else "Not supplied",
+          if (has_wes) {
+            paste(nrow(wes_variants), "PASS variants across", nrow(wes_gene_summary), "genes")
+          } else {
+            "Variant evidence is excluded from this report"
+          },
+          if (has_wes) "available" else "unavailable"
+        ),
+        input_card(
+          paste(pathway_collection_name, "GSEA analysis"),
+          "Available",
+          paste(nrow(pathway_sets), "tested gene sets provide pathway context for targets")
+        )
+      )
     ),
     div(
       class = "input-overview-section",
@@ -51,9 +93,16 @@ render_input_overview <- function() {
           paste(nrow(pathway_sets), "gene sets")
         ),
         input_card(
+          "Drug annotations",
+          if (has_drug_details) basename(clinreport_dir) else "Not supplied",
+          if (has_drug_details) "Pharmacology, safety and structure details are available" else "Drug annotation tabs are hidden",
+          if (has_drug_details) "available" else "unavailable"
+        ),
+        input_card(
           wes_display_name,
-          basename(wes_vcf_file),
-          paste(nrow(wes_variants), "PASS variants ·", nrow(wes_gene_summary), "genes")
+          if (has_wes) basename(wes_vcf_file) else "Not supplied",
+          if (has_wes) paste(nrow(wes_variants), "PASS variants ·", nrow(wes_gene_summary), "genes") else "WES-specific views are hidden",
+          if (has_wes) "available" else "unavailable"
         )
       )
     ),

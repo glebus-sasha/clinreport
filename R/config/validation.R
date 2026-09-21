@@ -3,7 +3,8 @@
 # 2. VALIDATION
 # ============================================================
 
-for (input_key in setdiff(clinreport_paths, "clinreport_dir")) {
+required_file_inputs <- setdiff(clinreport_paths, c("clinreport_dir", "wes_vcf_file", "tf_file", "dorothea_file"))
+for (input_key in required_file_inputs) {
   input_path <- get(input_key)
   if (nzchar(input_path) && dir.exists(input_path)) stop("Expected a file for ", input_key, ": ", input_path)
 }
@@ -23,7 +24,8 @@ if (length(missing_gsea_files) > 0) {
   stop("Missing GSEA input files: ", paste(missing_gsea_files, collapse = ", "))
 }
 
-if (!dir.exists(clinreport_dir)) {
+has_drug_details <- nzchar(clinreport_dir) && dir.exists(clinreport_dir)
+if (nzchar(clinreport_dir) && !has_drug_details) {
   stop("ClinReport directory does not exist: ", clinreport_dir)
 }
 
@@ -31,7 +33,8 @@ if (!file.exists(gene_file)) {
   stop("Gene expression file does not exist: ", gene_file)
 }
 
-if (!file.exists(wes_vcf_file)) {
+has_wes <- nzchar(wes_vcf_file) && file.exists(wes_vcf_file)
+if (nzchar(wes_vcf_file) && !has_wes) {
   stop("WES VCF file does not exist: ", wes_vcf_file)
 }
 

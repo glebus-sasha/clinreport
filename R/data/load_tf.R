@@ -34,5 +34,10 @@ download_dorothea <- function(resource_url = dorothea_url) {
     list(data = x, error = NULL)
   }, error = function(e) list(data = empty_tf_regulons(), error = conditionMessage(e)))
 }
-dorothea_resource <- download_dorothea()
+dorothea_resource <- if (is.null(tf_input$error)) {
+  download_dorothea()
+} else {
+  list(data = empty_tf_regulons(), error = "TF analysis was not supplied")
+}
 tf_regulons <- dorothea_resource$data
+has_tf_analysis <- is.null(tf_input$error) && is.null(dorothea_resource$error)
