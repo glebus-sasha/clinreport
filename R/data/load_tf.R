@@ -1,8 +1,8 @@
-# Analysis inputs stay in raw; the public resource is fetched into memory only.
-tf_file <- file.path("raw", "carcinoma_vs_normal_significant_tfs.tsv")
+# TF input and optional local DoRothEA resource come from configuration.
 empty_tf_results <- function() tibble(TF = character(), logFC = double(), AveExpr = double(),
   t = double(), P.Value = double(), adj.P.Val = double())
 tf_input <- tryCatch({
+  if (!nzchar(tf_file)) stop("TF input was not supplied")
   x <- read.delim(tf_file, check.names = FALSE, stringsAsFactors = FALSE)
   stopifnot(all(names(empty_tf_results()) %in% names(x)), !anyDuplicated(x$TF),
             all(!is.na(x$TF) & nzchar(x$TF)))
@@ -18,7 +18,7 @@ download_dorothea <- function(resource_url = dorothea_url) {
   tryCatch({
     old <- options(timeout = 60)
     on.exit(options(old), add = TRUE)
-    con <- url(resource_url, open = "rb")
+    con <- if (nzchar(dorothea_file)) file(dorothea_file, open = "rb") else url(resource_url, open = "rb")
     on.exit(close(con), add = TRUE)
     bytes <- readBin(con, what = "raw", n = 50L * 1024L * 1024L)
     decoded <- rawConnection(memDecompress(bytes, type = "unknown"))

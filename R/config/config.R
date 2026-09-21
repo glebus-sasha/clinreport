@@ -1,58 +1,57 @@
 # Application configuration
 
-# Keep machine-specific paths here. For a shared deployment, move these
-# values to environment variables or a config file.
+# Local demo defaults. Prepared reports override these with their supplied inputs.
 
 # ============================================================
 # 1. INPUT PARAMETERS
 # ============================================================
 
 drug_network_file <- file.path(
-  "C:/projects/clinreport/raw",
+  "raw",
   "all_samples_string_human_links_v12_0_min900_Ensembl_diamond_trustrank.csv"
 )
 
 clinreport_dir <- file.path(
-  "C:/projects/clinreport/raw",
+  "raw",
   "clinreport"
 )
 
 gene_file <- file.path(
-  "C:/projects/clinreport/raw",
+  "raw",
   "carcinoma_vs_normal_gene_names_added.tsv"
 )
 
 # Whole-exome sequencing variants annotated by PCGR for the current patient.
 wes_vcf_file <- file.path(
-  "C:/projects/clinreport/raw",
+  "raw",
   "R_PTA_22.pcgr.grch38.pass.vcf.gz"
 )
 wes_display_name <- "WES · PCGR"
 
 # Protein/gene interaction network used for the drug subgraph visualization.
 interaction_network_file <- file.path(
-  "C:/projects/clinreport/raw/network",
+  "raw/network",
   "string.human_links_v12_0_min900.Ensembl.edges.tsv"
 )
 
 # Transcript -> gene mapping. Used to enrich/normalize gene identifiers and names.
 tx2gene_file <- file.path(
-  "C:/projects/clinreport/raw",
+  "raw",
   "tx2gene.tsv"
 )
 
 # Hallmark GSEA inputs. These remain explicit configuration values so a later
 # parameterized run can replace them without changing UI or server logic.
 gsea_carcinoma_report_file <- file.path(
-  "C:/projects/clinreport/raw/gsea",
+  "raw/gsea",
   "carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_gsea_report_for_carcinoma.tsv"
 )
 gsea_normal_report_file <- file.path(
-  "C:/projects/clinreport/raw/gsea",
+  "raw/gsea",
   "carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_gsea_report_for_normal.tsv"
 )
 pathway_gmt_file <- file.path(
-  "C:/projects/clinreport/raw/gsea",
+  "raw/gsea",
   "carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_h_all_v2026_1_Hs_symbols.gmt"
 )
 
@@ -80,3 +79,15 @@ display_pathway_name <- function(pathways) {
 
 padj_cutoff <- 0.05
 log2fc_cutoff <- 1.0
+
+tf_file <- file.path("raw", "carcinoma_vs_normal_significant_tfs.tsv")
+dorothea_file <- ""
+
+# A prepared application embeds the exact paths and metadata supplied to
+# `clinreport --prepare`; no external configuration file is required.
+source("R/config/parameters.R", local = TRUE, encoding = "UTF-8")
+prepared_parameters_file <- "R/config/prepared_parameters.R"
+if (file.exists(prepared_parameters_file)) {
+  source(prepared_parameters_file, local = TRUE, encoding = "UTF-8")
+  list2env(clinreport_prepared_parameters, envir = environment())
+}
