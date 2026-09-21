@@ -108,16 +108,16 @@ explicitly supplied.
 
 ```sh
 Rscript run.R --help
-Rscript run.R --check [all nine required input arguments]
-Rscript run.R --prepare results/patient-002 [all nine required input arguments] --patient-id PATIENT-002 --padj-cutoff 0.01
+Rscript run.R --check [all seven required input arguments]
+Rscript run.R --prepare results/patient-002 [all seven required input arguments] --patient-id PATIENT-002 --padj-cutoff 0.01
 Rscript results/patient-002/run.R --port 3839
 ```
 
 `--check` checks file existence and parameter values, without loading the tables,
 downloading resources, or starting Shiny. Table schemas are checked by the app's
-existing loaders at startup. Required data: drug network CSV, drug detail directory,
-gene expression TSV, PCGR VCF.gz, interaction network TSV, transcript mapping TSV,
-two GSEA reports and GMT. Use `--tf-file=` to omit optional TF results. Supply
+existing loaders at startup. Required data: drug network CSV, gene expression TSV,
+interaction network TSV, transcript mapping TSV, two GSEA reports and GMT. Drug
+annotations, PCGR VCF.gz, and TF results are optional. Supply
 `--dorothea-file /path/to/dorothea_hs.rda` to bundle a local resource and avoid its
 startup download. Otherwise the existing internet download remains in place.
 
@@ -129,9 +129,10 @@ publish the image separately to Quay, then pin its version or digest in the pipe
 
 `examples/clinreport.nf` is an example DSL2 module with explicitly staged inputs.
 Set `params.clinreport_container` (for example `quay.io/your-org/clinreport:1.0.0`)
-and `params.outdir`, include the module, and pass the nine input channels in the
-declared order. The example omits TF input; add a staged TF input and `--tf-file`
-when needed. Add metadata and threshold arguments directly to the command. For
+and `params.outdir`, include the module, and pass the seven input channels in the
+declared order. Add staged inputs and `--clinreport-dir`, `--wes-vcf-file`, or
+`--tf-file` when those optional data sources are available. Add metadata and
+threshold arguments directly to the command. For
 multiple samples, use unique per-sample published directories.
 The module copies its output so it can survive removal of Nextflow's `work/`.
 
@@ -154,7 +155,7 @@ nested file copies, invalid inputs and overwrite protection.
 
 - `R/config/` — paths, thresholds, validation
 - `R/data/` — CSV/TSV/JSON loading and discovery
-- `R/domain/` — drug identifiers, names, and gene logic
+- `R/domain/` — drug identifiers and gene logic
 - `R/utils/` — generic helpers and URL builders
 - `R/ui/` — reusable components, tabs, pages, layout
 - `R/server/` — Shiny server orchestration and volcano plot
@@ -181,7 +182,7 @@ install.packages("visNetwork")
 
 Switch the network side panel between Pathways and TF. Select individual imported TFs or use All TFs / Clear. The TF tab contains the raw activity statistics; clicking a row toggles that TF. Activity differences are not RNA log2 fold changes. FDR determines significance, regardless of the input filename.
 
-The TF analysis input is configured with `tf_file` (default `raw/carcinoma_vs_normal_significant_tfs.tsv`; columns TF, logFC, AveExpr, t, P.Value, adj.P.Val). No preview-project files, saved R sessions, or sample activity matrices are used. TF targets are restricted to genes present in the RNA table.
+The optional TF analysis input is configured with `--tf-file` (columns TF, logFC, AveExpr, t, P.Value, adj.P.Val). When it is omitted, the TF overlay and tab are unavailable. No preview-project files, saved R sessions, or sample activity matrices are used. TF targets are restricted to genes present in the RNA table.
 
 Unless `dorothea_file` is supplied, at each app startup the official human DoRothEA resource is downloaded from https://raw.githubusercontent.com/saezlab/dorothea/master/data/dorothea_hs.rda and decompressed in memory. A/B/C signed interactions are retained. No automatic disk cache is created; a running process holds the resource in memory. This current resource may differ from the version used for the original activity inference. If loading fails, the app and TF table remain available and the panel reports the failure.
 

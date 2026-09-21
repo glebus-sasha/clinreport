@@ -40,24 +40,34 @@ if (-not $outputPath.StartsWith($resultsDir + [IO.Path]::DirectorySeparatorChar,
 }
 
 $rawDir = Join-Path $projectDir "raw"
-$inputs = @(
+$requiredInputs = @(
     "--drug-network-file", (Join-Path $rawDir "all_samples_string_human_links_v12_0_min900_Ensembl_diamond_trustrank.csv"),
-    "--clinreport-dir", (Join-Path $rawDir "clinreport"),
     "--gene-file", (Join-Path $rawDir "carcinoma_vs_normal_gene_names_added.tsv"),
-    "--wes-vcf-file", (Join-Path $rawDir "R_PTA_22.pcgr.grch38.pass.vcf.gz"),
     "--interaction-network-file", (Join-Path $rawDir "network\string.human_links_v12_0_min900.Ensembl.edges.tsv"),
     "--tx2gene-file", (Join-Path $rawDir "tx2gene.tsv"),
     "--gsea-carcinoma-report-file", (Join-Path $rawDir "gsea\carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_gsea_report_for_carcinoma.tsv"),
     "--gsea-normal-report-file", (Join-Path $rawDir "gsea\carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_gsea_report_for_normal.tsv"),
     "--pathway-gmt-file", (Join-Path $rawDir "gsea\carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_h_all_v2026_1_Hs_symbols.gmt"),
-    "--tf-file", (Join-Path $rawDir "carcinoma_vs_normal_significant_tfs.tsv"),
     "--patient-id", $PatientId,
     "--padj-cutoff", $PadjCutoff.ToString([Globalization.CultureInfo]::InvariantCulture),
     "--log2fc-cutoff", $Log2fcCutoff.ToString([Globalization.CultureInfo]::InvariantCulture),
     "--interaction-network-max-neighbors", $MaxNeighbors
 )
-foreach ($index in 1, 3, 5, 7, 9, 11, 13, 15, 17, 19) {
-    if (-not (Test-Path -LiteralPath $inputs[$index])) { throw "Required development input is missing: $($inputs[$index])" }
+foreach ($index in 1, 3, 5, 7, 9, 11, 13) {
+    if (-not (Test-Path -LiteralPath $requiredInputs[$index])) { throw "Required development input is missing: $($requiredInputs[$index])" }
+}
+
+$optionalInputs = @()
+foreach ($optionalInput in @(
+    @("--clinreport-dir", (Join-Path $rawDir "clinreport")),
+    @("--wes-vcf-file", (Join-Path $rawDir "R_PTA_22.pcgr.grch38.pass.vcf.gz")),
+    @("--tf-file", (Join-Path $rawDir "carcinoma_vs_normal_significant_tfs.tsv"))
+)) {
+    if (Test-Path -LiteralPath $optionalInput[1]) {
+        $optionalInputs += $optionalInput
+    } else {
+        Write-Host "Optional input not found; disabling $($optionalInput[0])."
+    }
 }
 
 if (Test-Path -LiteralPath $outputPath) {
@@ -65,7 +75,7 @@ if (Test-Path -LiteralPath $outputPath) {
 }
 
 Write-Host "Preparing $outputPath"
-& $RscriptPath (Join-Path $projectDir "run.R") "--prepare" $outputPath @inputs
+& $RscriptPath (Join-Path $projectDir "run.R") "--prepare" $outputPath @requiredInputs @optionalInputs
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 if ($PrepareOnly) {

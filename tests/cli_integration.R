@@ -19,16 +19,19 @@ dir.create(file.path(scratch, "inputs", "drugs", "nested"))
 writeLines("{}", file.path(scratch, "inputs", "drugs", "nested", "drug.json"))
 input_file <- normalizePath(file.path(scratch, "inputs", "same name.tsv"), winslash = "/")
 input_drugs <- normalizePath(file.path(scratch, "inputs", "drugs"), winslash = "/")
-input_args <- c(
+required_args <- c(
   "--drug-network-file", input_file,
-  "--clinreport-dir", input_drugs,
   "--gene-file", input_file,
-  "--wes-vcf-file", input_file,
   "--interaction-network-file", input_file,
   "--tx2gene-file", input_file,
   "--gsea-carcinoma-report-file", input_file,
   "--gsea-normal-report-file", input_file,
-  "--pathway-gmt-file", input_file,
+  "--pathway-gmt-file", input_file
+)
+input_args <- c(
+  required_args,
+  "--clinreport-dir", input_drugs,
+  "--wes-vcf-file", input_file,
   "--tf-file=", "--dorothea-file=",
   "--patient-id", "CLI patient",
   "--padj-cutoff", "0.00000123456789",
@@ -38,6 +41,15 @@ bundle <- file.path(scratch, "bundle")
 invoke(file.path(root, "run.R"), c("--prepare", bundle, input_args))
 invoke(file.path(root, "run.R"), c("--prepare", bundle, input_args), 1L)
 invoke(file.path(root, "run.R"), c("--check", input_args))
+core_bundle <- file.path(scratch, "core bundle")
+invoke(file.path(root, "run.R"), c("--prepare", core_bundle, required_args))
+source(file.path(core_bundle, "R", "config", "prepared_parameters.R"))
+core_parameters <- clinreport_prepared_parameters
+stopifnot(
+  identical(core_parameters$clinreport_dir, ""),
+  identical(core_parameters$wes_vcf_file, ""),
+  identical(core_parameters$tf_file, "")
+)
 moved <- file.path(scratch, "moved bundle")
 stopifnot(file.rename(bundle, moved))
 # Move original inputs away: the export must not depend on them.
@@ -54,4 +66,4 @@ invoke(file.path(root, "run.R"), c("--check", input_args, "--padj-cutoff", "NaN"
 invoke(file.path(root, "run.R"), c("--check", input_args, "--interaction-network-max-neighbors", "1.5"), 1L)
 invoke(file.path(root, "run.R"), c("--check", input_args, "--unknown", "value"), 1L)
 invoke(file.path(root, "run.R"), "--check", 1L)
-cat("PASS: explicit CLI, relative paths, copied nested data, relocation, invalid inputs, overwrite protection\n")
+cat("PASS: explicit CLI, optional-input omission, relative paths, copied nested data, relocation, invalid inputs, overwrite protection\n")
