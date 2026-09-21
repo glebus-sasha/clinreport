@@ -38,3 +38,15 @@ Install the additional package if needed:
 ```r
 install.packages("visNetwork")
 ```
+
+## TF overlay
+
+Switch the network side panel between Pathways and TF. Select individual imported TFs or use All TFs / Clear. The TF tab contains the raw activity statistics; clicking a row toggles that TF. Activity differences are not RNA log2 fold changes. FDR determines significance, regardless of the input filename.
+
+The only TF analysis input is `raw/carcinoma_vs_normal_significant_tfs.tsv` (TF, logFC, AveExpr, t, P.Value, adj.P.Val). No preview-project files, saved R sessions, or sample activity matrices are used. TF targets are restricted to genes present in the existing raw RNA table.
+
+At each app startup the official human DoRothEA resource is downloaded from https://raw.githubusercontent.com/saezlab/dorothea/master/data/dorothea_hs.rda and decompressed in memory. A/B/C signed interactions are retained. No disk cache is created; a running process holds the resource in memory. This current resource may differ from the version used for the original activity inference. If the download fails, the app and TF table remain available and the panel reports the failure.
+
+TFs are triangles. Drug-target links remain blue; STRING links remain grey dashed. TF activation uses green arrows and repression uses pink dashed links with a terminal bar. WES centre dots are preserved. In Direction mode selected TFs use activity difference while other genes use RNA expression.
+
+Integration check (requires internet and installed app dependencies): `Rscript --vanilla tests/tf_integration.R`.

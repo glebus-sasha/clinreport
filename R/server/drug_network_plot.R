@@ -23,7 +23,7 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
       mutation_count = coalesce(mutation_count, 0L),
       mutation_classes = coalesce(mutation_classes, "none"),
       mutated = mutation_count > 0,
-      group = if_else(type == "Target", "Target", paste(interaction_network_name, "neighbor")),
+      group = if_else(type == "Network neighbor", paste(interaction_network_name, "neighbor"), type),
       shape = "dot",
       size = case_when(
         type == "Target" ~ 22,
@@ -50,7 +50,7 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
       title = paste0(
         "<b>", htmlEscape(label), "</b><br>",
         "Ensembl: ", htmlEscape(gene_id), "<br>",
-        if_else(type == "Target", "Drug target", paste(interaction_network_name, "neighbor")),
+        if_else(type == "Target", "Drug target", if_else(type == "Network neighbor", paste(interaction_network_name, "neighbor"), type)),
         "<br>DE status: ", if_else(significant, "significant", "not significant"),
         "<br>Expression: ", case_when(
           is.na(log2FoldChange) ~ "unknown",
@@ -107,6 +107,12 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
     filter(from %in% nodes$id, to %in% nodes$id) |>
     distinct(from, to, .keep_all = TRUE)
 
+  edges$id <- paste("__BASE__", edges$from, edges$to, sep = "::")
+  edges$arrows.to.enabled <- FALSE
+  edges$arrows.to.type <- "arrow"
+  edges$smooth.enabled <- FALSE
+  edges$smooth.type <- "curvedCW"
+  edges$smooth.roundness <- 0.12
   list(nodes = nodes, edges = edges)
 }
 
@@ -117,7 +123,9 @@ register_drug_network_outputs <- function(
     selected_pathways,
     significant_ids,
     selected_network_gene,
-    color_by_direction
+    color_by_direction,
+    selected_tfs,
+    overlay_mode
 ) {
   extra_pathway_node_ids <- reactiveVal(character())
   extra_pathway_edge_ids <- reactiveVal(character())
@@ -136,7 +144,7 @@ register_drug_network_outputs <- function(
     }
 
     graph <- subgraph()
-    selected <- selected_pathways()
+    selected <- if (overlay_mode() == "tf") character() else selected_pathways()
     network_symbols <- graph$nodes$gene_name
     mutated_node_count <- sum(network_symbols %in% wes_gene_summary$gene_symbol)
     target_nodes <- graph$nodes |>
@@ -147,6 +155,7 @@ register_drug_network_outputs <- function(
       unique() |>
       discard(is.na)
     mutated_target_count <- sum(target_symbols %in% wes_gene_summary$gene_symbol)
+    target_tf_links <- get_target_tf_links(target_symbols)
     deg_target_symbols <- target_nodes |>
       filter(gene_id %in% significant_ids) |>
       pull(gene_name) |>
@@ -176,7 +185,12 @@ register_drug_network_outputs <- function(
         " · ", nrow(target_nodes), " direct targets · ",
         length(deg_target_symbols), " DE-significant targets · ",
         mutated_target_count, " WES-mutated targets · ",
-        target_pathway_count, " ", pathway_collection_name, " pathways contain drug targets"
+        target_pathway_count, " ", pathway_collection_name, " pathways contain drug targets",
+        if (is.null(dorothea_resource$error)) paste0(
+          " · ", n_distinct(target_tf_links$tf), " imported TFs regulate ",
+          n_distinct(target_tf_links$target), " drug targets (",
+          nrow(distinct(target_tf_links, tf, target)), " TF–target pairs)")
+        else " · TF associations unavailable"
       )),
       if (mutated_node_count > 0) {
         span(
@@ -283,13 +297,26 @@ register_drug_network_outputs <- function(
       )
   })
 
-  observeEvent(list(selected_pathways(), color_by_direction()), {
+  observeEvent(list(selected_pathways(), selected_tfs(), overlay_mode(), color_by_direction(), subgraph()), {
     drug <- selected_drug()
     req(drug)
 
     graph <- subgraph()
     selected <- selected_pathways()
-    structure_changed <- !identical(selected, rendered_pathways())
+    key <- c(overlay_mode(), if (overlay_mode() == "tf") selected_tfs() else selected)
+    structure_changed <- !identical(key, rendered_pathways())
+    if (overlay_mode() == "tf") {
+      data <- build_tf_network(graph, drug, selected_tfs(), significant_ids, color_by_direction())
+      proxy <- visNetworkProxy("drug_network_graph")
+      if (structure_changed && length(extra_pathway_edge_ids())) proxy <- visRemoveEdges(proxy, extra_pathway_edge_ids())
+      if (structure_changed && length(extra_pathway_node_ids())) proxy <- visRemoveNodes(proxy, extra_pathway_node_ids())
+      proxy <- visUpdateNodes(proxy, data$nodes)
+      if (nrow(data$tf_edges)) proxy <- visUpdateEdges(proxy, data$tf_edges)
+      extra_pathway_node_ids(data$extra_ids)
+      extra_pathway_edge_ids(data$tf_edges$id)
+      rendered_pathways(key)
+      return(invisible())
+    }
     selected_sets <- pathway_sets |>
       filter(pathway %in% selected) |>
       mutate(
@@ -322,7 +349,7 @@ register_drug_network_outputs <- function(
     )
 
     nodes <- base_data$nodes |>
-      select(id, size, color, borderWidth, mutated, title)
+      select(id, shape, size, color, borderWidth, mutated, title)
 
     proxy <- visNetworkProxy("drug_network_graph") |>
       visUpdateNodes(nodes)
@@ -344,7 +371,7 @@ register_drug_network_outputs <- function(
     if (length(selected) == 0) {
       extra_pathway_node_ids(character())
       extra_pathway_edge_ids(character())
-      rendered_pathways(selected)
+      rendered_pathways(key)
       return(invisible())
     }
 
@@ -495,6 +522,6 @@ register_drug_network_outputs <- function(
 
     extra_pathway_node_ids(c(extra_genes$id, hubs$id))
     extra_pathway_edge_ids(dynamic_edges$id)
-    rendered_pathways(selected)
-  }, ignoreInit = TRUE)
+    rendered_pathways(key)
+  }, ignoreInit = FALSE)
 }

@@ -158,6 +158,8 @@ server <- function(
   )
 
   selected_pathways <- reactiveVal(character())
+  selected_tfs <- reactiveVal(character())
+  overlay_mode <- reactive(if (identical(input$overlay_mode, 'tf')) 'tf' else 'pathways')
   selected_network_gene <- reactiveVal(NULL)
 
   set_network_gene_focus <- function(gene_symbol) {
@@ -214,6 +216,11 @@ server <- function(
       unique()
   })
 
+  register_tf_outputs(input, output, session, selected_tfs,
+    drug_target_symbols = current_drug_target_symbols,
+    selected_drug = selected_drug, selected_network_gene = selected_network_gene,
+    significant_ids = significant_gene_ids)
+
   drug_table_proxy <- dataTableProxy("drug_table")
 
   observeEvent(input$selected_network_node, {
@@ -224,7 +231,9 @@ server <- function(
       return()
     }
 
-    gene_symbol <- if (startsWith(node_id, "__PATHWAY_GENE__")) {
+    gene_symbol <- if (startsWith(node_id, "__TF_GENE__")) {
+      sub('^__TF_GENE__', '', node_id)
+    } else if (startsWith(node_id, "__PATHWAY_GENE__")) {
       sub("^__PATHWAY_GENE__", "", node_id)
     } else {
       gene_data |>
@@ -500,10 +509,9 @@ server <- function(
             ),
             div(
               class = "gsea-panel",
-              div(class = "gsea-panel-title", paste(pathway_collection_name, "pathways")),
-              div(class = "gsea-panel-subtitle", paste("All tested", pathway_collection_name, "gene sets · click to highlight DE genes")),
-              div(class = "gsea-pathway-list", uiOutput("gsea_pathway_tiles")),
-              uiOutput("gsea_pathway_details")
+              render_network_overlay_panel(),
+              conditionalPanel("input.overlay_mode !== 'tf'", uiOutput("gsea_pathway_details")),
+              tabsetPanel(render_tf_tab())
             )
           )
         )
@@ -634,7 +642,8 @@ server <- function(
     selected_pathways = selected_pathways,
     significant_ids = significant_gene_ids,
     selected_network_gene = selected_network_gene,
-    color_by_direction = color_by_direction
+    color_by_direction = color_by_direction,
+    selected_tfs = selected_tfs, overlay_mode = overlay_mode
   )
 
   register_gsea_outputs(

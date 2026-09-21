@@ -2036,3 +2036,19 @@ table.dataTable tbody tr.selected td {
     padding: 18px 14px 14px;
   }
 }
+
+.tf-actions { display:flex; gap:8px; margin:12px 0; }
+.tf-legend { font-size:12px; line-height:1.7; color:#64748b; padding:12px 0; }
+
+/* Panel navigation uses the document's teal accent and restrained surfaces. */
+.overlay-mode-switch { margin: 0 0 16px; padding: 4px; border: 1px solid #dbe3ec; border-radius: 10px; background: #f1f5f9; }
+.overlay-mode-switch .shiny-input-container { width: 100%; margin: 0; }
+.overlay-mode-switch .shiny-options-group { display: flex; gap: 4px; }
+.overlay-mode-switch .radio-inline { flex: 1; margin: 0; padding: 7px 12px; border: 1px solid transparent; border-radius: 7px; color: #64748b; text-align: center; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
+.overlay-mode-switch .radio-inline:hover { color: #0f766e; background: #ffffff80; }
+.overlay-mode-switch .radio-inline:has(input:checked) { background: #fff; border-color: #dbe3ec; color: #0f766e; box-shadow: 0 1px 3px #0f172a0d; }
+.overlay-mode-switch input { position: absolute; opacity: 0; }
+.overlay-mode-switch .radio-inline:has(input:focus-visible),
+.gsea-sort .radio-inline:has(input:focus-visible) { outline: 2px solid #0f766e; outline-offset: 2px; }
+.tf-actions { align-items: center; justify-content: space-between; }
+.tf-actions .gsea-sort .shiny-input-container { width: auto; margin: 0; }

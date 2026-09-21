@@ -81,40 +81,17 @@ render_drug_page <- function(
         ),
         div(
           class = "gsea-panel embedded-gsea-panel",
-        div(
-          class = "gsea-panel-heading",
-          div(class = "gsea-panel-title", paste(pathway_collection_name, "pathways")),
-          actionButton("clear_gsea_pathways", "Clear", class = "gsea-clear-button")
-        ),
-        div(class = "gsea-panel-subtitle", paste("All tested", pathway_collection_name, "gene sets · click to highlight DE genes")),
-        div(
-          class = "gsea-sort",
-          radioButtons(
-            "gsea_sort",
-            NULL,
-            choices = c("Enrichment" = "nes", "FDR" = "fdr"),
-            selected = "nes",
-            inline = TRUE
-          )
-        ),
-          uiOutput("gsea_matching_pathways"),
-          div(
-            class = "gsea-pathway-section gsea-all-pathway-section",
-            div(class = "gsea-pathway-section-title", paste("All", pathway_collection_name, "pathways")),
-            div(
-              class = "gsea-pathway-list gsea-all-pathway-list",
-              uiOutput("gsea_pathway_tiles")
-            )
-          )
+        render_network_overlay_panel()
         )
       ),
-      div(class = "gsea-details-strip", uiOutput("gsea_pathway_details"))
+      conditionalPanel("input.overlay_mode !== 'tf'", div(class = "gsea-details-strip", uiOutput("gsea_pathway_details")))
     ),
     
     
     tabsetPanel(
       
       id = "drug_tabs",
+      selected = "General",
       
       
       tabPanel(
@@ -208,7 +185,8 @@ render_drug_page <- function(
       tabPanel(
         "WES variants",
         render_wes_variants()
-      )
+      ),
+      render_tf_tab()
     )
   )
 }
