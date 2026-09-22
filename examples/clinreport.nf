@@ -40,6 +40,9 @@ process CLINREPORT {
       --pathway-collection-name 'Hallmark' \\
       --pathway-id-prefix 'HALLMARK_' \\
       --padj-cutoff ${padj_cutoff} \\
-      --log2fc-cutoff ${log2fc_cutoff}
+      --log2fc-cutoff ${log2fc_cutoff} \\
+      --use-tf-activity '${params.use_tf_activity}' \\
+      --use-wes '${params.use_wes}' \\
+      --skip-network-processing '${params.skip_network_processing}'
     """
 }

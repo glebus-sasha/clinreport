@@ -159,6 +159,7 @@ server <- function(
 
   selected_pathways <- reactiveVal(character())
   selected_tfs <- reactiveVal(character())
+  target_connected_only <- reactive(!identical(input$target_connected_only, FALSE))
   overlay_mode <- reactive(if (identical(input$overlay_mode, 'tf')) 'tf' else 'pathways')
   selected_network_gene <- reactiveVal(NULL)
 
@@ -216,7 +217,17 @@ server <- function(
       unique()
   })
 
+  observeEvent(selected_drug()$drugId, {
+    targets <- current_drug_target_symbols()
+    selected_pathways(pathway_sets$pathway[vapply(pathway_sets$genes,
+      function(genes) any(targets %in% genes), logical(1))])
+    selected_tfs(unique(get_target_tf_links(targets)$tf))
+  }, priority = 10)
+
+  observeEvent(input$select_all_pathways, selected_pathways(pathway_sets$pathway))
+
   register_tf_outputs(input, output, session, selected_tfs,
+    target_connected_only = target_connected_only,
     drug_target_symbols = current_drug_target_symbols,
     selected_drug = selected_drug, selected_network_gene = selected_network_gene,
     significant_ids = significant_gene_ids)
@@ -552,7 +563,6 @@ server <- function(
         NULL
       )
 
-      selected_pathways(character())
       selected_network_gene(NULL)
       
     },
@@ -637,13 +647,15 @@ server <- function(
 
   register_drug_network_outputs(
     output = output,
+    input = input,
     selected_drug = selected_drug,
     subgraph = drug_interaction_subgraph,
     selected_pathways = selected_pathways,
     significant_ids = significant_gene_ids,
     selected_network_gene = selected_network_gene,
     color_by_direction = color_by_direction,
-    selected_tfs = selected_tfs, overlay_mode = overlay_mode
+    selected_tfs = selected_tfs, overlay_mode = overlay_mode,
+    target_connected_only = target_connected_only
   )
 
   register_gsea_outputs(

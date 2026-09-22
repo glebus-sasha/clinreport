@@ -5,7 +5,8 @@ clinreport_paths <- c("drug_network_file", "clinreport_dir", "gene_file",
   "tf_file", "dorothea_file")
 clinreport_numbers <- c("padj_cutoff", "log2fc_cutoff", "interaction_network_max_neighbors")
 clinreport_strings <- c("patient_id", "wes_display_name", "network_display_name",
-  "interaction_network_name", "pathway_collection_name", "pathway_id_prefix")
+  "interaction_network_name", "pathway_collection_name", "pathway_id_prefix",
+  "use_tf_activity", "use_wes", "skip_network_processing")
 clinreport_keys <- c(clinreport_paths, clinreport_numbers, clinreport_strings)
 
 clinreport_resolve <- function(path, base) {

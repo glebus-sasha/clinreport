@@ -1,6 +1,6 @@
 register_tf_outputs <- function(input, output, session, selected_tfs,
                                 drug_target_symbols, selected_drug, selected_network_gene,
-                                significant_ids) {
+                                significant_ids, target_connected_only) {
   toggle_tf <- function(tf) {
     if (!tf %in% tf_results$TF) return(invisible())
     selected_tfs(if (tf %in% selected_tfs()) setdiff(selected_tfs(), tf) else c(selected_tfs(), tf))
@@ -78,6 +78,12 @@ register_tf_outputs <- function(input, output, session, selected_tfs,
   })
   output$tf_overlay_summary <- renderUI({
     edges <- tf_regulons |> filter(tf %in% selected_tfs(), target %in% gene_data$gene_name)
+    if (target_connected_only()) {
+      graph <- get_drug_interaction_subgraph(selected_drug()$drugId)
+      linked_tfs <- get_target_tf_links(drug_target_symbols())$tf
+      edges <- edges |> filter(tf %in% c(graph$nodes$gene_name, linked_tfs),
+                               target %in% graph$nodes$gene_name)
+    }
     missing <- setdiff(selected_tfs(), edges$tf)
     div(class = "gsea-panel-subtitle", paste(length(selected_tfs()), "selected TFs ·",
       n_distinct(edges$target), "regulon targets ·", nrow(edges), "regulatory links"),

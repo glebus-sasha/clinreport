@@ -118,6 +118,7 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
 
 register_drug_network_outputs <- function(
     output,
+    input,
     selected_drug,
     subgraph,
     selected_pathways,
@@ -125,11 +126,13 @@ register_drug_network_outputs <- function(
     selected_network_gene,
     color_by_direction,
     selected_tfs,
-    overlay_mode
+    overlay_mode,
+    target_connected_only
 ) {
   extra_pathway_node_ids <- reactiveVal(character())
   extra_pathway_edge_ids <- reactiveVal(character())
   rendered_pathways <- reactiveVal(character())
+  graph_generation <- reactiveVal(0L)
 
   output$drug_network_summary <- renderUI({
     drug <- selected_drug()
@@ -175,6 +178,9 @@ register_drug_network_outputs <- function(
         unique()
     } else {
       character()
+    }
+    if (target_connected_only()) {
+      selected_pathway_genes <- intersect(selected_pathway_genes, network_symbols)
     }
     pathway_overlap <- sum(selected_pathway_genes %in% network_symbols)
 
@@ -237,6 +243,14 @@ register_drug_network_outputs <- function(
     )
     req(nrow(data$edges) > 0)
 
+    # Proxy messages are safe only after this particular widget has mounted.
+    # A generation also rejects late ready events from the previous drug.
+    generation <- isolate(graph_generation()) + 1L
+    graph_generation(generation)
+    extra_pathway_node_ids(character())
+    extra_pathway_edge_ids(character())
+    rendered_pathways(character())
+
     visNetwork(data$nodes, data$edges, width = "100%", height = "500px") |>
       visNodes(
         borderWidth = 1,
@@ -296,19 +310,28 @@ register_drug_network_outputs <- function(
              });
            }"
         )
-      )
+      ) |>
+      htmlwidgets::onRender(JS(sprintf(
+        "function(el, x) {
+           Shiny.setInputValue('drug_network_ready', %d, {priority: 'event'});
+         }", generation
+      )))
   })
 
-  observeEvent(list(selected_pathways(), selected_tfs(), overlay_mode(), color_by_direction(), subgraph()), {
+  observeEvent(list(input$drug_network_ready, graph_generation(), selected_pathways(), selected_tfs(), overlay_mode(), color_by_direction(), target_connected_only(), subgraph()), {
+    req(graph_generation() > 0L,
+        identical(as.integer(input$drug_network_ready), graph_generation()))
     drug <- selected_drug()
     req(drug)
 
     graph <- subgraph()
     selected <- selected_pathways()
-    key <- c(overlay_mode(), if (overlay_mode() == "tf") selected_tfs() else selected)
+    key <- c(drug$drugId, overlay_mode(), as.character(target_connected_only()),
+             if (overlay_mode() == "tf") selected_tfs() else selected)
     structure_changed <- !identical(key, rendered_pathways())
     if (overlay_mode() == "tf") {
-      data <- build_tf_network(graph, drug, selected_tfs(), significant_ids, color_by_direction())
+      data <- build_tf_network(graph, drug, selected_tfs(), significant_ids, color_by_direction(),
+                               target_connected_only())
       proxy <- visNetworkProxy("drug_network_graph")
       if (structure_changed && length(extra_pathway_edge_ids())) proxy <- visRemoveEdges(proxy, extra_pathway_edge_ids())
       if (structure_changed && length(extra_pathway_node_ids())) proxy <- visRemoveNodes(proxy, extra_pathway_node_ids())
@@ -328,6 +351,9 @@ register_drug_network_outputs <- function(
           pathway_identity_color(pathway)
         }
       )
+    if (target_connected_only()) {
+      selected_sets$genes <- lapply(selected_sets$genes, intersect, y = graph$nodes$gene_name)
+    }
     pathway_gene_colors <- setNames(character(), character())
     if (nrow(selected_sets) > 0) {
       pathway_gene_colors <- unlist(

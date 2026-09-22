@@ -27,6 +27,20 @@ render_input_overview <- function() {
     ),
     div(
       class = "input-overview-section",
+      div(class = "input-overview-section-title", "Interpretation of drug selection"),
+      p(class = "input-overview-subtitle",
+        paste0(
+          "The recommended medicines were prioritised using differential expression",
+          if (isTRUE(as.logical(use_tf_activity))) ", transcription-factor activity" else "",
+          if (!isTRUE(as.logical(skip_network_processing))) paste0(", and expansion of the ", interaction_network_name, " interaction network") else "",
+          ". ",
+          if (isTRUE(as.logical(use_wes))) "WES evidence was also included in prioritisation. " else "WES findings are presented as an additional analysis and were not used to prioritise medicines. ",
+          "Pathway enrichment (GSEA) provides metabolic and functional context, while variant-level exome results are reported as supplementary evidence."
+        )
+      )
+    ),
+    div(
+      class = "input-overview-section",
       div(class = "input-overview-section-title", "Evidence available for drug assessment"),
       div(
         class = "input-overview-grid evidence-overview-grid",

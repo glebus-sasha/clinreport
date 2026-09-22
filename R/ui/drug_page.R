@@ -75,6 +75,17 @@ render_drug_page <- function(
               class = "shiny-input-checkbox"
             ),
             "Direction"
+          ),
+          tags$label(
+            class = "radio-inline",
+            title = "Show drug targets, their direct network neighbours and TF regulators. Disable to show all genes in selected overlays.",
+            tags$input(
+              id = "target_connected_only",
+              type = "checkbox",
+              class = "shiny-input-checkbox",
+              checked = "checked"
+            ),
+            "Target-linked genes"
           )
         ),
         visNetworkOutput("drug_network_graph", height = "500px")

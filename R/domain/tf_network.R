@@ -6,10 +6,17 @@ get_target_tf_links <- function(target_symbols) {
     distinct(tf, target, mor, confidence)
 }
 
-build_tf_network <- function(graph, drug, selected, significant_ids, color_by_direction) {
+build_tf_network <- function(graph, drug, selected, significant_ids, color_by_direction,
+                             target_connected_only = FALSE) {
   selected <- intersect(selected, tf_results$TF)
   links <- tf_regulons |>
     filter(tf %in% selected, target %in% gene_data$gene_name)
+  if (target_connected_only) {
+    target_symbols <- graph$nodes$gene_name[graph$nodes$gene_id %in% graph$targets]
+    linked_tfs <- get_target_tf_links(target_symbols)$tf
+    selected <- intersect(selected, unique(c(graph$nodes$gene_name, linked_tfs)))
+    links <- links |> filter(tf %in% selected, target %in% graph$nodes$gene_name)
+  }
   symbols <- unique(c(selected, links$target))
   lookup <- gene_data |>
     transmute(gene_name, gene_id = gene_id_clean) |>
