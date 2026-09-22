@@ -1,4 +1,12 @@
 # Overlay signed regulatory edges without replacing drug or STRING edges.
+tf_identity_color <- function(tfs) {
+  identities <- sort(unique(tf_results$TF))
+  palette <- setNames(grDevices::hcl(
+    h = ((seq_along(identities) - 1) * 137.508) %% 360, c = 78, l = 48
+  ), identities)
+  unname(palette[as.character(tfs)])
+}
+
 get_target_tf_links <- function(target_symbols) {
   tf_regulons |>
     filter(tf %in% tf_results$TF, target %in% target_symbols,
@@ -37,7 +45,7 @@ build_tf_network <- function(graph, drug, selected, significant_ids, color_by_di
   data$nodes$color[source_rows] <- if (color_by_direction) {
     ifelse(is.na(activity$logFC), pathway_direction_colors[["unknown"]],
            ifelse(activity$logFC >= 0, pathway_direction_colors[["up"]], pathway_direction_colors[["down"]]))
-  } else rep("#8b5cf6", length(source_rows))
+  } else tf_identity_color(data$nodes$label[source_rows])
   if (length(source_rows)) data$nodes$title[source_rows] <- paste0(data$nodes$title[source_rows],
     "<br><b>Transcription factor</b><br>Activity difference: ", signif(activity$logFC, 4),
     "<br>Activity FDR: ", signif(activity$adj.P.Val, 4),

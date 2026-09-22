@@ -17,8 +17,11 @@ shiny::testServer(server, {
  stopifnot(target_connected_only(), setequal(selected_pathways(), expected_pathways),
    setequal(selected_tfs(), get_target_tf_links(targets)$tf))
  session$setInputs(select_all_tfs=1, select_all_pathways=1)
- stopifnot(setequal(selected_pathways(), pathway_sets$pathway))
- stopifnot(length(selected_tfs())==nrow(tf_results)); invisible(output$drug_network_graph)
+ stopifnot(setequal(selected_pathways(), expected_pathways),
+   setequal(selected_tfs(), get_target_tf_links(targets)$tf), !show_context_genes())
+ session$setInputs(show_context_genes=TRUE)
+ stopifnot(show_context_genes())
+ invisible(output$drug_network_graph)
  session$setInputs(clear_tfs=1); stopifnot(length(selected_tfs())==0)
  session$setInputs(selected_tf_index=1); stopifnot(identical(selected_tfs(),tf_results$TF[1]))
  session$setInputs(overlay_mode='pathways',selected_gsea_pathway=pathway_sets$pathway[1])

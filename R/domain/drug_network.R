@@ -1,5 +1,35 @@
 # Drug -> interaction-network subgraph business logic
 
+count_visible_wes_genes <- function(nodes) {
+  hidden <- if (is.null(nodes$hidden)) rep(FALSE, nrow(nodes)) else nodes$hidden %in% TRUE
+  length(unique(nodes$label[nodes$mutated %in% TRUE & !hidden]))
+}
+
+target_evidence_summary <- function(target_ids, target_symbols, significant_ids,
+                                    wes_symbols = NULL, imported_tfs = NULL) {
+  deg <- target_ids %in% significant_ids
+  wes <- target_symbols %in% wes_symbols
+  tf <- target_symbols %in% imported_tfs
+  paste0(length(target_ids), " genes linked to this drug in the input network: ",
+    sum(deg), " with significant expression changes (DE)",
+    if (!is.null(wes_symbols)) paste0("; ", sum(wes), " with WES variants") else "; WES not supplied",
+    if (!is.null(imported_tfs)) paste0("; ", sum(tf), " TFs in the imported analysis") else "; TF analysis not supplied",
+    "; ", sum(!(deg | wes | tf)), " without these flags in the supplied data. Groups may overlap.")
+}
+
+# Context-only neighbours can be hidden while genes used by the active overlay
+# remain visible. Keep nodes in the widget so toggling preserves their positions.
+apply_context_visibility <- function(data, graph, overlay_symbols = character(), show_context = FALSE) {
+  context_ids <- graph$nodes$gene_id[graph$nodes$type == "Network neighbor" &
+    !graph$nodes$gene_name %in% overlay_symbols]
+  data$nodes$hidden <- !show_context & data$nodes$id %in% context_ids
+  data$nodes$physics <- !data$nodes$hidden
+  hidden_ids <- data$nodes$id[data$nodes$hidden]
+  data$edges$hidden <- data$edges$from %in% hidden_ids | data$edges$to %in% hidden_ids
+  data$edges$physics <- !data$edges$hidden
+  data
+}
+
 normalize_gene_id <- function(x) {
   str_remove(as.character(x), "\\.[0-9]+$")
 }

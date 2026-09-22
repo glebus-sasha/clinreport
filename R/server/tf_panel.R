@@ -9,7 +9,7 @@ register_tf_outputs <- function(input, output, session, selected_tfs,
     i <- suppressWarnings(as.integer(input$selected_tf_index))
     if (length(i) == 1 && !is.na(i) && i >= 1 && i <= nrow(tf_results)) toggle_tf(tf_results$TF[i])
   })
-  observeEvent(input$select_all_tfs, selected_tfs(tf_results$TF))
+  observeEvent(input$select_all_tfs, selected_tfs(unique(get_target_tf_links(drug_target_symbols())$tf)))
   observeEvent(input$clear_tfs, selected_tfs(character()))
   output$tf_status <- renderUI({
     if (!is.null(tf_input$error)) return(div(class = "network-empty-message", tf_input$error))
@@ -29,7 +29,8 @@ register_tf_outputs <- function(input, output, session, selected_tfs,
     lapply(seq_len(nrow(ordered)), function(i) {
       x <- ordered[i, ]
       div(class = paste0("gsea-pathway-tile", if (x$TF %in% selected_tfs()) " active" else ""),
-        style = "border-left-color:#8b5cf6",
+        style = paste0("border-left-color:", if (isTRUE(input$gsea_color_by_direction))
+          pathway_direction_color(x$logFC) else tf_identity_color(x$TF)),
         onclick = sprintf("Shiny.setInputValue('selected_tf_index', %d, {priority:'event'})", x$input_index),
         div(class = "gsea-pathway-name", x$TF),
         div(class = "gsea-pathway-metrics", span(sprintf("Δ activity %+.2f", x$logFC)),
@@ -61,20 +62,21 @@ register_tf_outputs <- function(input, output, session, selected_tfs,
     drug <- selected_drug()
     req(drug)
     targets <- unique(drug_target_symbols())
-    target_rows <- gene_data |> filter(gene_name %in% targets)
-    wes_symbols <- if (has_wes) unique(wes_gene_summary$gene_symbol) else character()
+    target_rows <- get_gene_display_names(get_drug_target_ids(drug$drugId))
     related <- get_target_tf_links(targets)
     div(class = "network-summary",
       span(class = "network-summary-drug", drug$label),
       span(paste0(" · ", paste(c(
-        paste0(length(targets), " direct targets"),
-        paste0(sum(target_rows$gene_id_clean %in% significant_ids), " DE-significant targets"),
-        if (has_wes) paste0(sum(targets %in% wes_symbols), " WES-mutated targets"),
+        target_evidence_summary(target_rows$gene_id, target_rows$gene_name, significant_ids,
+          if (has_wes) wes_gene_summary$gene_symbol else NULL,
+          if (has_tf_analysis) tf_results$TF else NULL),
         paste0(sum(vapply(pathway_sets$genes, function(gs) any(targets %in% gs), logical(1))),
           " ", pathway_collection_name, " pathways contain drug targets")
       ), collapse = " · "))),
       span(class = "network-summary-context", paste0(
-        "Graph context: ", nrow(related), " DoRothEA TF-target links connect imported TFs to direct targets.")))
+        "Regulators: ", n_distinct(related$tf), " imported TFs regulate ",
+        n_distinct(related$target), " drug targets (", nrow(related), " TF–target links). ",
+        "These regulators are counted separately from TFs that are themselves drug targets.")))
   })
   output$tf_overlay_summary <- renderUI({
     edges <- tf_regulons |> filter(tf %in% selected_tfs(), target %in% gene_data$gene_name)

@@ -127,12 +127,14 @@ register_drug_network_outputs <- function(
     color_by_direction,
     selected_tfs,
     overlay_mode,
-    target_connected_only
+    target_connected_only,
+    show_context_genes
 ) {
   extra_pathway_node_ids <- reactiveVal(character())
   extra_pathway_edge_ids <- reactiveVal(character())
   rendered_pathways <- reactiveVal(character())
   graph_generation <- reactiveVal(0L)
+  visible_wes_count <- reactiveVal(0L)
 
   output$drug_network_summary <- renderUI({
     drug <- selected_drug()
@@ -149,7 +151,7 @@ register_drug_network_outputs <- function(
     graph <- subgraph()
     selected <- if (overlay_mode() == "tf") character() else selected_pathways()
     network_symbols <- graph$nodes$gene_name
-    mutated_node_count <- if (has_wes) sum(network_symbols %in% wes_gene_summary$gene_symbol) else 0L
+    mutated_node_count <- visible_wes_count()
     target_nodes <- graph$nodes |>
       filter(type == "Target")
     neighbor_count <- sum(graph$nodes$type != "Target")
@@ -157,13 +159,7 @@ register_drug_network_outputs <- function(
       pull(gene_name) |>
       unique() |>
       discard(is.na)
-    mutated_target_count <- if (has_wes) sum(target_symbols %in% wes_gene_summary$gene_symbol) else 0L
     target_tf_links <- get_target_tf_links(target_symbols)
-    deg_target_symbols <- target_nodes |>
-      filter(gene_id %in% significant_ids) |>
-      pull(gene_name) |>
-      unique() |>
-      discard(is.na)
     target_pathway_count <- sum(vapply(
       pathway_sets$genes,
       function(gene_set) any(target_symbols %in% gene_set),
@@ -185,12 +181,12 @@ register_drug_network_outputs <- function(
     pathway_overlap <- sum(selected_pathway_genes %in% network_symbols)
 
     evidence_summary <- c(
-      paste0(nrow(target_nodes), " direct targets"),
-      paste0(length(deg_target_symbols), " DE-significant targets"),
-      if (has_wes) paste0(mutated_target_count, " WES-mutated targets"),
+      target_evidence_summary(target_nodes$gene_id, target_nodes$gene_name, significant_ids,
+        if (has_wes) wes_gene_summary$gene_symbol else NULL,
+        if (has_tf_analysis) tf_results$TF else NULL),
       paste0(target_pathway_count, " ", pathway_collection_name, " pathways contain drug targets"),
       if (has_tf_analysis) paste0(
-        n_distinct(target_tf_links$tf), " imported TFs regulate ",
+        "Regulators: ", n_distinct(target_tf_links$tf), " imported TFs regulate ",
         n_distinct(target_tf_links$target), " drug targets (",
         nrow(distinct(target_tf_links, tf, target)), " TF–target pairs)"
       )
@@ -200,17 +196,22 @@ register_drug_network_outputs <- function(
       class = "network-summary",
       span(class = "network-summary-drug", drug$label),
       span(paste0(" · ", paste(evidence_summary, collapse = " · "))),
+      span(class = "network-summary-context",
+        "Blue genes are shown because they are linked to the selected drug in the input network, even without significant expression changes or WES variants. Pathway and Direction colours may override blue; drug–gene links remain blue."),
       if (mutated_node_count > 0) {
         span(
           class = "network-summary-wes",
-          paste0("WES: ", mutated_node_count, " mutated genes on graph · centre dot")
+          paste0("WES: ", mutated_node_count,
+            if (mutated_node_count == 1L) " visible gene" else " visible genes",
+            " with variants · centre dot")
         )
       },
       span(
         class = "network-summary-context",
         paste0(
-          "Graph context: ", neighbor_count, " one-hop ", interaction_network_name,
-          " neighbours; ", nrow(graph$edges), " interaction links connect them to direct targets."
+          "Context: ", neighbor_count, " ", interaction_network_name,
+          " neighbours shown for their interactions with drug-linked genes; counted separately.",
+          if (!show_context_genes()) " Context-only genes are hidden." else " Context genes are shown."
         )
       ),
       if (length(selected) > 0) {
@@ -242,6 +243,8 @@ register_drug_network_outputs <- function(
       color_by_direction = isolate(color_by_direction())
     )
     req(nrow(data$edges) > 0)
+    data <- apply_context_visibility(data, graph, show_context = isolate(show_context_genes()))
+    visible_wes_count(count_visible_wes_genes(data$nodes))
 
     # Proxy messages are safe only after this particular widget has mounted.
     # A generation also rejects late ready events from the previous drug.
@@ -297,7 +300,7 @@ register_drug_network_outputs <- function(
              var nodes = this.body.nodes;
              Object.keys(nodes).forEach(function(id) {
                var node = nodes[id];
-               if (!node || !node.options || !node.options.mutated) return;
+               if (!node || !node.options || node.options.hidden || !node.options.mutated) return;
                ctx.save();
                ctx.beginPath();
                ctx.arc(node.x, node.y, 3.4, 0, 2 * Math.PI);
@@ -318,7 +321,7 @@ register_drug_network_outputs <- function(
       )))
   })
 
-  observeEvent(list(input$drug_network_ready, graph_generation(), selected_pathways(), selected_tfs(), overlay_mode(), color_by_direction(), target_connected_only(), subgraph()), {
+  observeEvent(list(input$drug_network_ready, graph_generation(), selected_pathways(), selected_tfs(), overlay_mode(), color_by_direction(), target_connected_only(), show_context_genes(), subgraph()), {
     req(graph_generation() > 0L,
         identical(as.integer(input$drug_network_ready), graph_generation()))
     drug <- selected_drug()
@@ -332,11 +335,16 @@ register_drug_network_outputs <- function(
     if (overlay_mode() == "tf") {
       data <- build_tf_network(graph, drug, selected_tfs(), significant_ids, color_by_direction(),
                                target_connected_only())
+      overlay_ids <- unique(c(data$tf_edges$from, data$tf_edges$to,
+                             data$nodes$id[data$nodes$shape == "triangle"]))
+      data <- apply_context_visibility(data, graph,
+        data$nodes$label[data$nodes$id %in% overlay_ids], show_context_genes())
+      visible_wes_count(count_visible_wes_genes(data$nodes))
       proxy <- visNetworkProxy("drug_network_graph")
       if (structure_changed && length(extra_pathway_edge_ids())) proxy <- visRemoveEdges(proxy, extra_pathway_edge_ids())
       if (structure_changed && length(extra_pathway_node_ids())) proxy <- visRemoveNodes(proxy, extra_pathway_node_ids())
       proxy <- visUpdateNodes(proxy, data$nodes)
-      if (nrow(data$tf_edges)) proxy <- visUpdateEdges(proxy, data$tf_edges)
+      proxy <- visUpdateEdges(proxy, data$edges)
       extra_pathway_node_ids(data$extra_ids)
       extra_pathway_edge_ids(data$tf_edges$id)
       rendered_pathways(key)
@@ -375,12 +383,15 @@ register_drug_network_outputs <- function(
       significant_ids = significant_ids,
       color_by_direction = color_by_direction()
     )
+    base_data <- apply_context_visibility(base_data, graph,
+      unique(unlist(selected_sets$genes)), show_context_genes())
 
     nodes <- base_data$nodes |>
-      select(id, shape, size, color, borderWidth, mutated, title)
+      select(id, shape, size, color, borderWidth, mutated, title, hidden, physics)
 
     proxy <- visNetworkProxy("drug_network_graph") |>
-      visUpdateNodes(nodes)
+      visUpdateNodes(nodes) |>
+      visUpdateEdges(base_data$edges)
 
     # Changing the colour mode must not reconstruct the network: the proxy
     # updates only visual attributes for the nodes and links that are present.
@@ -397,6 +408,7 @@ register_drug_network_outputs <- function(
     }
 
     if (length(selected) == 0) {
+      visible_wes_count(count_visible_wes_genes(base_data$nodes))
       extra_pathway_node_ids(character())
       extra_pathway_edge_ids(character())
       rendered_pathways(key)
@@ -549,6 +561,7 @@ register_drug_network_outputs <- function(
     }
 
     extra_pathway_node_ids(c(extra_genes$id, hubs$id))
+    visible_wes_count(count_visible_wes_genes(bind_rows(base_data$nodes, extra_genes)))
     extra_pathway_edge_ids(dynamic_edges$id)
     rendered_pathways(key)
   }, ignoreInit = FALSE)

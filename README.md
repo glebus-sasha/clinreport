@@ -180,9 +180,11 @@ install.packages("visNetwork")
 
 ## TF overlay
 
-Switch the network side panel between Pathways and TF. Select individual imported TFs or use All TFs / Clear. The TF tab contains the raw activity statistics; clicking a row toggles that TF. Activity differences are not RNA log2 fold changes. FDR determines significance, regardless of the input filename.
+Switch the network side panel between Pathways and TF. Select individual imported TFs or use All target-linked TFs / Clear. The TF tab contains the raw activity statistics; clicking a row toggles that TF. Activity differences are not RNA log2 fold changes. FDR determines significance, regardless of the input filename.
 
-Selecting a drug automatically selects all pathways containing its targets and all imported TFs regulating its targets. Use All pathways / Clear to change the pathway selection. Target-linked genes, next to Direction, is enabled by default in both overlay modes: pathway genes are limited to drug targets and their displayed one-hop interaction neighbours; TF overlays additionally retain regulators of drug targets, with regulon links limited to that same drug subgraph. Turn it off to display all genes in the selected pathways or regulons. The filter preserves your pathway and TF selections.
+Selecting a drug automatically selects all pathways containing its targets and all imported TFs regulating its targets. All target-linked pathways and All target-linked TFs restore those related selections; Clear removes the selection in that mode. Target-linked genes, next to Direction, is enabled by default in both overlay modes: pathway genes are limited to drug targets and their one-hop interaction neighbours; TF overlays additionally retain regulators of drug targets, with regulon links limited to that same drug subgraph. Turn it off to display all genes in the selected pathways or regulons. The filter preserves your pathway and TF selections.
+
+Context genes is off by default: network neighbours appear only when they participate in the active pathway or TF overlay. Enable it to show the remaining background neighbours. Hidden context nodes and links do not influence the layout. TFs have stable, distinct identity colours on their tiles and graph triangles when Direction is off; regulatory edges retain their activation/repression colours.
 
 The optional TF analysis input is configured with `--tf-file` (columns TF, logFC, AveExpr, t, P.Value, adj.P.Val). When it is omitted, the TF overlay and tab are unavailable. No preview-project files, saved R sessions, or sample activity matrices are used. TF targets are restricted to genes present in the RNA table.
 

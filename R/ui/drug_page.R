@@ -86,6 +86,12 @@ render_drug_page <- function(
               checked = "checked"
             ),
             "Target-linked genes"
+          ),
+          tags$label(
+            class = "radio-inline",
+            title = "Show network neighbours even when they are not part of the selected pathways or TF regulons.",
+            tags$input(id = "show_context_genes", type = "checkbox", class = "shiny-input-checkbox"),
+            "Context genes"
           )
         ),
         visNetworkOutput("drug_network_graph", height = "500px")

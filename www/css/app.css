@@ -323,11 +323,13 @@ body {
 .gsea-sort .radio-inline:has(input:checked) { border-color: #0f766e; background: #0f766e; color: #ffffff; }
 .gsea-sort input { position: absolute; opacity: 0; }
 
-.network-color-toggle { margin: 2px 0 10px; }
+.network-color-toggle { margin: 2px 0 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.network-color-toggle .radio-inline,
 .network-color-toggle .radio-inline:first-of-type,
 .network-color-toggle .radio-inline:last-of-type {
   border: 1px solid #dbe3ec;
   border-radius: 6px;
+  margin-left: 0;
 }
 
 .gsea-pathway-list {
@@ -2063,5 +2065,5 @@ table.dataTable tbody tr.selected td {
 .overlay-mode-switch input { position: absolute; opacity: 0; }
 .overlay-mode-switch .radio-inline:has(input:focus-visible),
 .gsea-sort .radio-inline:has(input:focus-visible) { outline: 2px solid #0f766e; outline-offset: 2px; }
-.tf-actions { align-items: center; justify-content: space-between; }
+.tf-actions { align-items: center; justify-content: space-between; flex-wrap: wrap; }
 .tf-actions .gsea-sort .shiny-input-container { width: auto; margin: 0; }
