@@ -134,6 +134,9 @@ declared order. Add staged inputs and `--clinreport-dir`, `--wes-vcf-file`, or
 `--tf-file` when those optional data sources are available. Add metadata and
 threshold arguments directly to the command. For
 multiple samples, use unique per-sample published directories.
+The module defaults to use_tf_activity = FALSE, use_wes = FALSE, and
+skip_network_processing = FALSE; set these Nextflow parameters explicitly to
+TRUE when the corresponding analysis should contribute to the Drug module.
 The module copies its output so it can survive removal of Nextflow's `work/`.
 
 Run a generated report using the same container, from the report directory:

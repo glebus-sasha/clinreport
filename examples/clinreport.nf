@@ -21,6 +21,9 @@ process CLINREPORT {
     def wes_args = wes ? "--wes-vcf-file '${wes}'" : ''
     def tf_args = tf ? "--tf-file '${tf}'" : ''
     def dorothea_args = dorothea ? "--dorothea-file '${dorothea}'" : ''
+    def use_tf_activity = params.use_tf_activity ?: 'FALSE'
+    def use_wes = params.use_wes ?: 'FALSE'
+    def skip_network_processing = params.skip_network_processing ?: 'FALSE'
     """
     clinreport --prepare report \\
       --patient-id '${meta.id}' \\
@@ -41,8 +44,8 @@ process CLINREPORT {
       --pathway-id-prefix 'HALLMARK_' \\
       --padj-cutoff ${padj_cutoff} \\
       --log2fc-cutoff ${log2fc_cutoff} \\
-      --use-tf-activity '${params.use_tf_activity}' \\
-      --use-wes '${params.use_wes}' \\
-      --skip-network-processing '${params.skip_network_processing}'
+      --use-tf-activity '${use_tf_activity}' \\
+      --use-wes '${use_wes}' \\
+      --skip-network-processing '${skip_network_processing}'
     """
 }
