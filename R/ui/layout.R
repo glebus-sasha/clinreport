@@ -136,6 +136,15 @@ render_input_overview <- function() {
         span(class = "input-overview-setting", paste0("padj < ", padj_cutoff)),
         span(class = "input-overview-setting", paste0("|log2FC| ≥ ", log2fc_cutoff))
       )
+    ),
+    div(
+      class = "input-overview-section",
+      div(class = "input-overview-section-title", "Preparation command"),
+      div(
+        class = "input-overview-command",
+        title = if (nzchar(analysis_command)) analysis_command else "Not recorded",
+        if (nzchar(analysis_command)) analysis_command else "Not recorded"
+      )
     )
     )
   )

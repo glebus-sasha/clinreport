@@ -380,6 +380,7 @@ body {
   background: #ffffff;
   font-size: 11px;
 }
+.input-overview-command { padding: 10px 12px; overflow-x: auto; border: 1px solid #dbe3ec; border-radius: 7px; color: #475569; background: #f8fafc; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 10px; white-space: nowrap; }
 
 .network-gsea-layout {
   display: grid;

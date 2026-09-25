@@ -57,7 +57,7 @@ pathway_gmt_file <- file.path(
 
 # Maximum number of interaction-network neighbours displayed per drug target.
 interaction_network_max_neighbors <- 40
-use_tf_activity <- TRUE
+use_tf_activity <- FALSE
 use_wes <- FALSE
 skip_network_processing <- FALSE
 
@@ -85,6 +85,7 @@ log2fc_cutoff <- 1.0
 
 tf_file <- file.path("raw", "carcinoma_vs_normal_significant_tfs.tsv")
 dorothea_file <- ""
+analysis_command <- ""
 
 # A prepared application embeds the exact paths and metadata supplied to
 # `clinreport --prepare`; no external configuration file is required.
