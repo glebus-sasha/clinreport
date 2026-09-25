@@ -4,7 +4,8 @@
 # ============================================================
 
 render_gene_page <- function(
-    gene
+    gene,
+    inline = FALSE
 ) {
   
   gene_name <- ifelse(
@@ -17,16 +18,13 @@ render_gene_page <- function(
   gene_variants <- wes_variants |>
     filter(gene_symbol == gene_name)
   mutation_count <- nrow(gene_variants)
+  drug_count <- sum(vapply(drug_network$drugId, function(drug_id)
+    gene$gene_id_clean %in% get_drug_target_ids(drug_id), logical(1)))
   
   
   div(
-    
-    actionButton(
-      "back_to_drug",
-      "← Back to drug",
-      class = "back-button"
-    ),
-    
+    class = if (inline) "gene-page gene-page-inline" else "gene-page",
+    if (inline) actionButton("close_gene_profile", "Close gene profile", class = "back-button"),
     
     div(
       class = "gene-header",
@@ -163,6 +161,13 @@ render_gene_page <- function(
 
       div(
         class = "summary-card",
+        div(class = "summary-label", "Drug-linked modules"),
+        div(class = "summary-value", drug_count),
+        div(class = "summary-note", "Drugs linked to this gene")
+      ),
+
+      div(
+        class = "summary-card",
 
         div(
           class = "summary-label",
@@ -284,7 +289,7 @@ render_gene_page <- function(
     
     plotlyOutput(
       "gene_volcano",
-      height = "600px"
+      height = "165px"
     )
   )
 }

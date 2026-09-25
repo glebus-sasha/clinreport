@@ -27,9 +27,6 @@ render_network_overlay_panel <- function() {
         actionButton("select_all_tfs", "All target-linked TFs", class = "gsea-clear-button")),
       uiOutput("tf_status"), uiOutput("tf_overlay_summary"),
       uiOutput("tf_matching_factors"),
-      div(class = "tf-legend", "▲ TF · blue: drug–target · grey dashed: STRING",
-        tags$br(), "Green → activation · pink dashed ⊣ repression",
-        tags$br(), "Direction: TF colour = activity difference; other genes = RNA expression."),
       div(class = "gsea-pathway-section-title", "All imported TFs"),
       div(class = "gsea-pathway-list gsea-all-pathway-list", uiOutput("tf_tiles")))
   )

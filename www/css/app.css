@@ -61,7 +61,15 @@ body {
   box-shadow:
     0 2px 8px rgba(20, 30, 40, 0.035);
   min-height: 760px;
+  position: relative;
+  transition: width .18s ease, padding .18s ease;
 }
+.drug-list-collapse { float: right; border: 0; background: transparent; color: #64748b; cursor: pointer; font-size: 20px; line-height: 1; }
+.main-layout.drug-list-collapsed { grid-template-columns: 38px minmax(0, 1fr); }
+.main-layout.drug-list-collapsed .drug-list { width: 38px; padding: 8px 5px; overflow: hidden; }
+.main-layout.drug-list-collapsed .drug-list > *:not(.network-header) { display: none; }
+.main-layout.drug-list-collapsed .network-header { padding: 0; }
+.main-layout.drug-list-collapsed .network-header > div:not(.drug-list-collapse) { display: none; }
 
 .network-header {
   padding: 7px 6px 12px 6px;
@@ -214,6 +222,156 @@ body {
   gap: 7px;
 }
 
+.input-overview-metadata {
+  margin-top: 24px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+}
+
+.input-overview-metadata > summary {
+  cursor: pointer;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  list-style: none;
+}
+
+.input-overview-metadata > summary::-webkit-details-marker {
+  display: none;
+}
+
+.input-overview-metadata > summary::before {
+  content: "›";
+  display: inline-block;
+  margin-right: 7px;
+  color: #0f766e;
+  font-size: 18px;
+  line-height: 10px;
+  vertical-align: -2px;
+  transition: transform .15s ease;
+}
+
+.input-overview-metadata[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.drug-module-summary {
+  margin: 0 0 14px;
+  padding: 20px;
+  border: 1px solid #dbe7f3;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fbff, #ffffff);
+}
+
+.drug-module-summary-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+}
+
+.drug-module-kicker, .legend-title {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.drug-module-summary-title {
+  margin-top: 3px;
+  color: #17202a;
+  font-size: 23px;
+  font-weight: 750;
+}
+
+.drug-module-summary-subtitle, .drug-module-note {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.drug-module-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 17px;
+}
+
+.drug-module-evidence {
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.drug-module-evidence.positive { border-color: #b9d9d1; }
+.drug-module-evidence.expanded { border-color: #e2e8f0; background: #fff; }
+.drug-module-evidence.disabled { border-style: dashed; }
+.drug-module-evidence-label { color: #475569; font-size: 11px; font-weight: 750; }
+.drug-module-evidence-value { margin-top: 3px; color: #17202a; font-size: 21px; font-weight: 750; }
+.drug-module-evidence-note { color: #64748b; font-size: 10px; line-height: 1.3; }
+.drug-module-gene-list { margin-top: 7px; color: #475569; font-size: 10px; line-height: 1.45; }
+.drug-module-gene-list summary { cursor: pointer; color: #0f766e; font-weight: 700; }
+.drug-module-toggle { cursor: pointer; list-style: none; color: #64748b; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.drug-module-shell-title { margin: 4px 0 8px; color: #17202a; font-size: 23px; font-weight: 750; letter-spacing: -.2px; }
+.drug-module-shell { margin: 0; }
+.drug-module { display: block; margin: 0 0 18px; padding: 14px 16px 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+.drug-module > .drug-module-toggle { margin: 0 0 8px; }
+.drug-module-toggle::-webkit-details-marker { display: none; }
+.drug-module-toggle::before { content: "›"; display: inline-block; margin-right: 7px; color: #0f766e; font-size: 18px; vertical-align: -2px; transition: transform .15s ease; }
+.drug-module[open] .drug-module-toggle::before { transform: rotate(90deg); }
+.network-panel-collapse { width: 100%; border: 0; background: transparent; color: #64748b; cursor: pointer; font-size: 20px; line-height: 1; text-align: left; }
+.network-panel-body { min-width: 0; }
+.embedded-gsea-panel.is-collapsed { min-width: 34px; width: 34px; padding: 8px 5px; }
+.embedded-gsea-panel.is-collapsed { justify-self: end; }
+.embedded-gsea-panel.is-collapsed .network-panel-body { display: none; }
+.embedded-gsea-panel.is-collapsed .network-panel-collapse { text-align: center; }
+.drug-information-sections { display: grid; gap: 18px; margin-top: 18px; }
+.drug-information-section { padding: 14px 16px 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+.drug-information-section-title { margin-bottom: 8px; color: #64748b; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.drug-information-section > summary { cursor: pointer; list-style: none; }
+.drug-information-section > summary::-webkit-details-marker { display: none; }
+.drug-information-section > summary::before { content: "›"; display: inline-block; margin-right: 7px; color: #0f766e; font-size: 18px; vertical-align: -2px; transition: transform .15s ease; }
+.drug-information-section[open] > summary::before { transform: rotate(90deg); }
+.gene-page-inline .gene-summary { grid-template-columns: 1fr; gap: 8px; }
+.gene-page-inline .summary-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; align-items: center; }
+.gene-page-inline .summary-card .summary-label,
+.gene-page-inline .summary-card .summary-note { grid-column: 1; }
+.gene-page-inline .summary-card .summary-value { grid-column: 2; grid-row: 1 / span 2; }
+.inline-gene-panel .plotly { max-height: 165px; }
+.inline-gene-panel { margin: 14px 0; padding: 16px; border: 1px solid #dbe7f3; border-radius: 12px; background: #fff; }
+.inline-gene-panel .gene-expression-plot { max-height: 220px; }
+.inline-gene-panel .plotly { max-height: 165px; }
+.gene-page-inline .gene-summary { display: flex; flex-direction: column; gap: 8px; }
+.gene-page-inline { font-size: 11px; }
+.gene-page-inline .gene-title-large { font-size: 16px; }
+.gene-page-inline .gene-id,
+.gene-page-inline .summary-label,
+.gene-page-inline .summary-note,
+.gene-page-inline .gene-filter-status { font-size: 10px; }
+.gene-page-inline .summary-value { font-size: 15px; }
+.gene-page-inline .section-header { margin-top: 12px; }
+.gene-page-inline .gene-header { margin-bottom: 8px; }
+.gene-page-inline .gene-filter-status { margin: 8px 0; }
+.tf-selection-summary { padding: 8px 10px; border-radius: 7px; background: #f8fafc; color: #475569; }
+
+.drug-module-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  margin: 8px 0 13px;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.legend-target { color: #2563eb; }
+.legend-string { color: #94a3b8; }
+.legend-tf { color: #7c3aed; }
+.legend-pathway { color: #0f766e; }
+
 .input-overview-setting {
   padding: 5px 8px;
   border: 1px solid #dbe3ec;
@@ -249,6 +407,9 @@ body {
   grid-template-columns: minmax(0, 2.1fr) minmax(245px, 0.9fr);
   gap: 18px;
   align-items: start;
+}
+.network-content-grid:has(.embedded-gsea-panel.is-collapsed) {
+  grid-template-columns: minmax(0, 1fr) 34px;
 }
 
 .embedded-gsea-panel {

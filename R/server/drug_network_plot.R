@@ -12,6 +12,13 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
       label = if_else(is.na(gene_name) | gene_name == "", gene_id, gene_name)
     ) |>
     left_join(
+      gene_data |>
+        transmute(label = gene_name, log2FoldChange_by_name = log2FoldChange) |>
+        distinct(label, .keep_all = TRUE),
+      by = "label"
+    ) |>
+    mutate(log2FoldChange = coalesce(log2FoldChange, log2FoldChange_by_name)) |>
+    left_join(
       wes_gene_summary |>
         rename(label = gene_symbol),
       by = "label"
@@ -150,8 +157,6 @@ register_drug_network_outputs <- function(
 
     graph <- subgraph()
     selected <- if (overlay_mode() == "tf") character() else selected_pathways()
-    network_symbols <- graph$nodes$gene_name
-    mutated_node_count <- visible_wes_count()
     target_nodes <- graph$nodes |>
       filter(type == "Target")
     neighbor_count <- sum(graph$nodes$type != "Target")
@@ -159,70 +164,21 @@ register_drug_network_outputs <- function(
       pull(gene_name) |>
       unique() |>
       discard(is.na)
-    target_tf_links <- get_target_tf_links(target_symbols)
-    target_pathway_count <- sum(vapply(
-      pathway_sets$genes,
-      function(gene_set) any(target_symbols %in% gene_set),
-      logical(1)
-    ))
-
-    selected_pathway_genes <- if (length(selected) > 0) {
-      pathway_sets |>
-        filter(pathway %in% selected) |>
-        pull(genes) |>
-        unlist() |>
-        unique()
-    } else {
-      character()
-    }
-    if (target_connected_only()) {
-      selected_pathway_genes <- intersect(selected_pathway_genes, network_symbols)
-    }
-    pathway_overlap <- sum(selected_pathway_genes %in% network_symbols)
-
-    evidence_summary <- c(
-      target_evidence_summary(target_nodes$gene_id, target_nodes$gene_name, significant_ids,
-        if (has_wes) wes_gene_summary$gene_symbol else NULL,
-        if (has_tf_analysis) tf_results$TF else NULL),
-      paste0(target_pathway_count, " ", pathway_collection_name, " pathways contain drug targets"),
-      if (has_tf_analysis) paste0(
-        "Regulators: ", n_distinct(target_tf_links$tf), " imported TFs regulate ",
-        n_distinct(target_tf_links$target), " drug targets (",
-        nrow(distinct(target_tf_links, tf, target)), " TF–target pairs)"
-      )
-    )
-
+    target_tf_count <- if (has_tf_analysis) sum(target_symbols %in% tf_results$TF) else 0L
+    wes_target_count <- if (has_wes) sum(target_symbols %in% wes_gene_summary$gene_symbol) else 0L
+    pathway_count <- sum(vapply(pathway_sets$genes,
+      function(gs) any(target_symbols %in% gs), logical(1)))
     div(
       class = "network-summary",
       span(class = "network-summary-drug", drug$label),
-      span(paste0(" · ", paste(evidence_summary, collapse = " · "))),
-      span(class = "network-summary-context",
-        "Blue genes are shown because they are linked to the selected drug in the input network, even without significant expression changes or WES variants. Pathway and Direction colours may override blue; drug–gene links remain blue."),
-      if (mutated_node_count > 0) {
-        span(
-          class = "network-summary-wes",
-          paste0("WES: ", mutated_node_count,
-            if (mutated_node_count == 1L) " visible gene" else " visible genes",
-            " with variants · centre dot")
-        )
-      },
-      span(
-        class = "network-summary-context",
-        paste0(
-          "Context: ", neighbor_count, " ", interaction_network_name,
-          " neighbours shown for their interactions with drug-linked genes; counted separately.",
-          if (!show_context_genes()) " Context-only genes are hidden." else " Context genes are shown."
-        )
-      ),
-      if (length(selected) > 0) {
-        span(
-          class = "network-summary-pathways",
-          paste0(
-            "Selected overlay: ", length(selected), " ", pathway_collection_name, " pathways · ",
-            length(selected_pathway_genes), " genes · ", pathway_overlap, " in drug subgraph"
-          )
-        )
-      }
+      span(paste0(" · ", nrow(target_nodes), " drug-linked targets · ",
+        target_tf_count, " target TFs · ", wes_target_count, " WES targets · ",
+        pathway_count, " connected ", pathway_collection_name, " pathways")),
+      if (overlay_mode() == "tf" && has_tf_analysis)
+        span(class = "network-summary-tf",
+          paste0(" · ", n_distinct(get_target_tf_links(target_symbols)$tf),
+            " linked TF regulators · ", length(selected_tfs()), " selected TFs")),
+      if (show_context_genes()) span(paste0(" · ", neighbor_count, " context genes")),
     )
   })
 

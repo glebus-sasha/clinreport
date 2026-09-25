@@ -57,7 +57,7 @@ pathway_gmt_file <- file.path(
 
 # Maximum number of interaction-network neighbours displayed per drug target.
 interaction_network_max_neighbors <- 40
-use_tf_activity <- FALSE
+use_tf_activity <- TRUE
 use_wes <- FALSE
 skip_network_processing <- FALSE
 

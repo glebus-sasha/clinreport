@@ -64,19 +64,7 @@ register_tf_outputs <- function(input, output, session, selected_tfs,
     targets <- unique(drug_target_symbols())
     target_rows <- get_gene_display_names(get_drug_target_ids(drug$drugId))
     related <- get_target_tf_links(targets)
-    div(class = "network-summary",
-      span(class = "network-summary-drug", drug$label),
-      span(paste0(" · ", paste(c(
-        target_evidence_summary(target_rows$gene_id, target_rows$gene_name, significant_ids,
-          if (has_wes) wes_gene_summary$gene_symbol else NULL,
-          if (has_tf_analysis) tf_results$TF else NULL),
-        paste0(sum(vapply(pathway_sets$genes, function(gs) any(targets %in% gs), logical(1))),
-          " ", pathway_collection_name, " pathways contain drug targets")
-      ), collapse = " · "))),
-      span(class = "network-summary-context", paste0(
-        "Regulators: ", n_distinct(related$tf), " imported TFs regulate ",
-        n_distinct(related$target), " drug targets (", nrow(related), " TF–target links). ",
-        "These regulators are counted separately from TFs that are themselves drug targets.")))
+    NULL
   })
   output$tf_overlay_summary <- renderUI({
     edges <- tf_regulons |> filter(tf %in% selected_tfs(), target %in% gene_data$gene_name)
@@ -87,8 +75,9 @@ register_tf_outputs <- function(input, output, session, selected_tfs,
                                target %in% graph$nodes$gene_name)
     }
     missing <- setdiff(selected_tfs(), edges$tf)
-    div(class = "gsea-panel-subtitle", paste(length(selected_tfs()), "selected TFs ·",
-      n_distinct(edges$target), "regulon targets ·", nrow(edges), "regulatory links"),
+    div(class = "gsea-panel-subtitle tf-selection-summary", paste(
+      if (length(selected_tfs())) paste(sort(selected_tfs()), collapse = ", ") else "No TF selected",
+      "·", n_distinct(edges$target), "regulon targets ·", nrow(edges), "regulatory links"),
       if (length(missing)) div(paste("No eligible links:", paste(missing, collapse = ", "))))
   })
   output$tf_table <- renderDT({

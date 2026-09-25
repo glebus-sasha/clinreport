@@ -9,6 +9,9 @@ render_input_overview <- function() {
       div(class = "input-overview-note", note)
     )
   }
+  n_degs <- sum(!is.na(gene_data$padj) & gene_data$padj < padj_cutoff &
+    !is.na(gene_data$log2FoldChange) &
+    abs(gene_data$log2FoldChange) >= log2fc_cutoff)
 
   div(
     class = "input-overview",
@@ -41,47 +44,50 @@ render_input_overview <- function() {
     ),
     div(
       class = "input-overview-section",
-      div(class = "input-overview-section-title", "Evidence available for drug assessment"),
+      div(class = "input-overview-section-title", "Analyses used to build the Drug module"),
       div(
         class = "input-overview-grid evidence-overview-grid",
         input_card(
           "Differential expression",
-          "Available",
-          paste(nrow(gene_data), "genes; targets are assessed against RNA differential expression")
+          "Used",
+          paste(n_degs, "DEGs passed the configured padj and log2FC thresholds")
         ),
-        input_card(
-          paste(interaction_network_name, "network expansion"),
-          "Available",
-          paste("One-hop", interaction_network_name, "neighbours extend direct drug targets")
-        ),
-        input_card(
-          "TF regulatory context",
-          if (has_tf_analysis) "Available" else "Not available",
-          if (has_tf_analysis) {
-            paste(nrow(tf_results), "TF activities with DoRothEA target links")
-          } else {
-            "No usable TF activity input and DoRothEA reference pair was supplied"
-          },
-          if (has_tf_analysis) "available" else "unavailable"
-        ),
-        input_card(
-          "WES variants",
-          if (has_wes) "Available" else "Not supplied",
-          if (has_wes) {
-            paste(nrow(wes_variants), "PASS variants across", nrow(wes_gene_summary), "genes")
-          } else {
-            "Variant evidence is excluded from this report"
-          },
-          if (has_wes) "available" else "unavailable"
-        ),
+        if (!isTRUE(as.logical(skip_network_processing)))
+          input_card(paste(interaction_network_name, "network expansion"), "Used",
+            paste("Expanded drug-linked targets using", interaction_network_name)),
+        if (isTRUE(as.logical(use_tf_activity)) && has_tf_analysis)
+          input_card("TF regulatory context", "Used",
+            paste(nrow(tf_results), "TF activities with DoRothEA target links")),
+        if (isTRUE(as.logical(use_wes)) && has_wes)
+          input_card("WES variants", "Used",
+            paste(nrow(wes_variants), "PASS variants across", nrow(wes_gene_summary), "genes"))
+      )
+    ),
+    div(
+      class = "input-overview-section",
+      div(class = "input-overview-section-title", "Additional analyses and context"),
+      div(
+        class = "input-overview-grid evidence-overview-grid",
+        if (has_tf_analysis && !isTRUE(as.logical(use_tf_activity)))
+          input_card("TF regulatory context", "Available",
+            "Shown as supplementary regulatory context", "available"),
+        if (has_wes && !isTRUE(as.logical(use_wes)))
+          input_card("WES variants", "Available",
+            "Shown as supplementary variant evidence", "available"),
+        if (isTRUE(as.logical(skip_network_processing)))
+          input_card(paste(interaction_network_name, "network expansion"), "Not used",
+            "Network expansion was disabled for this report", "unavailable"),
         input_card(
           paste(pathway_collection_name, "GSEA analysis"),
-          "Available",
+          "Additional",
           paste(nrow(pathway_sets), "tested gene sets provide pathway context for targets")
         )
       )
     ),
-    div(
+    tags$details(
+      class = "input-overview-metadata",
+      tags$summary("Analysis metadata"),
+      div(
       class = "input-overview-section",
       div(class = "input-overview-section-title", "Data sources"),
       div(
@@ -131,6 +137,7 @@ render_input_overview <- function() {
         span(class = "input-overview-setting", paste0("|log2FC| ≥ ", log2fc_cutoff))
       )
     )
+    )
   )
 }
 
@@ -167,6 +174,13 @@ ui <- fluidPage(
       
       div(
         class = "network-header",
+        tags$button(
+          id = "drug_list_toggle",
+          type = "button",
+          class = "drug-list-collapse",
+          title = "Collapse drug list",
+          "‹"
+        ),
         
         div(
           class = "network-title",

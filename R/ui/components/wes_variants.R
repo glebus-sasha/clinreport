@@ -33,7 +33,7 @@ render_wes_variants <- function() {
     ),
     div(
       class = "wes-variants-note",
-      "A small berry-coloured centre dot in the interaction graph denotes a gene with at least one WES variant."
+      "Variants are shown for genes present in the selected drug network."
     ),
     div(class = "wes-variants-table", DT::DTOutput("wes_variants_table"))
   )

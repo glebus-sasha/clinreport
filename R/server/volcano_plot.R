@@ -114,7 +114,7 @@ register_volcano_output <- function(
             hoverinfo = "text",
             
             marker = list(
-              size = 6,
+              size = 3,
               color = "#cbd5e1",
               opacity = 0.72
             ),
@@ -178,7 +178,7 @@ register_volcano_output <- function(
             hoverinfo = "text",
             
             marker = list(
-              size = 7,
+              size = 3,
               color = "#2563eb",
               opacity = 0.82
             ),
@@ -304,12 +304,12 @@ register_volcano_output <- function(
             mode = "markers",
             
             marker = list(
-              size = 12,
+              size = 6,
               symbol = "circle",
               color = "#ffffff",
               line = list(
                 color = "#17202a",
-                width = 3
+                width = 2
               )
             ),
             

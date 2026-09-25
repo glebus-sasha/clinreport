@@ -1,4 +1,16 @@
 /* Cross-widget highlights for the selected network gene. */
+$(document).on("click", "#drug_network_toggle", function () {
+  var panel = $(this).closest(".embedded-gsea-panel");
+  panel.toggleClass("is-collapsed");
+  $(this).text(panel.hasClass("is-collapsed") ? "‹" : "›");
+});
+
+$(document).on("click", "#drug_list_toggle", function () {
+  var layout = $(this).closest(".main-layout");
+  layout.toggleClass("drug-list-collapsed");
+  $(this).text(layout.hasClass("drug-list-collapsed") ? "›" : "‹");
+});
+
 Shiny.addCustomMessageHandler("filter-drug-rows", function (message) {
   var tableElement = $("#drug_table");
   var allowedRows = message.rows;

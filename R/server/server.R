@@ -220,8 +220,7 @@ server <- function(
 
   observeEvent(selected_drug()$drugId, {
     targets <- current_drug_target_symbols()
-    selected_pathways(pathway_sets$pathway[vapply(pathway_sets$genes,
-      function(genes) any(targets %in% genes), logical(1))])
+    selected_pathways(character())
     selected_tfs(unique(get_target_tf_links(targets)$tf))
   }, priority = 10)
 
@@ -264,6 +263,9 @@ server <- function(
     }
 
     set_network_gene_focus(gene_symbol)
+    selected_gene(gene_data |>
+      filter(gene_name == gene_symbol) |>
+      slice(1))
   })
 
   output$focused_drugs <- renderUI({
@@ -426,7 +428,6 @@ server <- function(
     req(nrow(expression_gene) > 0)
 
     selected_gene(expression_gene)
-    view_mode("gene")
   })
   
   
@@ -439,24 +440,6 @@ server <- function(
 
     if (is.null(drug) || nrow(drug) == 0) {
       return(render_input_overview())
-    }
-    
-    
-    if (
-      view_mode() == "gene"
-    ) {
-      
-      gene <- selected_gene()
-      
-      req(
-        gene
-      )
-      
-      return(
-        render_gene_page(
-          gene
-        )
-      )
     }
     
     
@@ -574,6 +557,13 @@ server <- function(
     
     ignoreInit = TRUE
   )
+
+  output$inline_gene_panel <- renderUI({
+    gene <- selected_gene()
+    if (is.null(gene)) return(NULL)
+    div(class = "inline-gene-panel", render_gene_page(gene, inline = TRUE))
+  })
+  observeEvent(input$close_gene_profile, selected_gene(NULL))
   
   
   # ==========================================================
@@ -618,10 +608,6 @@ server <- function(
       )
       
       
-      view_mode(
-        "gene"
-      )
-      
     }
   )
   
@@ -635,10 +621,6 @@ server <- function(
     input$back_to_drug,
     
     {
-      
-      view_mode(
-        "drug"
-      )
       
       selected_gene(
         NULL

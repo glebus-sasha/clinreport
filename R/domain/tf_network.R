@@ -38,14 +38,20 @@ build_tf_network <- function(graph, drug, selected, significant_ids, color_by_di
   expanded$nodes <- bind_rows(graph$nodes, extras) |> distinct(gene_id, .keep_all = TRUE)
   data <- prepare_vis_network(expanded, drug, setNames(character(), character()),
                               significant_ids, color_by_direction)
-  source_rows <- which(data$nodes$label %in% selected & data$nodes$id != "__DRUG__")
+  target_tfs <- intersect(graph$nodes$gene_name[graph$nodes$type == "Target"], tf_results$TF)
+  tf_nodes <- unique(c(selected, target_tfs))
+  source_rows <- which(data$nodes$label %in% tf_nodes & data$nodes$id != "__DRUG__")
   activity <- tf_results[match(data$nodes$label[source_rows], tf_results$TF), ]
   data$nodes$shape[source_rows] <- "triangle"
   data$nodes$size[source_rows] <- pmax(data$nodes$size[source_rows], 23)
-  data$nodes$color[source_rows] <- if (color_by_direction) {
+  data$nodes$color[source_rows] <- ifelse(
+    data$nodes$id[source_rows] %in% graph$targets,
+    "#2563eb",
+    if (color_by_direction) {
     ifelse(is.na(activity$logFC), pathway_direction_colors[["unknown"]],
            ifelse(activity$logFC >= 0, pathway_direction_colors[["up"]], pathway_direction_colors[["down"]]))
-  } else tf_identity_color(data$nodes$label[source_rows])
+    } else tf_identity_color(data$nodes$label[source_rows])
+  )
   if (length(source_rows)) data$nodes$title[source_rows] <- paste0(data$nodes$title[source_rows],
     "<br><b>Transcription factor</b><br>Activity difference: ", signif(activity$logFC, 4),
     "<br>Activity FDR: ", signif(activity$adj.P.Val, 4),
