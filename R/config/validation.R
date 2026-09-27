@@ -13,15 +13,43 @@ if (!file.exists(drug_network_file)) {
   stop("Drug network file does not exist: ", drug_network_file)
 }
 
-gsea_input_files <- c(
-  gsea_carcinoma_report_file,
-  gsea_normal_report_file,
-  pathway_gmt_file
-)
+gsea_input_files <- if (exists("gsea_files") && length(gsea_files)) gsea_files else
+  c(gsea_carcinoma_report_file, gsea_normal_report_file)
+gmt_input_files <- if (exists("gmt_files") && length(gmt_files)) gmt_files else pathway_gmt_file
+gsea_input_files <- c(gsea_input_files, gmt_input_files, if (exists("gmt_list_file")) gmt_list_file else character())
 
 missing_gsea_files <- gsea_input_files[!file.exists(gsea_input_files)]
 if (length(missing_gsea_files) > 0) {
   stop("Missing GSEA input files: ", paste(missing_gsea_files, collapse = ", "))
+}
+if (exists("gmt_list_file") && nzchar(gmt_list_file)) {
+  collection_list <- read.csv(gmt_list_file, stringsAsFactors = FALSE)
+  if (!all(c("name", "url") %in% names(collection_list)) || !nrow(collection_list)) {
+    stop("GMT collection list must contain name and url columns")
+  }
+  listed_gmts <- basename(sub("[?#].*$", "", collection_list$url))
+  if (anyNA(collection_list$name) || any(!nzchar(collection_list$name)) ||
+      anyDuplicated(collection_list$name) || anyDuplicated(listed_gmts) ||
+      !setequal(listed_gmts, basename(gmt_input_files)) ||
+      length(listed_gmts) != length(gmt_input_files)) {
+    stop("GMT files do not match the collection list")
+  }
+  report_names <- basename(if (exists("gsea_files") && length(gsea_files)) gsea_files else
+    c(gsea_carcinoma_report_file, gsea_normal_report_file))
+  if (anyDuplicated(report_names)) stop("GSEA report filenames must be unique")
+  stems <- tools::file_path_sans_ext(listed_gmts)
+  report_matches <- vapply(report_names, function(report) sum(vapply(stems, function(stem) {
+    grepl(paste0(stem, ".gsea_report_for_"), report, fixed = TRUE)
+  }, logical(1))), integer(1))
+  if (any(report_matches != 1L) ||
+      any(!grepl("\\.gsea_report_for_[[:alnum:]_-]+\\.tsv$", report_names, ignore.case = TRUE))) {
+    stop("Each GSEA report must match exactly one GMT collection and name its group")
+  }
+  for (stem in stems) {
+    if (!any(grepl(paste0(stem, ".gsea_report_for_"), report_names, fixed = TRUE))) {
+      stop("No GSEA report for GMT collection: ", stem)
+    }
+  }
 }
 
 has_drug_details <- nzchar(clinreport_dir) && dir.exists(clinreport_dir)

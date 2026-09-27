@@ -64,7 +64,7 @@ prepare_vis_network <- function(subgraph, drug, pathway_gene_colors, significant
           log2FoldChange >= 0 ~ "up",
           TRUE ~ "down"
         ),
-        "<br>Selected ", pathway_collection_name, " pathway: ", if_else(pathway_member, "member", "not a member"),
+        "<br>Selected pathway: ", if_else(pathway_member, "member", "not a member"),
         "<br>WES variants: ", mutation_count, " (", htmlEscape(mutation_classes), ")"
       )
     ) |>
@@ -129,6 +129,7 @@ register_drug_network_outputs <- function(
     selected_drug,
     subgraph,
     selected_pathways,
+    active_pathway_sets,
     significant_ids,
     selected_network_gene,
     color_by_direction,
@@ -166,14 +167,14 @@ register_drug_network_outputs <- function(
       discard(is.na)
     target_tf_count <- if (has_tf_analysis) sum(target_symbols %in% tf_results$TF) else 0L
     wes_target_count <- if (has_wes) sum(target_symbols %in% wes_gene_summary$gene_symbol) else 0L
-    pathway_count <- sum(vapply(pathway_sets$genes,
+    pathway_count <- sum(vapply(active_pathway_sets()$genes,
       function(gs) any(target_symbols %in% gs), logical(1)))
     div(
       class = "network-summary",
       span(class = "network-summary-drug", drug$label),
       span(paste0(" · ", nrow(target_nodes), " drug-linked targets · ",
         target_tf_count, " target TFs · ", wes_target_count, " WES targets · ",
-        pathway_count, " connected ", pathway_collection_name, " pathways")),
+        pathway_count, " connected ", display_collection_name(input$gsea_collection), " pathways")),
       if (overlay_mode() == "tf" && has_tf_analysis)
         span(class = "network-summary-tf",
           paste0(" · ", n_distinct(get_target_tf_links(target_symbols)$tf),
@@ -306,7 +307,7 @@ register_drug_network_outputs <- function(
       rendered_pathways(key)
       return(invisible())
     }
-    selected_sets <- pathway_sets |>
+    selected_sets <- active_pathway_sets() |>
       filter(pathway %in% selected) |>
       mutate(
         pathway_color = if (color_by_direction()) {
@@ -410,7 +411,7 @@ register_drug_network_outputs <- function(
         ),
         title = paste0(
           "<b>", htmlEscape(label), "</b><br>",
-          paste0("Selected ", pathway_collection_name, " pathway gene<br>DE status: "),
+          paste0("Selected ", display_collection_name(input$gsea_collection), " pathway gene<br>DE status: "),
           if_else(significant, "significant", "not significant"),
           "<br>Expression: ", case_when(
             is.na(log2FoldChange) ~ "unknown",
@@ -432,7 +433,7 @@ register_drug_network_outputs <- function(
         color = pathway_color,
         borderWidth = 2,
         mutated = FALSE,
-        title = paste0("<b>", htmlEscape(label), "</b><br>", pathway_collection_name, " pathway")
+        title = paste0("<b>", htmlEscape(label), "</b><br>", display_collection_name(input$gsea_collection), " pathway")
       )
 
     if (nrow(extra_genes) + nrow(hubs) > 0) {
@@ -452,7 +453,7 @@ register_drug_network_outputs <- function(
         id = paste0("__PATHWAY_EDGE__", pathway, "__", symbols),
         from = paste0("__PATHWAY_SET__", pathway),
         to = target_ids,
-        title = paste(pathway_collection_name, "pathway membership"),
+        title = paste(display_collection_name(input$gsea_collection), "pathway membership"),
         color = selected_sets$pathway_color[i],
         width = 1,
         dashes = TRUE

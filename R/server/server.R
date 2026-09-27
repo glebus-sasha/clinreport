@@ -158,6 +158,14 @@ server <- function(
   )
 
   selected_pathways <- reactiveVal(character())
+  active_pathway_sets <- reactive({
+    collection <- input$gsea_collection
+    if (is.null(collection) || !collection %in% pathway_collections) collection <- pathway_collections[1]
+    pathways_for_collection(collection)
+  })
+  observeEvent(input$gsea_collection, {
+    selected_pathways(character())
+  }, ignoreInit = TRUE, priority = 10)
   selected_tfs <- reactiveVal(character())
   target_connected_only <- reactive(!identical(input$target_connected_only, FALSE))
   show_context_genes <- reactive(isTRUE(input$show_context_genes))
@@ -197,6 +205,7 @@ server <- function(
 
   observeEvent(input$selected_gsea_pathway, {
     pathway <- input$selected_gsea_pathway
+    req(pathway %in% active_pathway_sets()$pathway)
     selected <- selected_pathways()
 
     selected_pathways(
@@ -226,7 +235,8 @@ server <- function(
 
   observeEvent(input$select_all_pathways, {
     targets <- current_drug_target_symbols()
-    selected_pathways(pathway_sets$pathway[vapply(pathway_sets$genes,
+    sets <- active_pathway_sets()
+    selected_pathways(sets$pathway[vapply(sets$genes,
       function(genes) any(targets %in% genes), logical(1))])
   })
 
@@ -348,7 +358,7 @@ server <- function(
       } else {
         ncbi_gene_search_url(variant$gene_symbol)
       }
-      related_pathways <- pathway_sets |>
+      related_pathways <- active_pathway_sets() |>
         filter(vapply(genes, function(gene_set) variant$gene_symbol %in% gene_set, logical(1)))
       pathway_html <- if (nrow(related_pathways) == 0) {
         "—"
@@ -500,7 +510,7 @@ server <- function(
                 div(class = "network-visualization-title", network_display_name),
                 div(
                   class = "network-visualization-subtitle",
-                  paste("Drug targets, differential expression, and", pathway_collection_name, "pathway coverage")
+                  "Drug targets, differential expression, and selected pathway coverage"
                 )
               ),
               uiOutput("drug_network_summary"),
@@ -638,6 +648,7 @@ server <- function(
     selected_drug = selected_drug,
     subgraph = drug_interaction_subgraph,
     selected_pathways = selected_pathways,
+    active_pathway_sets = active_pathway_sets,
     significant_ids = significant_gene_ids,
     selected_network_gene = selected_network_gene,
     color_by_direction = color_by_direction,
@@ -650,6 +661,7 @@ server <- function(
     output = output,
     input = input,
     selected_pathways = selected_pathways,
+    active_pathway_sets = active_pathway_sets,
     significant_ids = significant_gene_ids,
     subgraph = drug_interaction_subgraph,
     selected_network_gene = selected_network_gene,

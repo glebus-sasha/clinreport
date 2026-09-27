@@ -78,7 +78,7 @@ render_input_overview <- function() {
           input_card(paste(interaction_network_name, "network expansion"), "Not used",
             "Network expansion was disabled for this report", "unavailable"),
         input_card(
-          paste(pathway_collection_name, "GSEA analysis"),
+          "GSEA analysis",
           "Additional",
           paste(nrow(pathway_sets), "tested gene sets provide pathway context for targets")
         )
@@ -108,9 +108,9 @@ render_input_overview <- function() {
           paste(nrow(interaction_edges), "high-confidence edges")
         ),
         input_card(
-          paste(pathway_collection_name, "GSEA"),
-          basename(pathway_gmt_file),
-          paste(nrow(pathway_sets), "gene sets")
+          "GSEA collections",
+          paste(length(gmt_files), "GMT files"),
+          paste(nrow(pathway_sets), "reported gene sets")
         ),
         input_card(
           "Drug annotations",

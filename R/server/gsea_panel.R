@@ -1,9 +1,10 @@
-# Hallmark GSEA pathway controls
+# GSEA pathway controls for the selected collection.
 
 register_gsea_outputs <- function(
     output,
     input,
     selected_pathways,
+    active_pathway_sets,
     significant_ids,
     subgraph,
     selected_network_gene,
@@ -49,11 +50,25 @@ register_gsea_outputs <- function(
   }
 
   output$gsea_pathway_tiles <- renderUI({
-    active <- selected_pathways()
-    focused_gene <- selected_network_gene()
-    pathway_table <- sort_pathways(pathway_sets)
+    pathway_table <- active_pathway_sets()
+    search <- if (is.null(input$gsea_search)) "" else trimws(input$gsea_search)
+    if (nzchar(search)) {
+      pathway_table <- pathway_table |>
+        filter(grepl(search, pathway, ignore.case = TRUE, fixed = TRUE))
+    }
+    make_pathway_tiles(head(sort_pathways(pathway_table), 100L))
+  })
 
-    make_pathway_tiles(pathway_table)
+  output$gsea_pathway_count <- renderUI({
+    pathway_table <- active_pathway_sets()
+    search <- if (is.null(input$gsea_search)) "" else trimws(input$gsea_search)
+    if (nzchar(search)) {
+      pathway_table <- pathway_table |>
+        filter(grepl(search, pathway, ignore.case = TRUE, fixed = TRUE))
+    }
+    div(class = "gsea-panel-subtitle",
+      paste0("Showing ", min(nrow(pathway_table), 100L), " of ", nrow(pathway_table),
+        " pathways in ", display_collection_name(input$gsea_collection), ". Search to find more."))
   })
 
   output$gsea_matching_pathways <- renderUI({
@@ -61,20 +76,20 @@ register_gsea_outputs <- function(
     drug <- selected_drug()
     target_symbols <- drug_target_symbols()
 
-    drug_pathways <- pathway_sets |>
+    drug_pathways <- active_pathway_sets() |>
       filter(vapply(genes, function(gene_set) {
         any(target_symbols %in% gene_set)
       }, logical(1))) |>
       sort_pathways()
 
     gene_pathways <- if (!is.null(focused_gene)) {
-      pathway_sets |>
+      active_pathway_sets() |>
         filter(vapply(genes, function(gene_set) {
           focused_gene$symbol %in% gene_set
         }, logical(1))) |>
         sort_pathways()
     } else {
-      pathway_sets[0, ]
+      active_pathway_sets()[0, ]
     }
 
     req(nrow(drug_pathways) > 0 || nrow(gene_pathways) > 0)
@@ -115,7 +130,7 @@ register_gsea_outputs <- function(
     network_symbols <- subgraph()$nodes$gene_name
 
     lapply(selected, function(pathway_name) {
-      pathway <- pathway_sets |>
+      pathway <- active_pathway_sets() |>
         filter(pathway == pathway_name) |>
         slice(1)
 

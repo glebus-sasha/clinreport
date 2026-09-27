@@ -14,19 +14,30 @@ invoke <- function(script, args, expected = 0L) {
 }
 dir.create(file.path(scratch, "inputs"))
 writeLines("fixture", file.path(scratch, "inputs", "same name.tsv"))
+for (name in c("case.first.gsea_report_for_carcinoma.tsv",
+               "case.second.gsea_report_for_normal.tsv", "first.gmt", "second.gmt")) {
+  writeLines("fixture", file.path(scratch, "inputs", name))
+}
+writeLines(c("name,url", "First,https://example.org/first.gmt", "Second,https://example.org/second.gmt"),
+  file.path(scratch, "inputs", "gmt_list.csv"))
 dir.create(file.path(scratch, "inputs", "drugs"))
 dir.create(file.path(scratch, "inputs", "drugs", "nested"))
 writeLines("{}", file.path(scratch, "inputs", "drugs", "nested", "drug.json"))
 input_file <- normalizePath(file.path(scratch, "inputs", "same name.tsv"), winslash = "/")
+input_gsea <- normalizePath(file.path(scratch, "inputs", c(
+  "case.first.gsea_report_for_carcinoma.tsv",
+  "case.second.gsea_report_for_normal.tsv")), winslash = "/")
+input_gmts <- normalizePath(file.path(scratch, "inputs", c("first.gmt", "second.gmt")), winslash = "/")
+input_gmt_list <- normalizePath(file.path(scratch, "inputs", "gmt_list.csv"), winslash = "/")
 input_drugs <- normalizePath(file.path(scratch, "inputs", "drugs"), winslash = "/")
 required_args <- c(
   "--drug-network-file", input_file,
   "--gene-file", input_file,
   "--interaction-network-file", input_file,
   "--tx2gene-file", input_file,
-  "--gsea-carcinoma-report-file", input_file,
-  "--gsea-normal-report-file", input_file,
-  "--pathway-gmt-file", input_file
+  "--gsea-files", input_gsea,
+  "--gmt-files", input_gmts,
+  "--gmt-list-file", input_gmt_list
 )
 input_args <- c(
   required_args,
@@ -48,7 +59,11 @@ core_parameters <- clinreport_prepared_parameters
 stopifnot(
   identical(core_parameters$clinreport_dir, ""),
   identical(core_parameters$wes_vcf_file, ""),
-  identical(core_parameters$tf_file, "")
+  identical(core_parameters$tf_file, ""),
+  length(core_parameters$gsea_files) == 2L,
+  length(core_parameters$gmt_files) == 2L,
+  all(file.exists(file.path(core_bundle, core_parameters$gsea_files))),
+  all(file.exists(file.path(core_bundle, core_parameters$gmt_files)))
 )
 moved <- file.path(scratch, "moved bundle")
 stopifnot(file.rename(bundle, moved))
@@ -65,5 +80,9 @@ invoke(file.path(root, "run.R"), c("--check", input_args, "--gene-file", "missin
 invoke(file.path(root, "run.R"), c("--check", input_args, "--padj-cutoff", "NaN"), 1L)
 invoke(file.path(root, "run.R"), c("--check", input_args, "--interaction-network-max-neighbors", "1.5"), 1L)
 invoke(file.path(root, "run.R"), c("--check", input_args, "--unknown", "value"), 1L)
+writeLines(c("name,url", "Wrong,https://example.org/missing.gmt"),
+  file.path(scratch, "unavailable", "bad_gmt_list.csv"))
+invoke(file.path(root, "run.R"), c("--check", input_args,
+  "--gmt-list-file", file.path(scratch, "unavailable", "bad_gmt_list.csv")), 1L)
 invoke(file.path(root, "run.R"), "--check", 1L)
 cat("PASS: explicit CLI, optional-input omission, relative paths, copied nested data, relocation, invalid inputs, overwrite protection\n")

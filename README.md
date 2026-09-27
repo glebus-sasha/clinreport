@@ -24,17 +24,17 @@ From this repository (using the included local data):
 
 ```sh
 Rscript run.R --prepare results/clinreport \
-  --drug-network-file raw/all_samples_string_human_links_v12_0_min900_Ensembl_diamond_trustrank.csv \
-  --clinreport-dir raw/clinreport \
-  --gene-file raw/carcinoma_vs_normal_gene_names_added.tsv \
-  --wes-vcf-file raw/R_PTA_22.pcgr.grch38.pass.vcf.gz \
-  --interaction-network-file raw/network/string.human_links_v12_0_min900.Ensembl.edges.tsv \
-  --tx2gene-file raw/tx2gene.tsv \
-  --gsea-carcinoma-report-file raw/gsea/carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_gsea_report_for_carcinoma.tsv \
-  --gsea-normal-report-file raw/gsea/carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_gsea_report_for_normal.tsv \
-  --pathway-gmt-file raw/gsea/carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_h_all_v2026_1_Hs_symbols.gmt \
-  --tf-file raw/carcinoma_vs_normal_significant_tfs.tsv \
-  --patient-id PATIENT-001
+  --drug-network-file raw/pta_27/drug_network.csv \
+  --clinreport-dir raw/pta_27/drugs \
+  --gene-file raw/pta_27/gene_data.tsv \
+  --wes-vcf-file raw/pta_27/wes.pcgr.grch38.pass.vcf.gz \
+  --interaction-network-file raw/pta_27/network/string.human_links_v12_0_min900.Ensembl_edges.tsv \
+  --tx2gene-file raw/pta_27/tx2gene.tsv \
+  --gsea-files raw/pta_27/gsea/*gsea_report_for_*.tsv \
+  --gmt-files raw/pta_27/gsea/*.gmt \
+  --gmt-list-file raw/pta_27/gsea/gmt_list.csv \
+  --tf-file raw/pta_27/tf.tsv \
+  --patient-id PTA_27
 Rscript results/clinreport/run.R
 ```
 
@@ -76,7 +76,7 @@ If R is installed elsewhere, provide its executable explicitly:
 ```
 
 All input paths, display metadata, and thresholds are command-line options. Paths
-are relative to the calling working directory. Seven core input paths are required
+are relative to the calling working directory. Seven core input options are required
 for `--prepare` and `--check`. `--clinreport-dir`, `--wes-vcf-file`, `--tf-file`,
 and `--dorothea-file` are optional. Omitting the first three disables the
 corresponding analysis; they also accept an explicit empty value, such as
@@ -91,9 +91,9 @@ explicitly supplied.
 | `--wes-vcf-file` | No | WES views and variant evidence are unavailable |
 | `--interaction-network-file` | Yes | — |
 | `--tx2gene-file` | Yes | — |
-| `--gsea-carcinoma-report-file` | Yes | — |
-| `--gsea-normal-report-file` | Yes | — |
-| `--pathway-gmt-file` | Yes | — |
+| `--gsea-files` | Yes, one or more paths | — |
+| `--gmt-files` | Yes, one or more paths | — |
+| `--gmt-list-file` | Yes | — |
 | `--tf-file` | No | TF analysis is unavailable |
 | `--dorothea-file` | No | Downloaded at application startup |
 | `--patient-id` | No | `PATIENT-001` |
@@ -113,10 +113,10 @@ Rscript run.R --prepare results/patient-002 [all seven required input arguments]
 Rscript results/patient-002/run.R --port 3839
 ```
 
-`--check` checks file existence and parameter values, without loading the tables,
+`--check` checks file existence, GMT/report correspondence and parameter values, without loading the tables,
 downloading resources, or starting Shiny. Table schemas are checked by the app's
 existing loaders at startup. Required data: drug network CSV, gene expression TSV,
-interaction network TSV, transcript mapping TSV, two GSEA reports and GMT. Drug
+interaction network TSV, transcript mapping TSV, GSEA reports, GMT files and their collection list. Drug
 annotations, PCGR VCF.gz, and TF results are optional. Supply
 `--dorothea-file /path/to/dorothea_hs.rda` to bundle a local resource and avoid its
 startup download. Otherwise the existing internet download remains in place.
@@ -127,17 +127,17 @@ The updated Dockerfile installs the Shiny dependencies and registers
 `clinreport` as the image entrypoint. It does not include patient data. Build and
 publish the image separately to Quay, then pin its version or digest in the pipeline.
 
-`examples/clinreport.nf` is an example DSL2 module with explicitly staged inputs.
-Set `params.clinreport_container` (for example `quay.io/your-org/clinreport:1.0.0`)
-and `params.outdir`, include the module, and pass the seven input channels in the
-declared order. Add staged inputs and `--clinreport-dir`, `--wes-vcf-file`, or
-`--tf-file` when those optional data sources are available. Add metadata and
-threshold arguments directly to the command. For
-multiple samples, use unique per-sample published directories.
+`examples/clinreport.nf` follows the current `CLINREP` input order. Supply all
+GSEA reports, all GMT files and the matching `gmt_list_file`; the list's `name`
+and `url` columns assign display names to GMT basenames. The number and names of
+collections are not fixed. Stage drug annotation directories in `annotations`.
+WES and TF files appear as supplementary reports when supplied, even with
+`use_wes` or `use_tf_activity` set to `FALSE`. For multiple samples, publish each
+report to a unique directory in the surrounding workflow.
 The module defaults to use_tf_activity = FALSE, use_wes = FALSE, and
 skip_network_processing = FALSE; set these Nextflow parameters explicitly to
 TRUE when the corresponding analysis should contribute to the Drug module.
-The module copies its output so it can survive removal of Nextflow's `work/`.
+The generated report contains its own copy of all supplied input files.
 
 Run a generated report using the same container, from the report directory:
 

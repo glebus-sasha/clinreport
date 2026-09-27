@@ -3,7 +3,7 @@ param(
     [string]$OutputDir = "results/dev-report",
     [int]$Port = 3838,
     [string]$BindHost = "127.0.0.1",
-    [string]$PatientId = "PATIENT-001",
+    [string]$PatientId = "PTA_27",
     [double]$PadjCutoff = 0.05,
     [double]$Log2fcCutoff = 1.0,
     [int]$MaxNeighbors = 40,
@@ -40,28 +40,57 @@ if (-not $outputPath.StartsWith($resultsDir + [IO.Path]::DirectorySeparatorChar,
 }
 
 $rawDir = Join-Path $projectDir "raw"
+$currentInputDir = Join-Path $rawDir "pta_27"
+$drugDetailsDir = Join-Path $currentInputDir "drugs"
+$gseaDir = Join-Path $currentInputDir "gsea"
+$gmtListFile = Join-Path $gseaDir "gmt_list.csv"
+if (-not (Test-Path -LiteralPath $gmtListFile)) { throw "GMT collection list is missing: $gmtListFile" }
+$collections = @(Import-Csv -LiteralPath $gmtListFile)
+if ($collections.Count -eq 0) { throw "GMT collection list is empty: $gmtListFile" }
+$gmtFiles = @($collections | ForEach-Object { Join-Path $gseaDir ([IO.Path]::GetFileName(([uri]$_.url).AbsolutePath)) })
+$gseaReports = @(Get-ChildItem -LiteralPath $gseaDir -File -Filter '*gsea_report_for_*.tsv' | Sort-Object Name)
+if ($gmtFiles.Count -ne @(Get-ChildItem -LiteralPath $gseaDir -File -Filter '*.gmt').Count) {
+    throw "GMT files do not match the collections in $gmtListFile"
+}
+foreach ($gmtFile in $gmtFiles) {
+    if (-not (Test-Path -LiteralPath $gmtFile)) { throw "GMT input is missing: $gmtFile" }
+    $stem = [IO.Path]::GetFileNameWithoutExtension($gmtFile)
+    $matches = @($gseaReports | Where-Object { $_.Name.Contains("$stem.gsea_report_for_") })
+    if ($matches.Count -eq 0) { throw "No GSEA reports match GMT collection $stem" }
+}
+foreach ($drugSource in @("chembl", "opentargets", "pubchem")) {
+    if (-not (Get-ChildItem -LiteralPath $drugDetailsDir -Directory -Filter "*_$drugSource" -ErrorAction SilentlyContinue | Select-Object -First 1)) {
+        throw "Drug annotations are missing for $drugSource in $drugDetailsDir"
+    }
+}
 $requiredInputs = @(
-    "--drug-network-file", (Join-Path $rawDir "all_samples_string_human_links_v12_0_min900_Ensembl_diamond_trustrank.csv"),
-    "--gene-file", (Join-Path $rawDir "carcinoma_vs_normal_gene_names_added.tsv"),
-    "--interaction-network-file", (Join-Path $rawDir "network\string.human_links_v12_0_min900.Ensembl.edges.tsv"),
-    "--tx2gene-file", (Join-Path $rawDir "tx2gene.tsv"),
-    "--gsea-carcinoma-report-file", (Join-Path $rawDir "gsea\carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_gsea_report_for_carcinoma.tsv"),
-    "--gsea-normal-report-file", (Join-Path $rawDir "gsea\carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_gsea_report_for_normal.tsv"),
-    "--pathway-gmt-file", (Join-Path $rawDir "gsea\carcinoma_vs_normal_h_all_v2026_1_Hs_symbols_h_all_v2026_1_Hs_symbols.gmt"),
+    "--drug-network-file", (Join-Path $currentInputDir "drug_network.csv"),
+    "--gene-file", (Join-Path $currentInputDir "gene_data.tsv"),
+    "--interaction-network-file", (Join-Path $currentInputDir "network\string.human_links_v12_0_min900.Ensembl_edges.tsv"),
+    "--tx2gene-file", (Join-Path $currentInputDir "tx2gene.tsv"),
+    "--gsea-files") + @($gseaReports | ForEach-Object FullName) + @(
+    "--gmt-files") + $gmtFiles + @(
+    "--gmt-list-file", $gmtListFile,
     "--patient-id", $PatientId,
     "--padj-cutoff", $PadjCutoff.ToString([Globalization.CultureInfo]::InvariantCulture),
     "--log2fc-cutoff", $Log2fcCutoff.ToString([Globalization.CultureInfo]::InvariantCulture),
     "--interaction-network-max-neighbors", $MaxNeighbors
 )
-foreach ($index in 1, 3, 5, 7, 9, 11, 13) {
-    if (-not (Test-Path -LiteralPath $requiredInputs[$index])) { throw "Required development input is missing: $($requiredInputs[$index])" }
+$requiredFiles = @(
+    (Join-Path $currentInputDir "drug_network.csv"),
+    (Join-Path $currentInputDir "gene_data.tsv"),
+    (Join-Path $currentInputDir "network\string.human_links_v12_0_min900.Ensembl_edges.tsv"),
+    (Join-Path $currentInputDir "tx2gene.tsv"),
+    $gmtListFile) + $gmtFiles + @($gseaReports | ForEach-Object FullName)
+foreach ($requiredFile in $requiredFiles) {
+    if (-not (Test-Path -LiteralPath $requiredFile)) { throw "Required development input is missing: $requiredFile" }
 }
 
 $optionalInputs = @()
 foreach ($optionalInput in @(
-    @("--clinreport-dir", (Join-Path $rawDir "clinreport")),
-    @("--wes-vcf-file", (Join-Path $rawDir "R_PTA_22.pcgr.grch38.pass.vcf.gz")),
-    @("--tf-file", (Join-Path $rawDir "carcinoma_vs_normal_significant_tfs.tsv"))
+    @("--clinreport-dir", $drugDetailsDir),
+    @("--wes-vcf-file", (Join-Path $currentInputDir "wes.pcgr.grch38.pass.vcf.gz")),
+    @("--tf-file", (Join-Path $currentInputDir "tf.tsv"))
 )) {
     if (Test-Path -LiteralPath $optionalInput[1]) {
         $optionalInputs += $optionalInput

@@ -51,7 +51,7 @@ if (nrow(drug_dirs) == 0 && nzchar(clinreport_dir) && dir.exists(clinreport_dir)
   candidates <- list.dirs(clinreport_dir, recursive = TRUE, full.names = TRUE)
   # Release exports may name directories as *_DB00142_chembl (source suffix)
   # instead of nesting them under a chembl/ directory.
-  candidates <- candidates[grepl("DB[0-9]+(_(chembl|opentargets|opentargits|pubchem))?$", basename(candidates))]
+  candidates <- candidates[grepl("DB[0-9]+(_(chembl|opentargets|pubchem))?$", basename(candidates))]
   if (length(candidates)) {
     drug_dirs <- tibble(
       path = candidates,
@@ -61,8 +61,7 @@ if (nrow(drug_dirs) == 0 && nzchar(clinreport_dir) && dir.exists(clinreport_dir)
         bits <- strsplit(normalizePath(p, winslash = "/"), "/", fixed = TRUE)[[1]]
         hit <- bits[bits %in% sources]
         if (length(hit)) hit[[length(hit)]] else {
-          suffix <- str_extract(basename(p), "(chembl|opentargets|opentargits|pubchem)$")
-          if (identical(suffix, "opentargits")) suffix <- "opentargets"
+          suffix <- str_extract(basename(p), "(chembl|opentargets|pubchem)$")
           ifelse(is.na(suffix), "unknown", suffix)
         }
       }, character(1))

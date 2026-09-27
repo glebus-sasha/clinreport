@@ -18,9 +18,9 @@ main <- function() {
         "  --gene-file PATH\n",
         "  --interaction-network-file PATH\n",
         "  --tx2gene-file PATH\n",
-        "  --gsea-carcinoma-report-file PATH\n",
-        "  --gsea-normal-report-file PATH\n",
-        "  --pathway-gmt-file PATH\n\n",
+        "  --gsea-files PATH...         One or more GSEA reports\n",
+        "  --gmt-files PATH...          One or more GMT files\n",
+        "  --gmt-list-file PATH         GMT metadata CSV\n\n",
         "Optional data:\n",
         "  --clinreport-dir PATH         Drug annotations; omitted means unavailable\n",
         "  --wes-vcf-file PATH           Variant evidence; omitted means unavailable\n",
@@ -54,7 +54,8 @@ main <- function() {
   for (key in intersect(names(cli), clinreport_keys)) {
     value <- cli[[key]]
     if (key %in% clinreport_numbers) value <- suppressWarnings(as.numeric(value))
-    if (key %in% clinreport_paths) value <- clinreport_resolve(value, caller_dir)
+    if (key %in% clinreport_paths || key == "gmt_list_file") value <- clinreport_resolve(value, caller_dir)
+    if (key %in% clinreport_list_paths) value <- vapply(value, clinreport_resolve, character(1), base = caller_dir)
     values[[key]] <- value
   }
   setwd(app_dir)
@@ -70,7 +71,8 @@ main <- function() {
   }
   for (key in names(values)) assign(key, values[[key]], envir = env)
   if (!is.null(cli$prepare) || isTRUE(cli$check)) {
-    required <- setdiff(clinreport_paths, c("clinreport_dir", "wes_vcf_file", "tf_file", "dorothea_file"))
+    required <- c("drug_network_file", "gene_file", "interaction_network_file", "tx2gene_file",
+      "gsea_files", "gmt_files", "gmt_list_file")
     missing <- setdiff(required, names(cli))
     if (length(missing)) stop("Explicit input required: ", paste(paste0("--", gsub("_", "-", missing)), collapse = ", "))
   }
@@ -82,10 +84,12 @@ main <- function() {
   if (!is.null(cli$prepare)) {
     output <- clinreport_resolve(cli$prepare, caller_dir)
     if (file.exists(output) || dir.exists(output)) stop("Output already exists: ", output)
-    for (key in clinreport_paths) {
+    for (key in c(clinreport_paths, clinreport_list_paths, "gmt_list_file")) {
       path <- get(key, env)
-      if (nzchar(path) && dir.exists(path) && startsWith(tolower(paste0(output, "/")),
-          tolower(paste0(clinreport_resolve(path, app_dir), "/")))) stop("Output is inside an input directory")
+      if (length(path) && any(vapply(path, function(item) {
+        nzchar(item) && dir.exists(item) && startsWith(tolower(paste0(output, "/")),
+          tolower(paste0(clinreport_resolve(item, app_dir), "/")))
+      }, logical(1)))) stop("Output is inside an input directory")
     }
     if (!dir.create(output, recursive = TRUE)) stop("Cannot create output: ", output)
     copy_checked <- function(from, to, recursive = FALSE) {
@@ -103,12 +107,20 @@ main <- function() {
       c("clinreport", effective_command_args),
       collapse = " "
     )
-    for (key in clinreport_paths) {
+    for (key in c(clinreport_paths, clinreport_list_paths, "gmt_list_file")) {
       path <- bundled[[key]]
-      if (!nzchar(path) || !file.exists(path)) {
+      if (is.null(path) || !length(path) || (length(path) == 1 && !nzchar(path))) {
         bundled[[key]] <- ""
         next
       }
+      if (length(path) > 1) {
+        target_dir <- file.path(output, "data", key)
+        dir.create(target_dir, recursive = TRUE)
+        for (item in path) copy_checked(item, file.path(target_dir, basename(item)), dir.exists(item))
+        bundled[[key]] <- gsub("\\\\", "/", file.path("data", key, basename(path)))
+        next
+      }
+      if (!file.exists(path)) { bundled[[key]] <- ""; next }
       relative_dir <- file.path("data", key)
       target_dir <- file.path(output, relative_dir)
       dir.create(target_dir, recursive = TRUE)
