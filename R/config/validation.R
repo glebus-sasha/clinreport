@@ -3,7 +3,7 @@
 # 2. VALIDATION
 # ============================================================
 
-required_file_inputs <- setdiff(clinreport_paths, c("clinreport_dir", "wes_vcf_file", "tf_file", "dorothea_file"))
+required_file_inputs <- setdiff(clinreport_paths, c("clinreport_dir", "wes_vcf_file", "tf_file", "dorothea_file", "gene_annotations_file"))
 for (input_key in required_file_inputs) {
   input_path <- get(input_key)
   if (nzchar(input_path) && dir.exists(input_path)) stop("Expected a file for ", input_key, ": ", input_path)
@@ -59,6 +59,12 @@ if (nzchar(clinreport_dir) && !has_drug_details) {
 
 if (!file.exists(gene_file)) {
   stop("Gene expression file does not exist: ", gene_file)
+}
+if (nzchar(gene_annotations_file) && !file.exists(gene_annotations_file)) {
+  stop("Gene annotations file does not exist: ", gene_annotations_file)
+}
+if (nzchar(gene_annotations_file) && dir.exists(gene_annotations_file)) {
+  stop("Expected a JSON file for gene_annotations_file: ", gene_annotations_file)
 }
 
 has_wes <- nzchar(wes_vcf_file) && file.exists(wes_vcf_file)

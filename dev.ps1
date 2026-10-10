@@ -89,6 +89,7 @@ foreach ($requiredFile in $requiredFiles) {
 $optionalInputs = @()
 foreach ($optionalInput in @(
     @("--clinreport-dir", $drugDetailsDir),
+    @("--gene-annotations-file", (Join-Path $currentInputDir "annotations\gene_annotations.json")),
     @("--wes-vcf-file", (Join-Path $currentInputDir "wes.pcgr.grch38.pass.vcf.gz")),
     @("--tf-file", (Join-Path $currentInputDir "tf.tsv"))
 )) {

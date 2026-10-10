@@ -17,6 +17,7 @@ clinreport_dir <- file.path(
 gene_file <- file.path(
   "raw", "pta_27", "gene_data.tsv"
 )
+gene_annotations_file <- file.path("raw", "pta_27", "annotations", "gene_annotations.json")
 
 # Whole-exome sequencing variants annotated by PCGR for the current patient.
 wes_vcf_file <- file.path(

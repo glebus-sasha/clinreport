@@ -23,6 +23,7 @@ main <- function() {
         "  --gmt-list-file PATH         GMT metadata CSV\n\n",
         "Optional data:\n",
         "  --clinreport-dir PATH         Drug annotations; omitted means unavailable\n",
+        "  --gene-annotations-file PATH  Gene descriptions (MyGene.info); optional\n",
         "  --wes-vcf-file PATH           Variant evidence; omitted means unavailable\n",
         "  --tf-file PATH                 TF evidence; omitted means unavailable\n",
         "  --dorothea-file PATH           Default: download DoRothEA at application startup\n\n",
@@ -65,7 +66,7 @@ main <- function() {
   if (!is.null(cli$prepare) || isTRUE(cli$check)) {
     # In a pipeline, an omitted optional analysis must mean "not supplied",
     # not "use the local development fixture from raw/".
-    for (key in c("clinreport_dir", "wes_vcf_file", "tf_file")) {
+    for (key in c("clinreport_dir", "gene_annotations_file", "wes_vcf_file", "tf_file")) {
       if (!key %in% names(values)) values[[key]] <- ""
     }
   }

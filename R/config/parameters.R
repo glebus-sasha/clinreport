@@ -1,5 +1,5 @@
 # Shared input contract for launch and preparation.
-clinreport_paths <- c("drug_network_file", "clinreport_dir", "gene_file",
+clinreport_paths <- c("drug_network_file", "clinreport_dir", "gene_file", "gene_annotations_file",
   "wes_vcf_file", "interaction_network_file", "tx2gene_file",
   "gsea_carcinoma_report_file", "gsea_normal_report_file", "pathway_gmt_file",
   "tf_file", "dorothea_file")
