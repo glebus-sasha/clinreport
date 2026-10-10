@@ -1,5 +1,7 @@
 // The GMT list CSV names the collections; ClinReport validates all supplied
 // GMT and GSEA files, regardless of how many collections the workflow emits.
+// If annotations includes gene_annotations.json, ClinReport discovers it in
+// --clinreport-dir automatically; no separate Nextflow input is required.
 process CLINREP {
     tag "${meta.id}"
     container 'quay.io/glebussasha/clinreport:latest'

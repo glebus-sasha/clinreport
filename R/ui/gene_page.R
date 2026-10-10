@@ -17,6 +17,10 @@ render_gene_page <- function(
 
   gene_variants <- wes_variants |>
     filter(gene_symbol == gene_name)
+  annotation <- if (!is.na(gene$gene_id_clean) && nzchar(gene$gene_id_clean))
+    gene_annotations[[gene$gene_id_clean]] else NULL
+  gene_description <- safe_text(annotation$summary, "")
+  gene_full_name <- safe_text(annotation$name, "")
   mutation_count <- nrow(gene_variants)
   drug_count <- sum(vapply(drug_network$drugId, function(drug_id)
     gene$gene_id_clean %in% get_drug_target_ids(drug_id), logical(1)))
@@ -48,8 +52,15 @@ render_gene_page <- function(
         )
       )
     ),
-    
-    
+
+    if (nzchar(gene_description) || nzchar(gene_full_name)) div(
+      class = "gene-annotation-block",
+      if (nzchar(gene_full_name) && gene_full_name != gene_name)
+        div(class = "gene-full-name", gene_full_name),
+      if (nzchar(gene_description)) div(class = "gene-description", gene_description),
+      source_attribution(gene_annotation_source)
+    ),
+
     div(
       class = "gene-summary",
       

@@ -161,7 +161,7 @@ ui <- fluidPage(
   ),
   div(
     class = "app-title",
-    "ClinReport — Drug Reference"
+    "O2T ClinReport — Drug Prioritization Explorer"
   ),
   
   div(

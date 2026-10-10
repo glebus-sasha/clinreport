@@ -202,7 +202,8 @@ render_pharmacology <- function(
       div(
         class = "section-subtitle",
         "Disease associations reported by ChEMBL"
-      )
+      ),
+      source_attribution("ChEMBL")
     ),
     
     if (length(indication_cards) > 0) {
@@ -232,7 +233,8 @@ render_pharmacology <- function(
       div(
         class = "section-subtitle",
         "Target-level pharmacological relationships"
-      )
+      ),
+      source_attribution("ChEMBL")
     ),
     
     if (length(mechanism_cards) > 0) {

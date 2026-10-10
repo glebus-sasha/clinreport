@@ -119,7 +119,8 @@ render_safety <- function(
       div(
         class = "section-subtitle",
         "Regulatory and safety-related records"
-      )
+      ),
+      source_attribution("ChEMBL")
     ),
     
     if (length(warning_cards) > 0) {
@@ -152,7 +153,8 @@ render_safety <- function(
           length(synonyms),
           "unique names"
         )
-      )
+      ),
+      source_attribution("ChEMBL")
     ),
     
     if (length(synonym_chips) > 0) {

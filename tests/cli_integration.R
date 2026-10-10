@@ -14,6 +14,8 @@ invoke <- function(script, args, expected = 0L) {
 }
 dir.create(file.path(scratch, "inputs"))
 writeLines("fixture", file.path(scratch, "inputs", "same name.tsv"))
+writeLines('{"genes":{"ENSG00000000003":{"name":"tetraspanin 6","summary":"Example summary"}}}',
+  file.path(scratch, "inputs", "gene_annotations.json"))
 for (name in c("case.first.gsea_report_for_carcinoma.tsv",
                "case.second.gsea_report_for_normal.tsv", "first.gmt", "second.gmt")) {
   writeLines("fixture", file.path(scratch, "inputs", name))
@@ -30,6 +32,7 @@ input_gsea <- normalizePath(file.path(scratch, "inputs", c(
 input_gmts <- normalizePath(file.path(scratch, "inputs", c("first.gmt", "second.gmt")), winslash = "/")
 input_gmt_list <- normalizePath(file.path(scratch, "inputs", "gmt_list.csv"), winslash = "/")
 input_drugs <- normalizePath(file.path(scratch, "inputs", "drugs"), winslash = "/")
+input_annotations <- normalizePath(file.path(scratch, "inputs", "gene_annotations.json"), winslash = "/")
 required_args <- c(
   "--drug-network-file", input_file,
   "--gene-file", input_file,
@@ -42,6 +45,7 @@ required_args <- c(
 input_args <- c(
   required_args,
   "--clinreport-dir", input_drugs,
+  "--gene-annotations-file", input_annotations,
   "--wes-vcf-file", input_file,
   "--tf-file=", "--dorothea-file=",
   "--patient-id", "CLI patient",
@@ -58,6 +62,7 @@ source(file.path(core_bundle, "R", "config", "prepared_parameters.R"))
 core_parameters <- clinreport_prepared_parameters
 stopifnot(
   identical(core_parameters$clinreport_dir, ""),
+  identical(core_parameters$gene_annotations_file, ""),
   identical(core_parameters$wes_vcf_file, ""),
   identical(core_parameters$tf_file, ""),
   length(core_parameters$gsea_files) == 2L,
@@ -75,6 +80,7 @@ stopifnot(identical(resolved$patient_id, "CLI patient"), resolved$padj_cutoff ==
   identical(resolved$network_display_name, "Drug–gene сеть"),
   identical(resolved$wes_display_name, "WES · PCGR"),
   file.exists(file.path(moved, resolved$clinreport_dir, "nested", "drug.json")),
+  file.exists(file.path(moved, resolved$gene_annotations_file)),
   file.exists(file.path(moved, "www", "css", "app.css")))
 invoke(file.path(root, "run.R"), c("--check", input_args, "--gene-file", "missing.tsv"), 1L)
 invoke(file.path(root, "run.R"), c("--check", input_args, "--padj-cutoff", "NaN"), 1L)

@@ -70,4 +70,9 @@ source_buttons <- function(
   )
 }
 
+source_attribution <- function(...) {
+  sources <- c(...)
+  span(class = "source-attribution", "Source: ", paste(sources, collapse = " · "))
+}
+
 

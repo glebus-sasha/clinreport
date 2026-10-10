@@ -13,6 +13,7 @@ render_general <- function(
   pubchem_cid <- get_pubchem_cid(data)
   
   molecule <- data$chembl$chembl_molecule
+  description <- get_drug_description(data)
   
   molecular_weight <- suppressWarnings(
     as.numeric(
@@ -110,7 +111,8 @@ render_general <- function(
       div(
         class = "section-subtitle",
         "Cross-references to external resources"
-      )
+      ),
+      source_attribution("DrugBank", "ChEMBL", "PubChem")
     ),
     
     div(
@@ -126,7 +128,8 @@ render_general <- function(
         
         div(
           class = "identifier-value mono-value",
-          drug_id
+          tags$a(href = drugbank_url(drug_id), target = "_blank",
+            rel = "noopener noreferrer", class = "identifier-link", drug_id)
         )
       ),
       
@@ -210,9 +213,21 @@ render_general <- function(
       pubchem_cid
     ),
 
+    if (!is.null(description)) div(
+      class = "drug-description-block",
+      div(class = "section-header",
+        div(class = "section-title", "Description"),
+        source_attribution("PubChem", description$source)),
+      div(class = "drug-description-text", description$text),
+      if (nzchar(description$url)) tags$a(
+        href = description$url, target = "_blank", rel = "noopener noreferrer",
+        class = "drug-description-reference", "Original description ↗")
+    ),
+
     div(
       class = "section-header",
-      div(class = "section-title", "Development")
+      div(class = "section-title", "Development"),
+      source_attribution("ChEMBL")
     ),
 
     div(
@@ -251,7 +266,8 @@ render_general <- function(
       div(
         class = "section-subtitle",
         "Chemical structure alongside the selected interaction network"
-      )
+      ),
+      source_attribution("PubChem (image)", "ChEMBL (structure identifiers)")
     ),
     
     div(
@@ -297,7 +313,8 @@ render_general <- function(
     div(
       class = "section-header",
       div(class = "section-title", "Molecular properties"),
-      div(class = "section-subtitle", "Compact physicochemical profile")
+      div(class = "section-subtitle", "Compact physicochemical profile"),
+      source_attribution("ChEMBL")
     ),
 
     div(
