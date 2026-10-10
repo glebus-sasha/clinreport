@@ -139,6 +139,18 @@ skip_network_processing = FALSE; set these Nextflow parameters explicitly to
 TRUE when the corresponding analysis should contribute to the Drug module.
 The generated report contains its own copy of all supplied input files.
 
+Every prepared report also contains `default_report.pdf` and
+`default_selection.json`. The default PDF uses the top 15 drugs and includes
+network context diagrams for the top 3 drugs. These defaults can be changed
+with `--report-top-n`, `--report-graph-top-n` and `--report-language en|ru`.
+The application defaults to English and has one language switcher shared by
+the interface and generated reports. The report builder also lets the user
+edit the report title; its default is the patient ID plus the generation
+timestamp. In the Shiny application, the PDF report builder allows an expert
+to include or exclude drugs and change
+their order. A changed composition or order is marked in the PDF as an expert
+correction; changing Top N alone is not marked as an expert correction.
+
 Run a generated report using the same container, from the report directory:
 
 ```sh

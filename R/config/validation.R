@@ -114,3 +114,16 @@ if (!is.numeric(interaction_network_max_neighbors) || length(interaction_network
     interaction_network_max_neighbors != floor(interaction_network_max_neighbors) || interaction_network_max_neighbors < 1) {
   stop("interaction_network_max_neighbors must be a positive number")
 }
+
+if (!is.numeric(report_top_n) || length(report_top_n) != 1 || is.na(report_top_n) ||
+    !is.finite(report_top_n) || report_top_n != floor(report_top_n) || report_top_n < 1) {
+  stop("report_top_n must be a positive integer")
+}
+if (!is.numeric(report_graph_top_n) || length(report_graph_top_n) != 1 || is.na(report_graph_top_n) ||
+    !is.finite(report_graph_top_n) || report_graph_top_n != floor(report_graph_top_n) || report_graph_top_n < 0) {
+  stop("report_graph_top_n must be a non-negative integer")
+}
+if (!is.character(report_language) || length(report_language) != 1 ||
+    !report_language %in% c("en", "ru")) {
+  stop("report_language must be either 'en' or 'ru'")
+}

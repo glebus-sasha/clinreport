@@ -150,6 +150,35 @@ render_input_overview <- function() {
   )
 }
 
+render_report_builder <- function() {
+  max_drugs <- max(1L, nrow(drug_network))
+  default_top_n <- min(as.integer(report_top_n), max_drugs)
+  default_graph_n <- min(as.integer(report_graph_top_n), default_top_n)
+  div(
+    class = "report-builder",
+    div(class = "report-builder-heading",
+      div(class = "report-builder-title", "PDF Report"),
+      div(class = "report-builder-subtitle",
+        "Build the final drug list and adjust it manually when needed.")),
+    div(class = "report-title-field",
+      textInput("report_title", "Report title",
+        value = paste(patient_id, format(Sys.time(), "%Y-%m-%d %H-%M-%S")))),
+    div(class = "report-builder-controls",
+      numericInput("report_top_n", "Number of drugs (Top N)", default_top_n,
+        min = 1, max = max_drugs, step = 1),
+      numericInput("report_graph_top_n", "Network graphs (Top K)", default_graph_n,
+        min = 0, max = max_drugs, step = 1),
+      textInput("report_expert_name", "Expert (optional)", value = ""),
+      textAreaInput("report_expert_comment", "Expert comment (optional)", value = "",
+        rows = 2, placeholder = "For example: excluded because of a contraindication.")),
+    uiOutput("report_status"),
+    uiOutput("report_editor"),
+    div(class = "report-builder-actions",
+      actionButton("report_reset", "Reset to automatic list", class = "btn-default"),
+      downloadButton("download_report_pdf", "Generate PDF", class = "btn-primary"))
+  )
+}
+
 ui <- fluidPage(
   tags$head(
     tags$link(
@@ -157,17 +186,22 @@ ui <- fluidPage(
       type = "text/css",
       href = "css/app.css"
     ),
-    tags$script(src = "js/app.js")
+    tags$script(src = "js/app.js"),
+    tags$script(src = "js/i18n.js?v=2")
   ),
   div(
-    class = "app-title",
-    "O2T ClinReport — Drug Prioritization Explorer"
+    class = "app-heading",
+    div(class = "app-heading-copy",
+      div(class = "app-title", "O2T ClinReport - Drug Prioritization Explorer"),
+      div(class = "app-subtitle",
+        "Drug network - pharmacology - safety - molecular properties - target genes")),
+    div(class = "language-switcher",
+      selectInput("language", "Language",
+        choices = c("English" = "en", "Русский" = "ru"),
+        selected = report_language, width = "150px"))
   ),
-  
-  div(
-    class = "app-subtitle",
-    "Drug network · pharmacology · safety · molecular properties · target genes"
-  ),
+
+  render_report_builder(),
   
   
   div(

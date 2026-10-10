@@ -39,6 +39,7 @@ source("R/utils/urls.R", encoding = "UTF-8")
 source("R/domain/genes.R", encoding = "UTF-8")
 source("R/domain/drug_network.R", encoding = "UTF-8")
 source("R/domain/tf_network.R", encoding = "UTF-8")
+source("R/report/report_pdf.R", encoding = "UTF-8")
 
 # UI components
 source("R/ui/components/source_buttons.R", encoding = "UTF-8")

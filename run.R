@@ -37,6 +37,9 @@ main <- function() {
         "  --padj-cutoff NUMBER           Default: 0.05\n",
         "  --log2fc-cutoff NUMBER         Default: 1.0\n",
         "  --interaction-network-max-neighbors INTEGER  Default: 40\n\n",
+        "  --report-top-n INTEGER         Default: 15\n",
+        "  --report-graph-top-n INTEGER   Default: 3\n\n",
+        "  --report-language en|ru        Default: en\n\n",
         "  --use-tf-activity TRUE|FALSE  Include TF activity in Drug module prioritisation (default: FALSE)\n",
         "  --use-wes TRUE|FALSE          Include WES evidence in Drug module prioritisation (default: FALSE)\n",
         "  --skip-network-processing TRUE|FALSE  Disable network expansion (default: FALSE)\n\n",
@@ -47,7 +50,7 @@ main <- function() {
         "--prepare copies code and data and embeds the supplied settings; --check validates without starting Shiny.\n")
     return(invisible(NULL))
   }
-  controls <- c("prepare", "check", "host", "port")
+  controls <- c("prepare", "check", "generate_default_pdf", "host", "port")
   unknown <- setdiff(names(cli), c(controls, clinreport_keys))
   if (length(unknown)) stop("Unknown option(s): ", paste(unknown, collapse = ", "))
   if (!is.null(cli$prepare) && isTRUE(cli$check)) stop("Choose --prepare or --check")
@@ -61,6 +64,39 @@ main <- function() {
   }
   setwd(app_dir)
   on.exit(setwd(caller_dir), add = TRUE)
+
+  if (isTRUE(cli$generate_default_pdf)) {
+    source("R/config/config.R", local = .GlobalEnv, encoding = "UTF-8")
+    source("R/report/report_pdf.R", local = .GlobalEnv, encoding = "UTF-8")
+    required_report_packages <- c("shiny", "DT", "jsonlite", "dplyr", "purrr", "stringr", "htmltools", "plotly", "visNetwork")
+    missing_report_packages <- required_report_packages[!vapply(required_report_packages, requireNamespace, logical(1), quietly = TRUE)]
+    if (length(missing_report_packages)) {
+      generate_clinreport_fallback_pdf(
+        file.path(app_dir, "default_report.pdf"),
+        patient = patient_id,
+        reason = paste("missing R packages:", paste(missing_report_packages, collapse = ", ")),
+        top_n = report_top_n,
+        graph_top_n = report_graph_top_n,
+        language = report_language,
+        state_json_path = file.path(app_dir, "default_selection.json")
+      )
+    } else {
+      source("app.R", encoding = "UTF-8")
+      default_ids <- head(report_default_order(drug_network), as.integer(report_top_n))
+      generate_clinreport_pdf(
+        file.path(app_dir, "default_report.pdf"),
+        final_ids = default_ids,
+        baseline_ids = default_ids,
+        top_n = length(default_ids),
+        graph_top_n = min(as.integer(report_graph_top_n), length(default_ids)),
+        language = report_language,
+        state_json_path = file.path(app_dir, "default_selection.json")
+      )
+    }
+    cat("Generated default PDF: ", file.path(app_dir, "default_report.pdf"), "\n", sep = "")
+    return(invisible(NULL))
+  }
+
   env <- new.env(parent = globalenv())
   source("R/config/config.R", local = env, encoding = "UTF-8")
   if (!is.null(cli$prepare) || isTRUE(cli$check)) {
@@ -102,7 +138,10 @@ main <- function() {
       commandArgs(TRUE),
       paste0("--use-tf-activity=", get("use_tf_activity", env)),
       paste0("--use-wes=", get("use_wes", env)),
-      paste0("--skip-network-processing=", get("skip_network_processing", env))
+      paste0("--skip-network-processing=", get("skip_network_processing", env)),
+      paste0("--report-top-n=", get("report_top_n", env)),
+      paste0("--report-graph-top-n=", get("report_graph_top_n", env)),
+      paste0("--report-language=", get("report_language", env))
     )
     bundled$analysis_command <- paste(
       c("clinreport", effective_command_args),
@@ -144,6 +183,17 @@ main <- function() {
       'apptainer exec --bind "$PWD:/report" IMAGE.sif clinreport --host 127.0.0.1',
       "", "Open http://127.0.0.1:3838 on the same machine.",
       "DoRothEA needs internet unless dorothea_file was supplied during preparation."), file.path(output, "README.txt"))
+
+    rscript <- file.path(R.home("bin"), if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript")
+    generation_output <- system2(
+      rscript,
+      c(shQuote(file.path(output, "run.R")), "--generate-default-pdf"),
+      stdout = TRUE,
+      stderr = TRUE
+    )
+    if (!is.null(attr(generation_output, "status")) && attr(generation_output, "status") != 0) {
+      stop("Default PDF generation failed: ", paste(generation_output, collapse = "\n"))
+    }
     cat("Prepared ClinReport: ", output, "\n", sep = "")
     return(invisible(NULL))
   }

@@ -4,10 +4,11 @@ clinreport_paths <- c("drug_network_file", "clinreport_dir", "gene_file", "gene_
   "gsea_carcinoma_report_file", "gsea_normal_report_file", "pathway_gmt_file",
   "tf_file", "dorothea_file")
 clinreport_list_paths <- c("gsea_files", "gmt_files")
-clinreport_numbers <- c("padj_cutoff", "log2fc_cutoff", "interaction_network_max_neighbors")
+clinreport_numbers <- c("padj_cutoff", "log2fc_cutoff", "interaction_network_max_neighbors",
+  "report_top_n", "report_graph_top_n")
 clinreport_strings <- c("patient_id", "wes_display_name", "network_display_name",
   "interaction_network_name", "pathway_collection_name", "pathway_id_prefix",
-  "use_tf_activity", "use_wes", "skip_network_processing")
+  "use_tf_activity", "use_wes", "skip_network_processing", "report_language")
 clinreport_keys <- c(clinreport_paths, clinreport_list_paths, clinreport_numbers, clinreport_strings,
   "gmt_list_file")
 
@@ -45,7 +46,7 @@ clinreport_parse_args <- function(args) {
     option <- substring(args[1], 3)
     has_equals <- grepl("=", option, fixed = TRUE)
     key <- gsub("-", "_", sub("=.*$", "", option), fixed = TRUE)
-    if (key %in% c("help", "check")) {
+    if (key %in% c("help", "check", "generate_default_pdf")) {
       if (has_equals) stop("Flag does not take a value: --", key)
       values[[key]] <- TRUE
       args <- args[-1]

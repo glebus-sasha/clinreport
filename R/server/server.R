@@ -8,6 +8,173 @@ server <- function(
     output,
     session
 ) {
+
+  # ==========================================================
+  # PDF REPORT BUILDER
+  # ==========================================================
+
+  report_sorted_ids <- report_default_order(drug_network)
+  report_initial_top_n <- min(as.integer(report_top_n), length(report_sorted_ids))
+  report_baseline_ids <- reactiveVal(head(report_sorted_ids, report_initial_top_n))
+  report_final_order <- reactiveVal(head(report_sorted_ids, report_initial_top_n))
+
+  report_label <- function(ids) {
+    labels <- drug_network$label[match(ids, drug_network$drugId)]
+    ifelse(is.na(labels) | !nzchar(labels), ids, labels)
+  }
+
+  report_current_top_n <- reactive({
+    value <- suppressWarnings(as.integer(input$report_top_n))
+    if (is.na(value)) report_initial_top_n else max(1L, min(value, nrow(drug_network)))
+  })
+
+  report_current_graph_top_n <- reactive({
+    value <- suppressWarnings(as.integer(input$report_graph_top_n))
+    if (is.na(value)) as.integer(report_graph_top_n) else max(0L, min(value, length(report_final_order())))
+  })
+
+  observeEvent(input$report_top_n, {
+    n <- report_current_top_n()
+    automatic_ids <- head(report_sorted_ids, n)
+    report_baseline_ids(automatic_ids)
+    report_final_order(automatic_ids)
+    updateNumericInput(session, "report_graph_top_n",
+      value = min(report_current_graph_top_n(), n), max = nrow(drug_network))
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$report_toggle, {
+    event <- input$report_toggle
+    req(is.list(event), !is.null(event$drug_id))
+    id <- as.character(event$drug_id)
+    current <- report_final_order()
+    included <- isTRUE(event$included) || identical(as.character(event$included), "true")
+    if (included && !id %in% current) {
+      report_final_order(c(current, id))
+    } else if (!included && id %in% current) {
+      if (length(current) <= 1L) {
+        showNotification("At least one drug must remain in the final list.", type = "warning")
+        return()
+      }
+      report_final_order(setdiff(current, id))
+    }
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$report_move, {
+    event <- input$report_move
+    req(is.list(event), !is.null(event$drug_id), !is.null(event$direction))
+    current <- report_final_order()
+    index <- match(as.character(event$drug_id), current)
+    if (is.na(index)) return()
+    direction <- as.character(event$direction)
+    target <- if (direction == "up") index - 1L else index + 1L
+    if (target < 1L || target > length(current)) return()
+    current[c(index, target)] <- current[c(target, index)]
+    report_final_order(current)
+  }, ignoreInit = TRUE)
+
+  observeEvent(input$report_reset, {
+    automatic_ids <- head(report_sorted_ids, report_current_top_n())
+    report_baseline_ids(automatic_ids)
+    report_final_order(automatic_ids)
+  }, ignoreInit = TRUE)
+
+  output$report_status <- renderUI({
+    final_ids <- report_final_order()
+    baseline_ids <- report_baseline_ids()
+    changed <- !identical(final_ids, baseline_ids)
+    added <- setdiff(final_ids, baseline_ids)
+    removed <- setdiff(baseline_ids, final_ids)
+    moved <- setequal(final_ids, baseline_ids) && !identical(final_ids, baseline_ids)
+    div(
+      class = paste("report-status", if (changed) "changed" else "automatic"),
+      div(class = "report-status-title",
+        if (changed) "Expert changes were made to the final list" else
+          "No expert changes were made"),
+      div(class = "report-status-note",
+        if (changed) {
+          parts <- c(
+            if (length(added)) paste("added:", paste(report_label(added), collapse = ", ")),
+            if (length(removed)) paste("removed:", paste(report_label(removed), collapse = ", ")),
+            if (moved) "order changed"
+          )
+          paste(parts, collapse = " · ")
+        } else {
+          paste("Automatic list for selected Top", length(baseline_ids), "is ready to generate.")
+        })
+    )
+  })
+
+  output$report_editor <- renderUI({
+    current <- report_final_order()
+    candidates <- c(current, setdiff(report_sorted_ids, current))
+    rows <- lapply(seq_along(candidates), function(i) {
+      id <- candidates[i]
+      selected <- id %in% current
+      rank <- if (selected) match(id, current) else "—"
+      row <- drug_network[match(id, drug_network$drugId), , drop = FALSE]
+      id_json <- jsonlite::toJSON(id, auto_unbox = TRUE)
+      toggle_js <- paste0(
+        "Shiny.setInputValue('report_toggle', {drug_id:", id_json,
+        ", included:this.checked}, {priority:'event'});"
+      )
+      up_js <- paste0("Shiny.setInputValue('report_move', {drug_id:", id_json,
+        ", direction:'up'}, {priority:'event'}); return false;")
+      down_js <- paste0("Shiny.setInputValue('report_move', {drug_id:", id_json,
+        ", direction:'down'}, {priority:'event'}); return false;")
+      tags$tr(
+        class = if (selected) "report-drug-row selected" else "report-drug-row",
+        tags$td(rank),
+        tags$td(tags$input(type = "checkbox", checked = if (selected) "checked" else NULL,
+          onchange = toggle_js)),
+        tags$td(htmltools::htmlEscape(if (nrow(row)) row$label else id)),
+        tags$td(htmltools::htmlEscape(id)),
+        tags$td(if (nrow(row)) htmltools::htmlEscape(ifelse(nzchar(row$status), row$status, "—")) else "—"),
+        tags$td(if (nrow(row)) formatC(as.numeric(row$score), format = "f", digits = 3) else "—"),
+        tags$td(
+          tags$button(type = "button", class = "report-move-button", disabled = if (!selected || rank <= 1) TRUE else NULL,
+            onclick = up_js, "↑"),
+          tags$button(type = "button", class = "report-move-button", disabled = if (!selected || rank >= length(current)) TRUE else NULL,
+            onclick = down_js, "↓")
+        )
+      )
+    })
+    div(
+      class = "report-editor",
+      div(class = "report-editor-title", "Final list composition and order"),
+      div(class = "report-editor-note", "Include or exclude drugs and change their order with the arrows. Unchecked drugs remain available as candidates."),
+      tags$table(class = "report-editor-table",
+        tags$thead(tags$tr(
+          tags$th("Rank"), tags$th("In PDF"), tags$th("Drug"), tags$th("ID"),
+          tags$th("Status"), tags$th("Score"), tags$th("Order")
+        )),
+        tags$tbody(rows)
+      )
+    )
+  })
+
+  output$download_report_pdf <- downloadHandler(
+    filename = function() {
+      suffix <- if (!identical(report_final_order(), report_baseline_ids())) "-expert" else "-automatic"
+      title <- input$report_title
+      if (is.null(title) || !nzchar(trimws(title))) {
+        title <- paste(patient_id, format(Sys.time(), "%Y-%m-%d %H-%M-%S"))
+      }
+      paste0(gsub("[^A-Za-z0-9_-]", "_", title), suffix, ".pdf")
+    },
+    content = function(file) {
+      generate_clinreport_pdf(
+        file,
+        final_ids = report_final_order(),
+        baseline_ids = report_baseline_ids(),
+        top_n = report_current_top_n(),
+        graph_top_n = report_current_graph_top_n(),
+        expert_name = input$report_expert_name,
+        expert_comment = input$report_expert_comment,
+        language = input$language,
+        report_title = input$report_title
+      )
+    }
+  )
   
   
   # ==========================================================

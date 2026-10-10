@@ -32,6 +32,9 @@ process CLINREP {
     def use_tf_activity = params.use_tf_activity ?: 'FALSE'
     def use_wes = params.use_wes ?: 'FALSE'
     def skip_network_processing = params.skip_network_processing ?: 'FALSE'
+    def report_top_n = params.report_top_n == null ? 15 : params.report_top_n
+    def report_graph_top_n = params.report_graph_top_n == null ? 3 : params.report_graph_top_n
+    def report_language = params.report_language == null ? 'en' : params.report_language
     def gsea_args = gsea_files.collect { "'${it}'" }.join(' ')
     def gmt_args = gmts.collect { "'${it}'" }.join(' ')
     """
@@ -59,6 +62,9 @@ process CLINREP {
       --log2fc-cutoff ${log2fc_cutoff} \\
       --use-tf-activity '${use_tf_activity}' \\
       --use-wes '${use_wes}' \\
-      --skip-network-processing '${skip_network_processing}'
+      --skip-network-processing '${skip_network_processing}' \\
+      --report-top-n '${report_top_n}' \\
+      --report-graph-top-n '${report_graph_top_n}' \\
+      --report-language '${report_language}'
     """
 }
