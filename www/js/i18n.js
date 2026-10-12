@@ -10,7 +10,7 @@
       "Build the drug list and adjust it manually when needed.": "Сформируйте список лекарств и при необходимости скорректируйте его вручную.",
       "Report title": "Название отчёта",
       "Number of drugs (Top N)": "Количество лекарств (Top N)",
-      "Network graphs (Top K)": "Сетевых графиков (Top K)",
+      "Drug modules shown (Top K)": "Количество модулей препаратов (Top K)",
       "Expert (optional)": "Эксперт (необязательно)",
       "Expert comment (optional)": "Комментарий эксперта (необязательно)",
       "For example: excluded because of a contraindication.": "Например: препарат исключён из-за противопоказаний.",

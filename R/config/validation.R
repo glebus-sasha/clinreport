@@ -119,9 +119,9 @@ if (!is.numeric(report_top_n) || length(report_top_n) != 1 || is.na(report_top_n
     !is.finite(report_top_n) || report_top_n != floor(report_top_n) || report_top_n < 1) {
   stop("report_top_n must be a positive integer")
 }
-if (!is.numeric(report_graph_top_n) || length(report_graph_top_n) != 1 || is.na(report_graph_top_n) ||
-    !is.finite(report_graph_top_n) || report_graph_top_n != floor(report_graph_top_n) || report_graph_top_n < 0) {
-  stop("report_graph_top_n must be a non-negative integer")
+if (!is.numeric(report_module_top_n) || length(report_module_top_n) != 1 || is.na(report_module_top_n) ||
+    !is.finite(report_module_top_n) || report_module_top_n != floor(report_module_top_n) || report_module_top_n < 0) {
+  stop("report_module_top_n must be a non-negative integer")
 }
 if (!is.character(report_language) || length(report_language) != 1 ||
     !report_language %in% c("en", "ru")) {

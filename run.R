@@ -38,7 +38,7 @@ main <- function() {
         "  --log2fc-cutoff NUMBER         Default: 1.0\n",
         "  --interaction-network-max-neighbors INTEGER  Default: 40\n\n",
         "  --report-top-n INTEGER         Default: 15\n",
-        "  --report-graph-top-n INTEGER   Default: 3\n\n",
+        "  --report-module-top-n INTEGER Default: 5\n\n",
         "  --report-language en|ru        Default: en\n\n",
         "  --use-tf-activity TRUE|FALSE  Include TF activity in Drug module prioritisation (default: FALSE)\n",
         "  --use-wes TRUE|FALSE          Include WES evidence in Drug module prioritisation (default: FALSE)\n",
@@ -76,7 +76,7 @@ main <- function() {
         patient = patient_id,
         reason = paste("missing R packages:", paste(missing_report_packages, collapse = ", ")),
         top_n = report_top_n,
-        graph_top_n = report_graph_top_n,
+        module_top_n = report_module_top_n,
         language = report_language,
         state_json_path = file.path(app_dir, "default_selection.json")
       )
@@ -88,7 +88,7 @@ main <- function() {
         final_ids = default_ids,
         baseline_ids = default_ids,
         top_n = length(default_ids),
-        graph_top_n = min(as.integer(report_graph_top_n), length(default_ids)),
+        module_top_n = min(as.integer(report_module_top_n), length(default_ids)),
         language = report_language,
         state_json_path = file.path(app_dir, "default_selection.json")
       )
@@ -140,7 +140,7 @@ main <- function() {
       paste0("--use-wes=", get("use_wes", env)),
       paste0("--skip-network-processing=", get("skip_network_processing", env)),
       paste0("--report-top-n=", get("report_top_n", env)),
-      paste0("--report-graph-top-n=", get("report_graph_top_n", env)),
+      paste0("--report-module-top-n=", get("report_module_top_n", env)),
       paste0("--report-language=", get("report_language", env))
     )
     bundled$analysis_command <- paste(

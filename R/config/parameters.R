@@ -5,7 +5,7 @@ clinreport_paths <- c("drug_network_file", "clinreport_dir", "gene_file", "gene_
   "tf_file", "dorothea_file")
 clinreport_list_paths <- c("gsea_files", "gmt_files")
 clinreport_numbers <- c("padj_cutoff", "log2fc_cutoff", "interaction_network_max_neighbors",
-  "report_top_n", "report_graph_top_n")
+  "report_top_n", "report_module_top_n")
 clinreport_strings <- c("patient_id", "wes_display_name", "network_display_name",
   "interaction_network_name", "pathway_collection_name", "pathway_id_prefix",
   "use_tf_activity", "use_wes", "skip_network_processing", "report_language")

@@ -28,9 +28,9 @@ server <- function(
     if (is.na(value)) report_initial_top_n else max(1L, min(value, nrow(drug_network)))
   })
 
-  report_current_graph_top_n <- reactive({
-    value <- suppressWarnings(as.integer(input$report_graph_top_n))
-    if (is.na(value)) as.integer(report_graph_top_n) else max(0L, min(value, length(report_final_order())))
+  report_current_module_top_n <- reactive({
+    value <- suppressWarnings(as.integer(input$report_module_top_n))
+    if (is.na(value)) as.integer(report_module_top_n) else max(0L, min(value, length(report_final_order())))
   })
 
   observeEvent(input$report_top_n, {
@@ -38,8 +38,8 @@ server <- function(
     automatic_ids <- head(report_sorted_ids, n)
     report_baseline_ids(automatic_ids)
     report_final_order(automatic_ids)
-    updateNumericInput(session, "report_graph_top_n",
-      value = min(report_current_graph_top_n(), n), max = nrow(drug_network))
+    updateNumericInput(session, "report_module_top_n",
+      value = min(report_current_module_top_n(), n), max = nrow(drug_network))
   }, ignoreInit = TRUE)
 
   observeEvent(input$report_toggle, {
@@ -167,7 +167,7 @@ server <- function(
         final_ids = report_final_order(),
         baseline_ids = report_baseline_ids(),
         top_n = report_current_top_n(),
-        graph_top_n = report_current_graph_top_n(),
+        module_top_n = report_current_module_top_n(),
         expert_name = input$report_expert_name,
         expert_comment = input$report_expert_comment,
         language = input$language,

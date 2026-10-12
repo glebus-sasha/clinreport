@@ -2,7 +2,7 @@
 
 report_dictionary <- list(
   en = list(
-    title = "O2T ClinReport - Drug List", report_title = "Report title", patient = "Patient:", status = "List status",
+    title = "O2T ClinReport - Drug List", report_title = "Report title", patient = "Patient:", patient_id_label = "Patient ID", status = "List status",
     automatic = "Automatically generated", expert = "Reviewed and changed by an expert",
     automatic_note = "No expert changes were made to the drug list composition or order.",
     expert_note = "The drug list composition or order differs from the automatic list for the selected Top N.",
@@ -11,6 +11,12 @@ report_dictionary <- list(
     disclaimer = "This report is informational and intended to support, not replace, review by a qualified healthcare professional. It must not be used as the sole basis for diagnosis or treatment decisions.",
     final_list = "Drug list", score_note = "priority score is not a clinical probability of efficacy",
     molecular = "Molecular rationale", molecular_note = "Summary of evidence available in the current analysis run",
+    top_k = "Top-ranked drugs", de_significant_targets = "Significant DE targets", wes_targets = "WES-linked targets", tf_targets = "TF-linked targets",
+    evidence_definitions = "Evidence definitions", de_definition = "Significant DE targets: targets with expression changes meeting the configured adjusted p-value and |log2FC| thresholds.", wes_definition = "WES-linked targets: drug targets linked to variants detected in the WES input.", tf_definition = "TF-linked targets: drug targets connected to transcription-factor activity evidence.",
+    analysis_thresholds = "Analysis thresholds", sources = "Sources and reproducibility", sources_note = "Inputs, settings, and provenance recorded for this report",
+    input_data = "Input data", analysis_settings = "Analysis settings", item = "Item", value = "Value", analysis_command = "Preparation command", command_not_recorded = "Preparation command was not recorded",
+    source_drug_network = "Drug ranking input", source_gene_data = "Gene expression input", source_annotations = "Drug annotations", source_interactions = "Interaction network", source_wes = "WES input", source_tf = "TF input", source_pathways = "Pathway and GSEA inputs", source_gene_annotations = "Gene annotations", source_tx2gene = "Transcript-to-gene mapping",
+    setting_top_n = "Drug list Top N", setting_module_top_n = "Drug modules Top K", setting_padj = "Adjusted p-value cutoff", setting_log2fc = "Absolute log2FC cutoff", setting_wes_used = "WES used in prioritization", setting_tf_used = "TF activity used in prioritization", setting_network_skip = "Network expansion disabled", yes = "yes", no = "no", not_found = "not found",
     clinical = "Clinical and pharmacological context", clinical_continued = "Clinical and pharmacological context - continued",
     clinical_note = "Summary from available annotations; absence of an indication, warning, or other annotation does not mean there is no clinical evidence or risk",
     network = "Drug module:", network_note = "Drug targets only; colours show expression direction",
@@ -30,7 +36,7 @@ report_dictionary <- list(
     available = "available", not_provided = "not provided"
   ),
   ru = list(
-    title = "O2T ClinReport - Список лекарств", report_title = "Название отчёта", patient = "Пациент:", status = "Статус списка",
+    title = "O2T ClinReport - Список лекарств", report_title = "Название отчёта", patient = "Пациент:", patient_id_label = "ID пациента", status = "Статус списка",
     automatic = "Сформирован автоматически", expert = "Проверен и изменён экспертом",
     automatic_note = "Экспертская корректировка состава и порядка списка лекарств не внесена.",
     expert_note = "Состав или порядок списка лекарств отличается от автоматического списка для выбранного Top N.",
@@ -39,6 +45,12 @@ report_dictionary <- list(
     disclaimer = "Отчёт носит информационный характер и предназначен для поддержки, а не замены оценки квалифицированного медицинского специалиста. Он не должен использоваться как единственное основание для диагностики или выбора лечения.",
     final_list = "Список лекарств", score_note = "priority score не является клинической вероятностью эффективности",
     molecular = "Молекулярное обоснование", molecular_note = "Сводка по данным, доступным в текущем запуске анализа",
+    top_k = "Препараты с наивысшим приоритетом", de_significant_targets = "Значимые DE-мишени", wes_targets = "WES-связанные мишени", tf_targets = "TF-связанные мишени",
+    evidence_definitions = "Краткая справка", de_definition = "Значимые DE-мишени: мишени с изменением экспрессии, прошедшим заданные пороги скорректированного p-value и |log2FC|.", wes_definition = "WES-связанные мишени: мишени лекарств, связанные с вариантами, выявленными во входных данных WES.", tf_definition = "TF-связанные мишени: мишени лекарств, связанные с данными об активности факторов транскрипции.",
+    analysis_thresholds = "Пороги анализа", sources = "Источники и воспроизводимость", sources_note = "Входные данные, настройки и происхождение данных, зафиксированные для этого отчёта",
+    input_data = "Входные данные", analysis_settings = "Параметры анализа", item = "Параметр", value = "Значение", analysis_command = "Команда подготовки", command_not_recorded = "Команда подготовки не была записана",
+    source_drug_network = "Вход для ранжирования лекарств", source_gene_data = "Вход экспрессии генов", source_annotations = "Аннотации лекарств", source_interactions = "Сеть взаимодействий", source_wes = "Вход WES", source_tf = "Вход TF", source_pathways = "Пути и GSEA", source_gene_annotations = "Аннотации генов", source_tx2gene = "Транскрипты - гены",
+    setting_top_n = "Top N списка лекарств", setting_module_top_n = "Top K модулей препаратов", setting_padj = "Порог скорректированного p-value", setting_log2fc = "Порог абсолютного log2FC", setting_wes_used = "WES использован при ранжировании", setting_tf_used = "Активность TF использована при ранжировании", setting_network_skip = "Расширение сети отключено", yes = "да", no = "нет", not_found = "не найден",
     clinical = "Клинический и фармакологический контекст", clinical_continued = "Клинический и фармакологический контекст - продолжение",
     clinical_note = "Аннотации из доступных источников; отсутствие показания или предупреждения не означает отсутствия данных или рисков",
     network = "Модуль препарата:", network_note = "Только мишени лекарства; цвет показывает направление экспрессии",
@@ -107,11 +119,130 @@ report_text <- function(x, y, text, width = 92, cex = 0.82, col = "#17202a", fon
   y - length(lines) * line_height
 }
 
-report_header <- function(title, subtitle = NULL) {
+report_config_value <- function(name, default = "") {
+  if (!exists(name, inherits = TRUE)) return(default)
+  report_scalar(get(name, inherits = TRUE), default)
+}
+
+report_path_label <- function(name, default = "") {
+  path <- report_config_value(name, "")
+  if (!nzchar(path)) return(default)
+  basename(gsub("\\\\", "/", path))
+}
+
+report_source_value <- function(display_name, path_name, language = "ru") {
+  path <- report_config_value(path_name, "")
+  if (!nzchar(path)) return(report_tr("not_provided", language))
+  label <- report_path_label(path_name, report_tr("not_provided", language))
+  availability <- if (file.exists(path) || dir.exists(path)) "" else paste0(" (", report_tr("not_found", language), ")")
+  prefix <- report_scalar(display_name, "")
+  paste0(if (nzchar(prefix)) paste0(prefix, " - ") else "", label, availability)
+}
+
+report_bool_value <- function(value, language = "ru") {
+  enabled <- isTRUE(value) || identical(tolower(as.character(value)), "true")
+  report_tr(if (enabled) "yes" else "no", language)
+}
+
+report_round_rect <- function(x1, y1, x2, y2, radius = 0.012, col = NA, border = NA, lwd = 1) {
+  radius <- min(radius, (x2 - x1) / 2, (y2 - y1) / 2)
+  arc <- function(cx, cy, start, end) {
+    theta <- seq(start, end, length.out = 8)
+    cbind(cx + radius * cos(theta), cy + radius * sin(theta))
+  }
+  points <- rbind(
+    c(x1 + radius, y2), c(x2 - radius, y2), arc(x2 - radius, y2 - radius, pi / 2, 0),
+    c(x2, y1 + radius), arc(x2 - radius, y1 + radius, 0, -pi / 2),
+    c(x1 + radius, y1), arc(x1 + radius, y1 + radius, -pi / 2, -pi),
+    c(x1, y2 - radius), arc(x1 + radius, y2 - radius, pi, pi / 2)
+  )
+  polygon(points[, 1], points[, 2], col = col, border = border, lwd = lwd)
+}
+
+report_draw_top_k <- function(headers, rows, x1 = 0.53, x2 = 0.94, y_top = 0.78,
+                                 row_height = 0.043, font_size = 0.58, header_size = 0.58) {
+  if (!length(rows) || !nrow(rows)) return(invisible(y_top))
+  widths <- c(0.13, 0.59, 0.28)
+  x <- x1 + c(0, cumsum(widths) * (x2 - x1))
+  rect(x[1], y_top - row_height, x[length(x)], y_top, col = "#e6f2f0", border = NA)
+  header_align <- c("center", "left", "center")
+  for (i in seq_along(headers)) {
+    if (header_align[[i]] == "left") {
+      text(x[i] + 0.006, y_top - row_height * 0.68, headers[[i]], adj = 0,
+        cex = header_size, font = 2, col = "#134e4a")
+    } else {
+      text((x[i] + x[i + 1]) / 2, y_top - row_height * 0.68, headers[[i]],
+        cex = header_size, font = 2, col = "#134e4a")
+    }
+  }
+  for (r in seq_len(nrow(rows))) {
+    y1 <- y_top - row_height * (r + 1)
+    y2 <- y_top - row_height * r
+    if (r %% 2 == 0) rect(x[1], y1, x[length(x)], y2, col = "#f8fafc", border = NA)
+    text((x[1] + x[2]) / 2, (y1 + y2) / 2, report_scalar(rows$rank[r], "-"), cex = font_size, col = "#17202a")
+    text(x[2] + 0.006, (y1 + y2) / 2, report_scalar(rows$drug[r], "-"), adj = 0, cex = font_size, col = "#17202a")
+    text((x[3] + x[4]) / 2, (y1 + y2) / 2, report_scalar(rows$score[r], "-"), cex = font_size, col = "#17202a")
+  }
+  segments(x[1], y_top, x[length(x)], y_top, col = "#94a3b8")
+  segments(x[1], y_top - row_height * (nrow(rows) + 1), x[length(x)],
+    y_top - row_height * (nrow(rows) + 1), col = "#94a3b8")
+  invisible(y_top - row_height * (nrow(rows) + 1))
+}
+
+report_source_rows <- function(context, language = "ru") {
+  pathway_name <- report_config_value("pathway_collection_name", "")
+  pathway_count <- if (exists("gmt_files", inherits = TRUE)) length(gmt_files) else 0L
+  pathway_value <- if (nzchar(pathway_name)) pathway_name else report_tr("not_provided", language)
+  if (pathway_count > 0) pathway_value <- paste0(pathway_value, " (", pathway_count, ")")
+  source_rows <- data.frame(
+    item = c(report_tr("source_drug_network", language), report_tr("source_gene_data", language),
+      report_tr("source_annotations", language), report_tr("source_interactions", language),
+      report_tr("source_wes", language), report_tr("source_tf", language),
+      report_tr("source_pathways", language), report_tr("source_gene_annotations", language),
+      report_tr("source_tx2gene", language)),
+    value = c(
+      report_source_value("", "drug_network_file", language),
+      report_source_value("", "gene_file", language),
+      report_source_value("", "clinreport_dir", language),
+      report_source_value(report_config_value("interaction_network_name", "STRING"), "interaction_network_file", language),
+      report_source_value(report_config_value("wes_display_name", "WES"), "wes_vcf_file", language),
+      report_source_value("", "tf_file", language),
+      if (pathway_count > 0) pathway_value else report_tr("not_provided", language),
+      report_source_value("", "gene_annotations_file", language),
+      report_source_value("", "tx2gene_file", language)
+    ),
+    stringsAsFactors = FALSE
+  )
+  settings <- data.frame(
+    item = c(report_tr("setting_top_n", language), report_tr("setting_module_top_n", language),
+      report_tr("setting_padj", language), report_tr("setting_log2fc", language),
+      report_tr("setting_wes_used", language), report_tr("setting_tf_used", language),
+      report_tr("setting_network_skip", language)),
+    value = c(
+      as.character(context$top_n), as.character(context$module_top_n),
+      report_config_value("padj_cutoff", "-"), report_config_value("log2fc_cutoff", "-"),
+      report_bool_value(report_config_value("use_wes", FALSE), language),
+      report_bool_value(report_config_value("use_tf_activity", FALSE), language),
+      report_bool_value(report_config_value("skip_network_processing", FALSE), language)
+    ),
+    stringsAsFactors = FALSE
+  )
+  list(source_rows = source_rows, settings = settings)
+}
+
+report_header <- function(title, subtitle = NULL, patient = NULL, language = "ru", show_patient = FALSE) {
   text(0.06, 0.95, title, adj = 0, cex = 1.35, font = 2, col = "#0f766e")
+  if (isTRUE(show_patient) && !is.null(patient) && nzchar(report_scalar(patient, ""))) {
+    report_round_rect(0.73, 0.895, 0.94, 0.965, radius = 0.010, col = "#f0fdfa", border = "#c9ddd9")
+    text(0.745, 0.946, report_tr("patient_id_label", language), adj = 0, cex = 0.44,
+      font = 2, col = "#0f766e")
+    text(0.745, 0.916, report_scalar(patient, "-"), adj = 0, cex = 0.64,
+      font = 2, col = "#134e4a")
+  }
   subtitle_lines <- character()
   if (!is.null(subtitle) && nzchar(subtitle)) {
-    subtitle_lines <- report_wrap(subtitle, width = 112)
+    subtitle_width <- if (!is.null(patient) && nzchar(report_scalar(patient, ""))) 80 else 112
+    subtitle_lines <- report_wrap(subtitle, width = subtitle_width)
     text(0.06, 0.915 - (seq_along(subtitle_lines) - 1L) * 0.022, subtitle_lines,
       adj = 0, cex = 0.72, col = "#64748b")
   }
@@ -287,7 +418,7 @@ report_network_annotations <- function(nodes) {
   )
 }
 
-report_build_context <- function(final_ids, baseline_ids, top_n, graph_top_n,
+report_build_context <- function(final_ids, baseline_ids, top_n, module_top_n,
                                  expert_name = "", expert_comment = "", report_title = "") {
   final_ids <- unique(as.character(final_ids))
   baseline_ids <- unique(as.character(baseline_ids))
@@ -302,7 +433,7 @@ report_build_context <- function(final_ids, baseline_ids, top_n, graph_top_n,
     final_ids = final_ids,
     baseline_ids = baseline_ids,
     top_n = as.integer(top_n),
-    graph_top_n = min(as.integer(graph_top_n), length(final_ids)),
+    module_top_n = min(as.integer(module_top_n), length(final_ids)),
     expert_adjusted = expert_adjusted,
     expert_name = report_scalar(expert_name, ""),
     expert_comment = report_scalar(expert_comment, ""),
@@ -316,7 +447,7 @@ report_build_context <- function(final_ids, baseline_ids, top_n, graph_top_n,
   )
 }
 
-report_draw_network <- function(drug_id, language = "ru") {
+report_draw_network <- function(drug_id, language = "ru", patient = NULL) {
   drug_row <- drug_network[match(drug_id, drug_network$drugId), , drop = FALSE]
   drug_label <- if (nrow(drug_row)) report_scalar(drug_row$label, drug_id) else drug_id
   graph <- tryCatch(
@@ -324,7 +455,7 @@ report_draw_network <- function(drug_id, language = "ru") {
     error = function(e) list(nodes = data.frame(), edges = data.frame(), targets = character())
   )
   report_canvas()
-  report_header(paste(report_tr("network", language), drug_label))
+  report_header(paste(report_tr("network", language), drug_label), language = language)
   if (!nrow(graph$nodes)) {
     text(0.5, 0.52, report_tr("network_missing", language), cex = 1, col = "#64748b")
     return(invisible())
@@ -493,7 +624,7 @@ report_open_device <- function(path) {
 }
 
 generate_clinreport_fallback_pdf <- function(path, patient = "-", reason = "", top_n = 15,
-                                             graph_top_n = 3, state_json_path = NULL,
+                                             module_top_n = 5, state_json_path = NULL,
                                              language = "ru", report_title = "") {
   language <- if (language %in% names(report_dictionary)) language else "en"
   report_title <- report_scalar(report_title,
@@ -502,12 +633,13 @@ generate_clinreport_fallback_pdf <- function(path, patient = "-", reason = "", t
   report_open_device(path)
   on.exit(grDevices::dev.off(), add = TRUE)
   report_canvas()
-  report_header(report_title, paste(report_tr("fallback_title", language), "-", report_tr("patient", language), patient))
+  report_header(report_title, paste(report_tr("fallback_title", language), "-", report_tr("patient", language), patient),
+    patient = patient, language = language, show_patient = TRUE)
   text(0.06, 0.80, report_tr("fallback_title", language), adj = 0, cex = 1.0, font = 2, col = "#0f766e")
   fallback_tail <- if (language == "ru") "и графиков." else "and graphs."
   report_text(0.06, 0.73,
     paste(report_tr("fallback_text", language), report_tr("fallback_defaults", language),
-      paste("Top", top_n), paste("Top", graph_top_n), fallback_tail), cex = 0.82)
+      paste("Top", top_n), paste("Top", module_top_n), fallback_tail), cex = 0.82)
   if (nzchar(reason)) report_text(0.06, 0.58, paste(report_tr("fallback_reason", language), reason), cex = 0.68, col = "#64748b")
   if (!is.null(state_json_path)) {
     if (requireNamespace("jsonlite", quietly = TRUE)) {
@@ -517,7 +649,7 @@ generate_clinreport_fallback_pdf <- function(path, patient = "-", reason = "", t
         report_title = report_title,
         language = language,
         top_n = as.integer(top_n),
-        graph_top_n = as.integer(graph_top_n),
+        module_top_n = as.integer(module_top_n),
         expert_adjusted = FALSE,
         baseline_ids = character(),
         final_ids = character()
@@ -527,7 +659,7 @@ generate_clinreport_fallback_pdf <- function(path, patient = "-", reason = "", t
         "{",
         paste0('  "patient_id": "', gsub('"', '\\\"', patient, fixed = TRUE), '",'),
         paste0('  "top_n": ', as.integer(top_n), ','),
-        paste0('  "graph_top_n": ', as.integer(graph_top_n), ','),
+        paste0('  "module_top_n": ', as.integer(module_top_n), ','),
         '  "expert_adjusted": false,',
         '  "baseline_ids": [],',
         '  "final_ids": []',
@@ -539,7 +671,7 @@ generate_clinreport_fallback_pdf <- function(path, patient = "-", reason = "", t
 }
 
 generate_clinreport_pdf <- function(path, final_ids, baseline_ids = final_ids, top_n = length(final_ids),
-                                    graph_top_n = 3, expert_name = "", expert_comment = "",
+                                    module_top_n = 5, expert_name = "", expert_comment = "",
                                     state_json_path = NULL, language = "ru", report_title = "") {
   if (!length(final_ids)) stop("The final report list must contain at least one drug")
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
@@ -547,38 +679,50 @@ generate_clinreport_pdf <- function(path, final_ids, baseline_ids = final_ids, t
   patient <- if (exists("patient_id")) report_scalar(patient_id, "-") else "-"
   report_title <- report_scalar(report_title,
     paste(patient, format(Sys.time(), "%Y-%m-%d %H-%M-%S")))
-  context <- report_build_context(final_ids, baseline_ids, top_n, graph_top_n,
+  context <- report_build_context(final_ids, baseline_ids, top_n, module_top_n,
     expert_name, expert_comment, report_title)
   report_open_device(path)
   on.exit(grDevices::dev.off(), add = TRUE)
 
+  drug_rows <- drug_network[match(context$final_ids, drug_network$drugId), , drop = FALSE]
+  top_k <- min(as.integer(context$module_top_n), nrow(drug_rows))
+  top_rows <- data.frame(
+    rank = seq_len(top_k),
+    drug = as.character(drug_rows$label[seq_len(top_k)]),
+    score = formatC(as.numeric(drug_rows$score[seq_len(top_k)]), format = "f", digits = 3),
+    stringsAsFactors = FALSE
+  )
   report_canvas()
-  report_header(context$report_title, paste(report_tr("title", language), "-", report_tr("patient", language), patient))
-  text(0.06, 0.82, report_tr("status", language), adj = 0, cex = 0.78, font = 2, col = "#475569")
+  report_header(report_tr("title", language), context$report_title, patient = patient, language = language, show_patient = TRUE)
+  text(0.06, 0.825, report_tr("status", language), adj = 0, cex = 0.78, font = 2, col = "#475569")
   status <- if (context$expert_adjusted) report_tr("expert", language) else report_tr("automatic", language)
   status_note <- if (context$expert_adjusted) {
     report_tr("expert_note", language)
   } else {
     report_tr("automatic_note", language)
   }
-  rect(0.06, 0.69, 0.94, 0.79, col = if (context$expert_adjusted) "#fff7ed" else "#ecfdf5",
+  rect(0.06, 0.66, 0.46, 0.795, col = if (context$expert_adjusted) "#fff7ed" else "#ecfdf5",
     border = if (context$expert_adjusted) "#f59e0b" else "#10b981")
-  text(0.08, 0.75, status, adj = 0, cex = 1.0, font = 2,
+  text(0.08, 0.75, status, adj = 0, cex = 0.92, font = 2,
     col = if (context$expert_adjusted) "#9a3412" else "#047857")
-  text(0.08, 0.715, report_wrap(status_note, 105), adj = 0, cex = 0.72, col = "#475569")
-  y <- 0.62
-  y <- report_text(0.06, y, paste(report_tr("drug_count", language), length(context$final_ids)), cex = 0.82, font = 2)
-  y <- report_text(0.06, y - 0.02, paste(report_tr("graph_count", language), context$graph_top_n), cex = 0.82)
-  y <- report_text(0.06, y - 0.02, paste(report_tr("generated", language), context$generated_at), cex = 0.82)
-  if (nzchar(context$expert_name)) y <- report_text(0.06, y - 0.02, paste(report_tr("expert_label", language), context$expert_name), cex = 0.82)
+  status_lines <- report_wrap(status_note, 48)
+  text(0.08, 0.715 - (seq_along(status_lines) - 1L) * 0.022, status_lines,
+    adj = 0, cex = 0.62, col = "#475569")
+  y <- 0.605
+  y <- report_text(0.06, y, paste(report_tr("drug_count", language), length(context$final_ids)), cex = 0.72, width = 52)
+  y <- report_text(0.06, y - 0.012, paste(report_tr("graph_count", language), context$module_top_n), cex = 0.72, width = 52)
+  y <- report_text(0.06, y - 0.012, paste(report_tr("generated", language), context$generated_at), cex = 0.65, width = 52)
+  if (nzchar(context$expert_name)) y <- report_text(0.06, y - 0.012, paste(report_tr("expert_label", language), context$expert_name), cex = 0.68, width = 52)
   if (nzchar(context$expert_comment)) {
-    text(0.06, y - 0.02, report_tr("comment_label", language), adj = 0, cex = 0.82, font = 2, col = "#475569")
-    report_text(0.06, y - 0.055, context$expert_comment, cex = 0.78)
+    text(0.06, y - 0.018, report_tr("comment_label", language), adj = 0, cex = 0.68, font = 2, col = "#475569")
+    report_text(0.06, y - 0.048, context$expert_comment, width = 52, cex = 0.62)
   }
-  report_text(0.06, 0.21, report_tr("disclaimer", language), width = 125,
-    cex = 0.62, col = "#64748b", line_height = 0.024)
+  text(0.53, 0.825, report_tr("top_k", language), adj = 0, cex = 0.78, font = 2, col = "#475569")
+  report_draw_top_k(c(report_tr("rank", language), report_tr("drug", language), "Score"), top_rows,
+    x1 = 0.53, x2 = 0.94, y_top = 0.795, row_height = 0.043, font_size = 0.55, header_size = 0.52)
+  report_text(0.06, 0.205, report_tr("disclaimer", language), width = 125,
+    cex = 0.60, col = "#64748b", line_height = 0.023)
 
-  drug_rows <- drug_network[match(context$final_ids, drug_network$drugId), , drop = FALSE]
   baseline_rank <- match(context$final_ids, context$baseline_ids)
   change <- vapply(seq_along(context$final_ids), function(i) {
     id <- context$final_ids[i]
@@ -595,7 +739,8 @@ generate_clinreport_pdf <- function(path, final_ids, baseline_ids = final_ids, t
     check.names = FALSE, stringsAsFactors = FALSE
   )
   report_canvas()
-  report_header(report_tr("final_list", language), paste("Top", context$top_n, "-", report_tr("score_note", language)))
+  report_header(report_tr("final_list", language), paste("Top", context$top_n, "-", report_tr("score_note", language)),
+    language = language)
   report_draw_table(c(report_tr("rank", language), report_tr("drug", language), report_tr("id", language),
     report_tr("status_header", language), "Score", report_tr("original_rank", language), report_tr("change", language)),
     table_rows, c(0.055, 0.27, 0.14, 0.12, 0.10, 0.10, 0.215),
@@ -614,15 +759,31 @@ generate_clinreport_pdf <- function(path, final_ids, baseline_ids = final_ids, t
     )
   }) |> bind_rows()
   report_canvas()
-  report_header(report_tr("molecular", language), report_tr("molecular_note", language))
-  report_draw_table(c(report_tr("drug", language), report_tr("targets", language), report_tr("de", language), report_tr("wes", language), report_tr("tf", language)), evidence_rows,
-    c(0.42, 0.14, 0.14, 0.14, 0.16),
-    row_height = min(0.045, 0.75 / max(1, nrow(evidence_rows))), font_size = 0.65)
-  y <- 0.14
-  report_text(0.06, y, paste("DE:", "padj <", padj_cutoff, "; |log2FC| >=", log2fc_cutoff), cex = 0.72)
-  report_text(0.06, y - 0.05,
+  report_header(report_tr("molecular", language), report_tr("molecular_note", language), language = language)
+  molecular_row_height <- min(0.050, 0.54 / max(1, nrow(evidence_rows)))
+  molecular_bottom <- report_draw_wrapped_table(
+    c(report_tr("drug", language), report_tr("targets", language), report_tr("de_significant_targets", language),
+      report_tr("wes_targets", language), report_tr("tf_targets", language)),
+    evidence_rows,
+    c(0.34, 0.14, 0.18, 0.17, 0.17),
+    wrap_cols = 2:5, base_row_height = molecular_row_height, font_size = 0.58, header_size = 0.50,
+    wrap_widths = c(24, 16, 20, 19, 19)
+  )
+  info_y <- max(0.115, molecular_bottom - 0.06)
+  text(0.06, info_y, paste0(report_tr("analysis_thresholds", language), ": DE padj < ", padj_cutoff, "; |log2FC| >= ", log2fc_cutoff),
+    adj = 0, cex = 0.63, col = "#17202a")
+  text(0.06, info_y - 0.025,
     paste("WES:", if (exists("has_wes") && isTRUE(has_wes)) report_tr("available", language) else report_tr("not_provided", language),
-      "- TF:", if (exists("has_tf_analysis") && isTRUE(has_tf_analysis)) report_tr("available", language) else report_tr("not_provided", language)), cex = 0.72)
+      "- TF:", if (exists("has_tf_analysis") && isTRUE(has_tf_analysis)) report_tr("available", language) else report_tr("not_provided", language)),
+    adj = 0, cex = 0.63, col = "#17202a")
+  text(0.06, info_y - 0.050, report_tr("evidence_definitions", language),
+    adj = 0, cex = 0.56, font = 2, col = "#475569")
+  definition_y <- info_y - 0.073
+  for (definition_key in c("de_definition", "wes_definition", "tf_definition")) {
+    definition_y <- report_text(0.06, definition_y, report_tr(definition_key, language),
+      width = 128, cex = 0.50, col = "#64748b", line_height = 0.017)
+    definition_y <- definition_y - 0.003
+  }
 
   clinical_rows <- lapply(context$final_ids, function(id) {
     row <- drug_network[match(id, drug_network$drugId), , drop = FALSE]
@@ -644,7 +805,8 @@ generate_clinreport_pdf <- function(path, final_ids, baseline_ids = final_ids, t
       report_canvas()
       report_header(
         if (page_start == 1L) report_tr("clinical", language) else report_tr("clinical_continued", language),
-        if (page_start == 1L) report_tr("clinical_note", language) else NULL
+        if (page_start == 1L) report_tr("clinical_note", language) else NULL,
+        language = language
       )
       report_draw_wrapped_table(
         c(report_tr("drug", language), report_tr("approval", language), report_tr("phase", language),
@@ -660,17 +822,45 @@ generate_clinreport_pdf <- function(path, final_ids, baseline_ids = final_ids, t
     }
   }
 
-  context_ids <- head(context$final_ids, context$graph_top_n)
-  for (id in context_ids) report_draw_network(id, language)
+  context_ids <- head(context$final_ids, context$module_top_n)
+  for (id in context_ids) report_draw_network(id, language, patient)
 
   if (length(context$added) || length(context$removed) || length(context$moved)) {
     report_canvas()
-    report_header(report_tr("history", language))
+    report_header(report_tr("history", language), language = language)
     y <- 0.82
     if (length(context$added)) y <- report_text(0.08, y, paste(report_tr("added", language), paste(context$added, collapse = ", ")), cex = 0.78)
     if (length(context$removed)) y <- report_text(0.08, y - 0.02, paste(report_tr("removed", language), paste(context$removed, collapse = ", ")), cex = 0.78)
     if (length(context$moved)) y <- report_text(0.08, y - 0.02, report_tr("moved", language), cex = 0.78)
     if (nzchar(context$expert_comment)) report_text(0.08, y - 0.02, paste(report_tr("comment_label", language), context$expert_comment), cex = 0.78)
+  }
+
+  provenance <- report_source_rows(context, language)
+  report_canvas()
+  report_header(report_tr("sources", language), report_tr("sources_note", language), language = language)
+  text(0.06, 0.845, report_tr("input_data", language), adj = 0, cex = 0.82, font = 2, col = "#475569")
+  report_draw_wrapped_table(
+    c(report_tr("item", language), report_tr("value", language)), provenance$source_rows,
+    c(0.32, 0.68), wrap_cols = c(1L, 2L), y_top = 0.815,
+    base_row_height = 0.045, font_size = 0.50, header_size = 0.58,
+    wrap_widths = c(32, 76)
+  )
+
+  report_canvas()
+  report_header(report_tr("sources", language), report_tr("analysis_settings", language), language = language)
+  text(0.06, 0.845, report_tr("analysis_settings", language), adj = 0, cex = 0.82, font = 2, col = "#475569")
+  report_draw_wrapped_table(
+    c(report_tr("item", language), report_tr("value", language)), provenance$settings,
+    c(0.48, 0.52), wrap_cols = c(1L, 2L), y_top = 0.815,
+    base_row_height = 0.047, font_size = 0.54, header_size = 0.58,
+    wrap_widths = c(42, 58)
+  )
+  analysis_command <- report_config_value("analysis_command", "")
+  text(0.06, 0.39, report_tr("analysis_command", language), adj = 0, cex = 0.76, font = 2, col = "#475569")
+  if (nzchar(analysis_command)) {
+    report_text(0.06, 0.355, analysis_command, width = 118, cex = 0.46, col = "#17202a", line_height = 0.020)
+  } else {
+    report_text(0.06, 0.355, report_tr("command_not_recorded", language), width = 118, cex = 0.60, col = "#64748b")
   }
 
   if (!is.null(state_json_path)) {
@@ -681,7 +871,7 @@ generate_clinreport_pdf <- function(path, final_ids, baseline_ids = final_ids, t
         report_title = context$report_title,
         language = language,
         top_n = context$top_n,
-        graph_top_n = context$graph_top_n,
+        module_top_n = context$module_top_n,
         expert_adjusted = context$expert_adjusted,
         expert_name = context$expert_name,
         expert_comment = context$expert_comment,

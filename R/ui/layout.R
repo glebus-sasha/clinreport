@@ -153,7 +153,7 @@ render_input_overview <- function() {
 render_report_builder <- function() {
   max_drugs <- max(1L, nrow(drug_network))
   default_top_n <- min(as.integer(report_top_n), max_drugs)
-  default_graph_n <- min(as.integer(report_graph_top_n), default_top_n)
+  default_module_n <- min(as.integer(report_module_top_n), default_top_n)
   div(
     class = "report-builder",
     div(class = "report-builder-heading",
@@ -166,7 +166,7 @@ render_report_builder <- function() {
     div(class = "report-builder-controls",
       numericInput("report_top_n", "Number of drugs (Top N)", default_top_n,
         min = 1, max = max_drugs, step = 1),
-      numericInput("report_graph_top_n", "Network graphs (Top K)", default_graph_n,
+      numericInput("report_module_top_n", "Drug modules shown (Top K)", default_module_n,
         min = 0, max = max_drugs, step = 1),
       textInput("report_expert_name", "Expert (optional)", value = ""),
       textAreaInput("report_expert_comment", "Expert comment (optional)", value = "",
