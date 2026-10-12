@@ -159,7 +159,7 @@ render_report_builder <- function() {
     div(class = "report-builder-heading",
       div(class = "report-builder-title", "PDF Report"),
       div(class = "report-builder-subtitle",
-        "Build the final drug list and adjust it manually when needed.")),
+        "Build the drug list and adjust it manually when needed.")),
     div(class = "report-title-field",
       textInput("report_title", "Report title",
         value = paste(patient_id, format(Sys.time(), "%Y-%m-%d %H-%M-%S")))),

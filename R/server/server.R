@@ -52,7 +52,7 @@ server <- function(
       report_final_order(c(current, id))
     } else if (!included && id %in% current) {
       if (length(current) <= 1L) {
-        showNotification("At least one drug must remain in the final list.", type = "warning")
+        showNotification("At least one drug must remain in the drug list.", type = "warning")
         return()
       }
       report_final_order(setdiff(current, id))
@@ -88,7 +88,7 @@ server <- function(
     div(
       class = paste("report-status", if (changed) "changed" else "automatic"),
       div(class = "report-status-title",
-        if (changed) "Expert changes were made to the final list" else
+        if (changed) "Expert changes were made to the drug list" else
           "No expert changes were made"),
       div(class = "report-status-note",
         if (changed) {
@@ -140,7 +140,7 @@ server <- function(
     })
     div(
       class = "report-editor",
-      div(class = "report-editor-title", "Final list composition and order"),
+      div(class = "report-editor-title", "Drug list composition and order"),
       div(class = "report-editor-note", "Include or exclude drugs and change their order with the arrows. Unchecked drugs remain available as candidates."),
       tags$table(class = "report-editor-table",
         tags$thead(tags$tr(

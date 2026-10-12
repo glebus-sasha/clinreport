@@ -49,7 +49,7 @@ pathway_gmt_file <- ""
 interaction_network_max_neighbors <- 40
 report_top_n <- 15
 report_graph_top_n <- 3
-report_language <- "en"
+report_language <- "ru"
 use_tf_activity <- FALSE
 use_wes <- FALSE
 skip_network_processing <- FALSE

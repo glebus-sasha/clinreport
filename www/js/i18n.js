@@ -7,7 +7,7 @@
       "O2T ClinReport - Drug Prioritization Explorer": "O2T ClinReport - исследователь приоритизации лекарств",
       "Drug network - pharmacology - safety - molecular properties - target genes": "лекарственная сеть - фармакология - безопасность - молекулярные свойства - гены-мишени",
       "PDF Report": "PDF-отчёт",
-      "Build the final drug list and adjust it manually when needed.": "Сформируйте финальный список лекарств и при необходимости скорректируйте его вручную.",
+      "Build the drug list and adjust it manually when needed.": "Сформируйте список лекарств и при необходимости скорректируйте его вручную.",
       "Report title": "Название отчёта",
       "Number of drugs (Top N)": "Количество лекарств (Top N)",
       "Network graphs (Top K)": "Сетевых графиков (Top K)",
@@ -16,7 +16,7 @@
       "For example: excluded because of a contraindication.": "Например: препарат исключён из-за противопоказаний.",
       "Reset to automatic list": "Сбросить к автоматическому списку",
       "Generate PDF": "Сформировать PDF",
-      "Final list composition and order": "Состав и порядок финального списка",
+      "Drug list composition and order": "Состав и порядок списка лекарств",
       "Include or exclude drugs and change their order with the arrows. Unchecked drugs remain available as candidates.": "Включайте и исключайте препараты и меняйте их порядок стрелками. Неотмеченные препараты останутся среди кандидатов.",
       "Rank": "Ранг",
       "In PDF": "В PDF",
@@ -24,13 +24,13 @@
       "Score": "Оценка",
       "Status": "Статус",
       "Order": "Порядок",
-      "Expert changes were made to the final list": "В итоговый список внесены экспертские изменения",
+      "Expert changes were made to the drug list": "В список лекарств внесены экспертские изменения",
       "No expert changes were made": "Экспертская корректировка не внесена",
       "order changed": "изменён порядок",
       "added:": "добавлены:",
       "removed:": "исключены:",
       "Automatic list for selected Top": "Автоматический список для выбранного Top",
-      "At least one drug must remain in the final list.": "В итоговом списке должно остаться хотя бы одно лекарство.",
+      "At least one drug must remain in the drug list.": "В списке лекарств должно остаться хотя бы одно лекарство.",
       "Analysis inputs": "Входные данные анализа",
       "Patient ID": "ID пациента",
       "Select a drug to inspect the evidence available for its targets, expression profile and interaction network.": "Выберите препарат, чтобы посмотреть данные по его мишеням, профилю экспрессии и сети взаимодействий.",
@@ -111,8 +111,8 @@
     var dynamic = source.trim();
     if (language === "ru" && dynamic.indexOf("Automatic list for selected Top") === 0) {
       node.nodeValue = source.replace("Automatic list for selected Top", "Автоматический список для выбранного Top").replace("is ready to generate.", "готов к формированию.");
-    } else if (language === "ru" && dynamic.indexOf("Expert changes were made to the final list") === 0) {
-      node.nodeValue = source.replace("Expert changes were made to the final list", "В итоговый список внесены экспертские изменения");
+    } else if (language === "ru" && dynamic.indexOf("Expert changes were made to the drug list") === 0) {
+      node.nodeValue = source.replace("Expert changes were made to the drug list", "В список лекарств внесены экспертские изменения");
     } else if (language === "ru") {
       var translated = source
         .replace("records · select a drug to inspect details", "записей · выберите препарат для просмотра подробностей")
